@@ -3,29 +3,73 @@
 namespace App\Imports;
 
 use App\Models\Participant;
-use Maatwebsite\Excel\Concerns\ToModel;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
 
-class ImportParticipant implements ToModel
+/**
+ * Format file: kolom A = Nama, kolom B = NIM, kolom C = Status (diabaikan).
+ * Baris judul (header) dan baris tanpa NIM angka otomatis dilewati.
+ *
+ * Semua peserta hasil import berstatus "not verified": di aplikasi ini "verified"
+ * berarti "sudah dibuatkan akun", dan akun dibuat lewat broadcast / verifikasi manual.
+ */
+class ImportParticipant implements ToCollection
 {
-    /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
-    public function model(array $row)
+    public int $imported = 0;
+
+    /** Jumlah baris yang NIM-nya sudah terdaftar. */
+    public int $skipped = 0;
+
+    /** Nomor baris (1-based, sesuai Excel) yang tidak valid. */
+    public array $invalidRows = [];
+
+    public function collection(Collection $rows): void
     {
-        // Lewati NIM yang sudah terdaftar (import ulang / baris ganda di file yang sama).
-        // Tanpa WithBatchInserts setiap baris langsung disimpan, jadi duplikat dalam file ikut terdeteksi.
-        if (Participant::where('nim', $row[1])->exists()) {
-            return null;
+        foreach ($rows as $index => $row) {
+            $rowNumber = $index + 1;
+            $name = trim((string) ($row[0] ?? ''));
+            $nim = $this->normalizeNim($row[1] ?? null);
+
+            if ($nim === null) {
+                // Baris judul pertama (mis. "Nama | NIM | Status") bukan kesalahan.
+                if (! ($rowNumber === 1 && $this->looksLikeHeader($row))) {
+                    $this->invalidRows[] = $rowNumber;
+                }
+                continue;
+            }
+
+            // Lewati NIM yang sudah terdaftar (import ulang / baris ganda di file yang sama).
+            if (Participant::where('nim', $nim)->exists()) {
+                $this->skipped++;
+                continue;
+            }
+
+            Participant::create([
+                'participant_name' => $name,
+                'nim' => $nim,
+                'status' => 'not verified',
+                'image' => 'avatar.png',
+            ]);
+            $this->imported++;
+        }
+    }
+
+    /**
+     * NIM hanya angka. Sel numerik Excel bisa terbaca sebagai int/float.
+     */
+    private function normalizeNim(mixed $value): ?string
+    {
+        if (is_float($value) && floor($value) === $value) {
+            $value = number_format($value, 0, '', '');
         }
 
-        return new Participant([
-            'participant_name' => $row[0],
-            'nim' => $row[1],
-            // 'whatsapp_number' => $row[2],
-            'status' => $row[2],
-            'image' => 'avatar.png',
-        ]);
+        $nim = trim((string) $value);
+
+        return preg_match('/^\d+$/', $nim) ? $nim : null;
+    }
+
+    private function looksLikeHeader(Collection $row): bool
+    {
+        return str_contains(strtolower(trim((string) ($row[1] ?? ''))), 'nim');
     }
 }

@@ -295,13 +295,19 @@ class ParticipantController extends Controller
             ],
         );
         try {
-            $file = $request->file('file');
-            $fileName = rand().$file->getClientOriginalName();
+            // Baca langsung dari file sementara upload: file berisi NIM peserta,
+            // jadi jangan disalin ke folder public.
+            $import = new ImportParticipant;
+            DB::transaction(fn () => Excel::import($import, $request->file('file')));
 
-            $file->move('files/',$fileName);
-            Excel::import(new ImportParticipant, public_path('files/'.$fileName));
+            $response = redirect('/back-admin-logged/participant')
+                ->withStatus("{$import->imported} peserta diimport, {$import->skipped} dilewati (NIM sudah terdaftar).");
 
-            return redirect('/back-admin-logged/participant')->withStatus('Berhasil mengimport data.');
+            if ($import->invalidRows) {
+                $response->withError(count($import->invalidRows) . ' baris tidak valid (NIM kosong/bukan angka) di baris: ' . implode(', ', $import->invalidRows));
+            }
+
+            return $response;
         } catch(\Throwable $e){
             return redirect()->back()->withError($e->getMessage());
         } catch(\Illuminate\Database\QueryException $e){

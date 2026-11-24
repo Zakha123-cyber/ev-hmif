@@ -115,9 +115,12 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **✅ Selesai (24 Nov 2026):** `DB::transaction` per peserta + `catch (\Throwable)` (di-`report()`); peserta yang gagal di-rollback penuh (tetap `not verified`, bisa dicoba lagi) dan peserta lain tetap diproses. Ringkasan "N peserta berhasil" + daftar NIM yang gagal. `echo` dihapus, `set_time_limit(0)`. Ditemukan & diperbaiki juga: `username_old`/`password_old` tidak ada di `$fillable`; layout admin hanya menampilkan `status` **atau** `error` (sekarang keduanya). Test: `tests/Feature/BroadcastTest.php` (+4 test).
   - Belum: antrian (queue) — email masih dikirim sinkron. Untuk peserta sangat banyak, broadcast bisa dijalankan beberapa kali; peserta yang sudah berhasil tidak diproses ulang.
 
-### [ ] #11 Import Excel tanpa validasi
+### [x] #11 Import Excel tanpa validasi
 - **Lokasi:** `app/Imports/ImportParticipant.php`
 - **Rencana fix:** Pakai `WithHeadingRow` (atau `WithStartRow`), `WithValidation` (nim wajib & unik, status ∈ enum), lewati duplikat, jalankan dalam transaksi. Dokumentasikan format kolom Excel.
+- **✅ Selesai (24 Nov 2026):** importer `ToCollection`: baris judul dilewati, NIM wajib angka (sel numerik Excel dinormalisasi, spasi di-trim), NIM terdaftar dilewati, seluruh import dalam satu transaksi, ringkasan "N diimport, M dilewati" + nomor baris tidak valid. Format kolom ditampilkan di modal import. Test: `tests/Feature/ImportParticipantTest.php` (7 test).
+  - **Perubahan perilaku:** kolom C (status) diabaikan — semua peserta hasil import `not verified`, karena "verified" = sudah punya akun (peserta "verified" tanpa akun tidak akan pernah diproses broadcast/verifikasi manual).
+  - **Privasi:** file Excel (berisi NIM) tidak lagi disalin ke `public/files/` dengan nama asli (sebelumnya bisa diunduh publik). Cek & hapus file lama di folder `files/` pada server.
 
 ### [ ] #12 Generator username/password
 - **Lokasi:** `GeneratorController.php`, `routes/web.php:30-31`

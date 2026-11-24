@@ -189,7 +189,11 @@
                     <form action="{{url('/back-admin-logged/participant/import')}}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div>
-                            <label for="file" class="text-gray-800 text-sm font-bold leading-tight tracking-normal">Pilih file (.xlsx)</label>
+                            <label for="file" class="text-gray-800 text-sm font-bold leading-tight tracking-normal">Pilih file (.xlsx / .xls / .csv)</label>
+                            <p class="text-gray-600 text-xs mt-1">
+                                Kolom A = Nama, kolom B = NIM (angka). Baris judul boleh ada.
+                                NIM yang sudah terdaftar dilewati. Semua peserta masuk sebagai <em>not verified</em>.
+                            </p>
                             <input id="file" type="file" name="file" class="mb-5 mt-2 py-2 text-gray-600 focus:outline-none focus:border focus:border-indigo-700 font-normal w-full flex items-center pl-3 text-sm border-gray-300 rounded border"/>
                         </div>
                         <div class="flex items-center justify-end w-full">
