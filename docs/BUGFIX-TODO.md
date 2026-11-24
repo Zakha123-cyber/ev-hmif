@@ -133,10 +133,11 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **Rencana fix:** Pilih salah satu: tambah migration kolom `email_backup` + input di form peserta, **atau** hapus fitur & tombolnya.
 - **✅ Selesai (24 Nov 2026) — fitur dilengkapi:** migration `add_email_backup_to_participants_table` (nullable), input "Email Backup (opsional)" di form tambah & edit peserta (validasi format email). Tombol kirim: error jika email backup kosong atau peserta belum punya akun (email akan berisi kredensial kosong); kegagalan kirim di-`report()`. Test: `tests/Feature/EmailBackupTest.php` (6 test).
 
-### [ ] #14 Redirect setelah login bisa error
+### [x] #14 Redirect setelah login bisa error
 - **Lokasi:** `app/Http/Controllers/RedirectRoleController.php:16, 22`
 - **Masalah:** User tanpa role → `pluck('name')[0]` error; redirect ke `GET /logout` padahal logout hanya POST.
 - **Rencana fix:** Pakai `hasRole()`; user tanpa role → logout via `Auth::logout()` + redirect ke login dengan pesan.
+- **✅ Selesai (24 Nov 2026):** `hasRole()`; akun tanpa role di-logout (session di-invalidate) lalu ke `/login` dengan pesan. Ditemukan & diperbaiki juga: **halaman login tidak pernah menampilkan error** (komponen error ada di template lama yang dikomentari) → pesan "username/password salah", lockout, dan "belum memiliki akses" kini tampil; username lama tetap terisi. Test: `tests/Feature/RoleRedirectTest.php` (6 test).
 
 ---
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RedirectRoleController extends Controller
 {
@@ -11,15 +12,23 @@ class RedirectRoleController extends Controller
         $this->middleware('auth');
     }
 
-    private $param;
-    public function index(){
-        $roleUser = \Auth::user()->roles->pluck('name')[0];
-        if ($roleUser == 'Admin') {
+    public function index(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->hasRole('Admin')) {
             return redirect('/back-admin-logged/dashboard');
-        } elseif ($roleUser == 'Participant') {
-            return redirect('/vote');
-        }else {
-            return redirect('/logout');
         }
+
+        if ($user->hasRole('Participant')) {
+            return redirect('/vote');
+        }
+
+        // Akun tanpa role tidak punya halaman tujuan: keluarkan dengan pesan yang jelas.
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login')->withErrors(['username' => 'Akun ini belum memiliki akses. Hubungi panitia.']);
     }
 }

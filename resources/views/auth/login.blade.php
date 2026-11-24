@@ -95,9 +95,17 @@
                     @else
                         <span class="login100-form-title" style="color: white;">Election Login</span>
                     @endif
-                    
+
+                    @if ($errors->any())
+                        <div class="alert alert-danger" role="alert" style="font-size: 14px;">
+                            @foreach ($errors->all() as $error)
+                                <div>{{ $error }}</div>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <div class="wrap-input100 validate-input" data-validate = "Valid username is required">
-                        <input class="input100" type="text" name="username" placeholder="Username">
+                        <input class="input100" type="text" name="username" placeholder="Username" value="{{ old('username') }}">
                         <span class="focus-input100"></span>
                         <span class="symbol-input100"><i class="fa fa-user" aria-hidden="true"></i></span>
                     </div>
