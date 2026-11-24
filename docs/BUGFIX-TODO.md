@@ -80,6 +80,7 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **Lokasi:** `.env` di server (cPanel) — **bukan perubahan kode**
 - **Rencana fix:** `APP_ENV=production`, `APP_DEBUG=false`, `LOG_LEVEL=error`, `SESSION_SECURE_COOKIE=true`. Deploy vendor dengan `composer install --no-dev --optimize-autoloader`. Jalankan `php artisan config:cache`.
 - **Selesai jika:** Error di production menampilkan halaman 500 generik tanpa stack trace.
+- **📄 Panduan dibuat (24 Nov 2026):** `docs/DEPLOY.md` berisi konfigurasi `.env` production + urutan deploy lengkap (termasuk migrasi #1–#5). **Item ini baru dicentang setelah `.env` di server cPanel benar-benar diubah** — tidak bisa dilakukan dari repo.
 
 ### [ ] #7 Broadcast email dipicu lewat GET
 - **Lokasi:** `routes/web.php:65`, tombol di `admin/pages/participant/list.blade.php`
