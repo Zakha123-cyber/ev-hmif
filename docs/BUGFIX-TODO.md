@@ -95,12 +95,14 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **✅ Selesai (24 Nov 2026):** validasi `nullable|image|mimes:jpg,jpeg,png,webp|max:10240` (10 MB karena poster lama ada yang ±7 MB; SVG ditolak). File disimpan dengan `hashName()` ke `public_path(...)` — sebelumnya path relatif sehingga lokasi bergantung working directory. `public/assets/upload/.htaccess` menolak eksekusi skrip. Test: `tests/Feature/UploadValidationTest.php` (8 test).
   - Deploy: salin `public/assets/upload/.htaccess` ke folder upload di server (lihat `docs/DEPLOY.md`).
 
-### [ ] #9 Penanganan kredensial
+### [x] #9 Penanganan kredensial
 - **Lokasi:** `database/seeders/UserSeeder.php`, `GeneratorController.php:17`, kolom `participants.password_old`
 - **Rencana fix:**
   - Password admin seeder ambil dari `.env` (mis. `ADMIN_SEED_PASSWORD`), bukan hardcode. **Ganti password admin di production.**
   - Generator pakai `random_int()` / `Str::random()`, panjang minimal 8.
   - `password_old`: dibiarkan (sesuai keputusan di atas).
+- **✅ Selesai (24 Nov 2026):** `config/election.php` → `ADMIN_SEED_PASSWORD`; kosong = password acak 16 karakter ditampilkan sekali di terminal. Seeder kini mencari peserta admin lewat NIM (sebelumnya hardcode `participant_id` 1 & 2 → gagal jika ID berbeda). Generator: `random_int`, 8 karakter, tanpa karakter mirip (0/O, 1/l/I). Test: `tests/Feature/CredentialsTest.php` (5 test).
+  - ⚠️ **Password admin di production masih yang lama** (sudah pernah ada di kode) → ganti manual setelah deploy.
 
 ---
 

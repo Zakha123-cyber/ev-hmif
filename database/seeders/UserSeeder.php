@@ -2,61 +2,42 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Participant;
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
-     *
-     * @return void
+     * Akun admin bawaan, dipasangkan ke peserta admin dari ParticipantSeeder lewat NIM.
      */
-    public function run()
+    private const ADMINS = [
+        '9999999999' => 'superadmin@hmifunej.id',
+        '8888888888' => 'admin@hmifunej.id',
+    ];
+
+    public function run(): void
     {
-        $admin = User::create([
-            'participant_id' => 1,
-            'username' => 'superadmin@hmifunej.id',
-            'password' => bcrypt('JayalahHimpunanku'),
-            'remember_token' => \Str::random(60),
-            'status' => 'voted',
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-        event(new Registered($admin));
-        $admin->assignRole('Admin');
+        $password = config('election.admin_seed_password');
 
-        $admin = User::create([
-            'participant_id' => 2,
-            'username' => 'admin@hmifunej.id',
-            'password' => bcrypt('JayalahHimpunanku'),
-            'remember_token' => \Str::random(60),
-            'status' => 'voted',
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-        event(new Registered($admin));
-        $admin->assignRole('Admin');
+        if (! $password) {
+            $password = Str::password(16, symbols: false);
+            $this->command?->warn("ADMIN_SEED_PASSWORD tidak diatur. Password admin acak: {$password}");
+            $this->command?->warn('Simpan password ini sekarang — tidak akan ditampilkan lagi.');
+        }
 
-        // $partisipan = User::create([
-        //     'participant_id' => 3,
-        //     'username' => 'alif@gmail.com',
-        //     'password' => bcrypt('12345678'),
-        //     'remember_token' => \Str::random(60),
-        //     'status' => 'not voted',
-        //     'created_at' => now(),
-        //     'updated_at' => now()
-        // ]);
-        // event(new Registered($partisipan));
-        // $partisipan->assignRole('Participant');
+        foreach (self::ADMINS as $nim => $username) {
+            $admin = User::create([
+                'participant_id' => Participant::where('nim', $nim)->value('id'),
+                'username' => $username,
+                'password' => bcrypt($password),
+                'remember_token' => Str::random(60),
+                'status' => 'voted',
+            ]);
+            event(new Registered($admin));
+            $admin->assignRole('Admin');
+        }
     }
 }

@@ -9,13 +9,26 @@ use App\Models\User;
 
 class GeneratorController extends Controller
 {
-    public function generateUsername(){
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < 6; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
+    // Tanpa karakter yang mirip (0/O, 1/l/I) agar mudah diketik ulang dari email.
+    private const ALPHABET = '23456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
+    private const LENGTH = 8;
+
+    /**
+     * String acak yang aman secara kriptografis (random_int, bukan rand()).
+     */
+    private function randomString(): string
+    {
+        $max = strlen(self::ALPHABET) - 1;
+        $result = '';
+        for ($i = 0; $i < self::LENGTH; $i++) {
+            $result .= self::ALPHABET[random_int(0, $max)];
         }
+
+        return $result;
+    }
+
+    public function generateUsername(){
+        $randomString = $this->randomString();
 
         if($randomString == User::where('username', $randomString)->first()){
             $this->generateUsername();
@@ -25,12 +38,7 @@ class GeneratorController extends Controller
     }
 
     public function generatePassword(){
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < 6; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
+        $randomString = $this->randomString();
 
         if($randomString == User::where('username', $randomString)->first()){
             $this->generatePassword();

@@ -19,7 +19,7 @@ LOG_LEVEL=error
 SESSION_SECURE_COOKIE=true
 ```
 
-Isi juga kredensial DB & SMTP production.
+Isi juga kredensial DB & SMTP production. `ADMIN_SEED_PASSWORD` hanya dipakai bila menjalankan `php artisan db:seed` (database baru).
 
 Cek hasilnya: buka URL yang tidak ada / picu error → harus tampil halaman error generik tanpa stack trace.
 
