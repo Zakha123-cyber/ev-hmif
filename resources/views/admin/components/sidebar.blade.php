@@ -29,5 +29,9 @@
             <i class="fad fa-chart-pie text-xs mr-2"></i>
             &nbsp;Live Count
         </a>
+        <a href="{{url('/back-admin-logged/election-schedule')}}" class="mb-3 @if (Request::segment(2) == 'election-schedule') text-teal-600 @endif capitalize font-medium text-sm hover:text-teal-600 transition ease-in-out duration-500">
+            <i class="fad fa-calendar-alt text-xs mr-2"></i>
+            &nbsp;Jadwal Pemilihan
+        </a>
     </div>
 </div>

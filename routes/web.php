@@ -1,16 +1,14 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Models\Candidate;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Carbon\Carbon;
 
 use App\Http\Controllers\VoteController;
 use App\Http\Controllers\Admin\CountController;
 use App\Http\Controllers\RedirectRoleController;
 use App\Http\Controllers\Admin\CandidateController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ElectionScheduleController;
 use App\Http\Controllers\Admin\GeneratorController;
 use App\Http\Controllers\Admin\ParticipantController;
 use App\Http\Controllers\HomeController;
@@ -30,24 +28,8 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/generateNewUsername', [GeneratorController::class, 'generateUsername']);
 Route::get('/generateNewPassword', [GeneratorController::class, 'generatePassword']);
 
-Route::get('/vote', function () {
-    $now = Carbon::now();
-    $this->param['user'] = Auth::user();
-    $this->param['candidates'] = Candidate::all();
-    return view('vote_closed', $this->param);
-    // if ($now->gte(Carbon::createFromTime(07, 0, 0))) {
-    //     return view('vote_page', $this->param);
-    // }
-    // else if ($now->gte(Carbon::createFromTime(15, 0, 0))) {
-    //     return view('vote_closed', $this->param);
-    // }
-    // else {
-    //     return view('vote_prepare', $this->param);
-    // }
-})->middleware('auth');
-
-// Route::get('/vote', [VoteController::class, 'vote_page'])->middleware('auth');
-Route::post('/vote-paslon', [VoteController::class, 'vote'])->middleware('auth');
+Route::get('/vote', [VoteController::class, 'vote_page'])->middleware('auth');
+Route::post('/vote-paslon', [VoteController::class, 'vote'])->middleware(['auth', 'voting.open']);
 
 Route::prefix('/back-admin-logged')->group(function () {
     Route::get('/redirect-role', [RedirectRoleController::class, 'index']);
@@ -78,6 +60,9 @@ Route::prefix('/back-admin-logged')->group(function () {
     Route::get('/participant-verification/info/print/{participant}', [ParticipantController::class, 'printVerification']);
 
     Route::get('/live-count', [CountController::class, 'index']);
+
+    Route::get('/election-schedule', [ElectionScheduleController::class, 'edit']);
+    Route::put('/election-schedule', [ElectionScheduleController::class, 'update']);
 });
 
 require __DIR__.'/auth.php';

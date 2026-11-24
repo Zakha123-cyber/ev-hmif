@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Count;
 use App\Models\Candidate;
+use App\Models\ElectionSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class VoteController extends Controller
 {
@@ -15,19 +15,22 @@ class VoteController extends Controller
         $this->middleware(['role:Participant']);
     }
 
-    // public function vote_page()
-    // {
-    //     $now = Carbon::now();
+    public function vote_page()
+    {
+        $setting = ElectionSetting::current();
 
-    //     $this->param['user'] = Auth::user();
-    //     $this->param['candidates'] = Candidate::all();
+        $view = match ($setting->status()) {
+            ElectionSetting::STATUS_OPEN => 'vote_page',
+            ElectionSetting::STATUS_CLOSED => 'vote_closed',
+            default => 'vote_prepare',
+        };
 
-    //     if ($now->gte(Carbon::createFromTime(05, 0, 0))) {
-    //         return view('vote_closed', $this->param);
-    //     }
-
-    //     return view('vote_page', $this->param);
-    // }
+        return view($view, [
+            'user' => Auth::user(),
+            'candidates' => Candidate::all(),
+            'setting' => $setting,
+        ]);
+    }
 
     public function vote(Request $request)
     {
