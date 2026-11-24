@@ -108,10 +108,12 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 
 ## 🟡 Sedang — fitur rusak
 
-### [ ] #10 Broadcast berhenti di tengah saat ada error
+### [x] #10 Broadcast berhenti di tengah saat ada error
 - **Lokasi:** `ParticipantController.php:56-95`
 - **Masalah:** `catch (Carbon\Exceptions\Exception)` salah kelas → error tidak tertangkap & transaksi tidak di-rollback; email dikirim sinkron dalam loop (rawan timeout); ada `echo` sisa debug.
 - **Rencana fix:** `catch (\Throwable)`, transaksi per peserta, hapus `echo`, kumpulkan ringkasan berhasil/gagal. Pertimbangkan antrian (`QUEUE_CONNECTION=database` + cron `queue:work --stop-when-empty` di cPanel).
+- **✅ Selesai (24 Nov 2026):** `DB::transaction` per peserta + `catch (\Throwable)` (di-`report()`); peserta yang gagal di-rollback penuh (tetap `not verified`, bisa dicoba lagi) dan peserta lain tetap diproses. Ringkasan "N peserta berhasil" + daftar NIM yang gagal. `echo` dihapus, `set_time_limit(0)`. Ditemukan & diperbaiki juga: `username_old`/`password_old` tidak ada di `$fillable`; layout admin hanya menampilkan `status` **atau** `error` (sekarang keduanya). Test: `tests/Feature/BroadcastTest.php` (+4 test).
+  - Belum: antrian (queue) — email masih dikirim sinkron. Untuk peserta sangat banyak, broadcast bisa dijalankan beberapa kali; peserta yang sudah berhasil tidak diproses ulang.
 
 ### [ ] #11 Import Excel tanpa validasi
 - **Lokasi:** `app/Imports/ImportParticipant.php`

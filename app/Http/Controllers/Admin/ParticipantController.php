@@ -14,7 +14,6 @@ use App\Models\User;
 
 use App\Http\Controllers\Admin\GeneratorController;
 use App\Mail\BroadcastMail;
-use Carbon\Exceptions\Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -87,46 +86,64 @@ class ParticipantController extends Controller
 
     private function runBroadcast(){
         // Hanya peserta yang belum punya akun: mencegah akun kedua untuk orang yang sama.
-        $participants = Participant::where("status", "not verified")->whereDoesntHave('user')->get();
-        foreach($participants as $participant){
-            DB::beginTransaction();
-            try{
-                $username = (New GeneratorController)->generateUsername();
-                $password = (New GeneratorController)->generatePassword();
-                $status = "verified";      
-                DB::table('participants')
-                ->where('id', $participant->id)
-                ->update([
-                    'username_old' => $username,
-                    'password_old' => $password,
-                    'status' => $status
-                ]);
-                $user = User::create([
-                    'participant_id' => $participant->id,
-                    'username' => $username,
-                    'password' => bcrypt($password),
-                    'remember_token' => \Str::random(60),
-                    'status' => 'not voted',
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
-                event(new Registered($user));
-                $user->assignRole('Participant');
+        $participants = Participant::where("status", "not verified")->whereDoesntHave('user')->orderBy('id')->get();
 
-                // Mail::to($participant->nim."@mail.unej.ac.id")->queue(new BroadcastMail($participant));
-                Mail::to(substr($participant->nim, 0, 2)."241010".substr($participant->nim, 2)."@mail.unej.ac.id")->queue(new BroadcastMail($participant));
-                // echo $participant->nim."@mail.unej.ac.id";
-                echo substr($participant->nim, 0, 2)."241010".substr($participant->nim, 2)."@mail.unej.ac.id";
-                echo $participant->status;
-                echo "<br>";
-                DB::commit();
-            }catch(Exception $e){
-                DB::rollBack();
-                
+        // Pengiriman email sinkron bisa lama untuk banyak peserta.
+        @set_time_limit(0);
+
+        $generator = new GeneratorController;
+        $succeeded = 0;
+        $failed = [];
+
+        foreach ($participants as $participant) {
+            try {
+                // Satu transaksi per peserta: jika akun/email gagal, peserta ini di-rollback
+                // penuh (tetap "not verified") sehingga bisa dicoba lagi, peserta lain tetap jalan.
+                DB::transaction(function () use ($participant, $generator) {
+                    $username = $generator->generateUsername();
+                    $password = $generator->generatePassword();
+
+                    $participant->update([
+                        'username_old' => $username,
+                        'password_old' => $password,
+                        'status' => 'verified',
+                    ]);
+
+                    $user = User::create([
+                        'participant_id' => $participant->id,
+                        'username' => $username,
+                        'password' => bcrypt($password),
+                        'remember_token' => \Str::random(60),
+                        'status' => 'not voted',
+                    ]);
+                    event(new Registered($user));
+                    $user->assignRole('Participant');
+
+                    Mail::to($this->campusEmail($participant))->queue(new BroadcastMail($participant));
+                });
+                $succeeded++;
+            } catch (\Throwable $e) {
+                $participant->refresh();
+                report($e);
+                $failed[] = $participant->nim;
             }
         }
 
-        return redirect()->back()->withStatus('Berhasil mengirimkan email.');;
+        $response = redirect()->back()->withStatus("Akun dibuat & email dikirim untuk {$succeeded} peserta.");
+
+        if ($failed) {
+            $response->withError(count($failed) . ' peserta gagal diproses (bisa dicoba lagi): ' . implode(', ', $failed));
+        }
+
+        return $response;
+    }
+
+    /**
+     * Alamat email kampus dari NIM peserta.
+     */
+    private function campusEmail(Participant $participant): string
+    {
+        return substr($participant->nim, 0, 2) . '241010' . substr($participant->nim, 2) . '@mail.unej.ac.id';
     }
 
     public function store(Request $request){

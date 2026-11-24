@@ -24,7 +24,8 @@
                         </button>
                         <span>{{session('status')}}</span>
                     </div>
-                @elseif (session('error'))
+                @endif
+                @if (session('error'))
                     <div class="alert alert-error alert-close mb-5">
                         <button class="alert-btn-close">
                             <i class="fad fa-times"></i>
