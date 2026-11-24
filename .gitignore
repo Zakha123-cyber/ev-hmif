@@ -13,7 +13,6 @@ auth.json
 /public/build
 /public/hot
 /public/storage
-# Note: /public/css/app.css & /public/js/app.js ARE committed (used by layouts, no build step produces them)
 
 # --- Archives / backups ---
 *.zip

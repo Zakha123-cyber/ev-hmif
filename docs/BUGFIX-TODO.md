@@ -148,9 +148,11 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - Dashboard & live count: `countVoted` ikut menghitung admin → filter hanya role `Participant`.
 - **✅ Selesai (24 Nov 2026):** judul login "Election Vote Selesai!" kini mengikuti status jadwal (`welcome` sudah di #2) — tidak ada lagi cek jam 15:30 di kode. Statistik dashboard & live count lewat `App\Services\ElectionStats`: sudah/belum memilih hanya role Participant, total peserta tanpa peserta milik admin. Test: `tests/Feature/ScheduleAndStatsTest.php` (5 test).
 
-### [ ] #16 Kode Breeze yang tidak terpakai
+### [x] #16 Kode Breeze yang tidak terpakai
 - Route `register`, `forgot-password`, `reset-password`, `ProfileController`, dan test bawaan Breeze mengacu ke kolom `name`/`email` yang sudah dihapus.
 - **Rencana fix:** Hapus route/controller/view/test yang tidak dipakai; ganti dengan test fitur nyata (login, vote, admin).
+- **✅ Selesai (24 Nov 2026):** `routes/auth.php` hanya login & logout. Dihapus: 8 controller auth Breeze, `ProfileController` + request, view auth/register/reset/verify/confirm, `dashboard`, `backup`, `layouts/*`, `components/*`, `app/View/Components`, `public/css/app.css` & `public/js/app.js` (hanya dipakai layout Breeze), blok Breeze yang dikomentari di `login.blade.php`, serta 20 test Breeze yang rusak. Diganti `tests/Feature/AuthenticationTest.php` (login/gagal/lockout/logout + route lama 404) dan `tests/Feature/PagesSmokeTest.php` (semua halaman tampil).
+  - Opsional (tidak dikerjakan): toolchain Vite/Tailwind (`package.json`, `vite.config.js`, `resources/css|js`) tidak dipakai view mana pun.
 
 ---
 
@@ -160,6 +162,6 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 
 ## Setelah semua selesai
 
-- [ ] `php artisan test` hijau
+- [x] `php artisan test` hijau — 113 test lulus (24 Nov 2026)
 - [ ] Uji manual alur penuh di lokal: import → broadcast (`MAIL_MAILER=log`) → login peserta → vote → live count
 - [ ] Update `deploy/` & catatan deploy, lalu deploy ke staging/production
