@@ -166,6 +166,13 @@ a {
     text-underline-offset: 4px;
 }
 
+/* Hover tidak hanya warna: garis bawah menebal */
+.btn--quiet:hover {
+    background: transparent;
+    color: var(--paper);
+    text-decoration-thickness: 3px;
+}
+
 /* ---------- Header ---------- */
 
 .site-header {
@@ -284,6 +291,12 @@ a {
 .slider-toggle:hover {
     background: var(--paper);
     color: var(--deep);
+}
+
+.slider-toggle:active {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--ink);
 }
 
 /* ---------- Slip status ---------- */
@@ -483,6 +496,12 @@ a {
 
 .ballot__mission summary:hover {
     color: var(--ink);
+    text-decoration-thickness: 3px;
+}
+
+.ballot__mission summary:active {
+    color: var(--deep);
+    text-decoration-style: double;
 }
 
 .ballot__mission ul {
@@ -640,6 +659,12 @@ a {
 
 .site-footer__help a:hover {
     color: var(--yellow);
+    text-decoration-thickness: 3px;
+}
+
+.site-footer__help a:active {
+    color: var(--paper);
+    text-decoration-style: double;
 }
 
 .site-footer__copy {
