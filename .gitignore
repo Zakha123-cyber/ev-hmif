@@ -1,0 +1,54 @@
+# --- Dependencies ---
+/vendor
+/node_modules
+
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+auth.json
+/storage/*.key
+
+# --- Build output & dev leftovers ---
+/public/build
+/public/hot
+/public/storage
+# Note: /public/css/app.css & /public/js/app.js ARE committed (used by layouts, no build step produces them)
+
+# --- Archives / backups ---
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.sql
+*.sql.gz
+
+# --- User uploads (real data: candidate posters, participant photos, imported Excel with NIM) ---
+/public/assets/upload/kandidat/*
+!/public/assets/upload/kandidat/.gitkeep
+/public/assets/upload/participant/*
+!/public/assets/upload/participant/.gitkeep
+/public/files/*
+!/public/files/.gitkeep
+
+# --- Logs ---
+*.log
+error_log
+
+# --- Testing ---
+/.phpunit.cache
+/.phpunit.result.cache
+/coverage
+
+# --- Local tooling ---
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.vscode
+/.claude
+.DS_Store
+Thumbs.db
+desktop.ini
