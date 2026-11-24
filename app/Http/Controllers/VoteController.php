@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Count;
 use App\Models\Candidate;
 use App\Models\ElectionSetting;
+use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class VoteController extends Controller
 {
@@ -34,24 +37,36 @@ class VoteController extends Controller
 
     public function vote(Request $request)
     {
-        $request->validate([
-            'candidate_id' => 'required',
-        ]);
+        $request->validate(
+            ['candidate_id' => 'required|integer|exists:candidates,id'],
+            [
+                'required' => 'Pilih salah satu kandidat.',
+                'integer' => 'Kandidat tidak valid.',
+                'exists' => 'Kandidat tidak valid.',
+            ],
+        );
 
-        Auth::user()->status = 'voted';
-        Auth::user()->save();
+        try {
+            DB::transaction(function () use ($request) {
+                // Kunci baris user agar dua request bersamaan dari akun yang sama diproses bergantian.
+                $user = User::whereKey(Auth::id())->lockForUpdate()->first();
 
-        $cek = Count::where('user_id', Auth::user()->id)->exists();
+                if (! Count::where('user_id', $user->id)->exists()) {
+                    // Simpan suara dulu, baru tandai "voted" — keduanya dalam satu transaksi.
+                    Count::create([
+                        'candidate_id' => $request->candidate_id,
+                        'user_id' => $user->id,
+                    ]);
+                }
 
-        if (!$cek) {
-            Count::create([
-                'candidate_id' => $request->candidate_id,
-                'user_id' => Auth::user()->id,
-            ]);
-            return redirect('/vote');
-        } else {
-            return redirect('/vote');
+                $user->status = 'voted';
+                $user->save();
+            });
+        } catch (UniqueConstraintViolationException) {
+            // Kalah balapan dengan request lain yang sudah menyimpan suara: anggap sudah memilih.
+            User::whereKey(Auth::id())->update(['status' => 'voted']);
         }
 
+        return redirect('/vote');
     }
 }

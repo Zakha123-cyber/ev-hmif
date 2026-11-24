@@ -61,7 +61,7 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **✅ Selesai (24 Nov 2026):** migration `restrict_vote_deletion_on_counts_table` (FK `counts.candidate_id` & `counts.user_id` → RESTRICT; rollback diuji). `CandidateController::destroy` & `ParticipantController::destroy` menolak dengan pesan jika ada suara terkait. Test: `tests/Feature/VotePreservationTest.php` (6 test).
   - ⚠️ Konsekuensi: kandidat/peserta dari pemilihan sebelumnya yang sudah punya suara **tidak bisa dihapus lewat panel**. Untuk memulai periode baru perlu cara reset suara yang disengaja (lihat catatan "Fitur lanjutan" di bawah).
 
-### [ ] #5 Proses voting tidak atomik & tanpa validasi
+### [x] #5 Proses voting tidak atomik & tanpa validasi
 - **Lokasi:** `app/Http/Controllers/VoteController.php:32-50`
 - **Masalah:** Status `voted` disimpan sebelum suara tercatat; `candidate_id` tidak divalidasi; tidak ada unique constraint → request paralel bisa menghasilkan 2 suara.
 - **Rencana fix:**
@@ -69,6 +69,8 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
   - Migration: `unique` pada `counts.user_id`.
   - Bungkus dalam `DB::transaction` + `lockForUpdate()` pada user; buat `Count` dulu, baru set status `voted`. Tangani duplicate-key sebagai "sudah memilih".
 - **Selesai jika:** Test: kandidat tidak valid ditolak tanpa mengubah status; dua submit beruntun tetap 1 baris `counts`.
+- **✅ Selesai (24 Nov 2026):** validasi `exists:candidates,id`; `DB::transaction` + `lockForUpdate()` pada user, suara disimpan dulu baru status `voted`; `UniqueConstraintViolationException` dianggap "sudah memilih". Migration `add_unique_user_id_to_counts_table` (berhenti dengan daftar duplikat jika ada suara ganda; rollback diuji). Test: `tests/Feature/VoteIntegrityTest.php` (5 test).
+  - Deploy: sebelum migrate di server, cek `SELECT user_id, COUNT(*) FROM counts GROUP BY user_id HAVING COUNT(*) > 1;`
 
 ---
 
