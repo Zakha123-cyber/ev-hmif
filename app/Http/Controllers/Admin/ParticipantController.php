@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\GeneratorController;
 use App\Mail\BroadcastMail;
 use Carbon\Exceptions\Exception;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
@@ -55,6 +56,21 @@ class ParticipantController extends Controller
     }
 
     public function broadcast(){
+        // Cegah dua broadcast berjalan bersamaan (klik ganda / dua admin sekaligus).
+        $lock = Cache::lock('participant-broadcast', 600);
+
+        if (! $lock->get()) {
+            return redirect()->back()->withError('Pengiriman email sedang berjalan. Tunggu hingga selesai.');
+        }
+
+        try {
+            return $this->runBroadcast();
+        } finally {
+            $lock->release();
+        }
+    }
+
+    private function runBroadcast(){
         // Hanya peserta yang belum punya akun: mencegah akun kedua untuk orang yang sama.
         $participants = Participant::where("status", "not verified")->whereDoesntHave('user')->get();
         foreach($participants as $participant){

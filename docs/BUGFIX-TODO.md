@@ -82,10 +82,11 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **Selesai jika:** Error di production menampilkan halaman 500 generik tanpa stack trace.
 - **📄 Panduan dibuat (24 Nov 2026):** `docs/DEPLOY.md` berisi konfigurasi `.env` production + urutan deploy lengkap (termasuk migrasi #1–#5). **Item ini baru dicentang setelah `.env` di server cPanel benar-benar diubah** — tidak bisa dilakukan dari repo.
 
-### [ ] #7 Broadcast email dipicu lewat GET
+### [x] #7 Broadcast email dipicu lewat GET
 - **Lokasi:** `routes/web.php:65`, tombol di `admin/pages/participant/list.blade.php`
 - **Rencana fix:** Ubah ke `POST` + `@csrf` + konfirmasi; cegah eksekusi paralel (mis. `Cache::lock('broadcast')`).
 - **Selesai jika:** `GET /back-admin-logged/participant/broadcast` mengembalikan 405.
+- **✅ Selesai (24 Nov 2026):** route jadi `POST`, tombol jadi form `@csrf` + `confirm()`; `Cache::lock('participant-broadcast')` menolak broadcast kedua selama yang pertama berjalan. Test: `tests/Feature/BroadcastTest.php` (4 test).
 
 ### [ ] #8 Upload file tanpa validasi tipe
 - **Lokasi:** `CandidateController.php:72, 133`, `ParticipantController.php:127, 200`

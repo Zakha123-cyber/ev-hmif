@@ -44,7 +44,7 @@ Route::prefix('/back-admin-logged')->group(function () {
 
     Route::get('/participant', [ParticipantController::class, 'index']);
     Route::get('/participant/add', [ParticipantController::class, 'add']);
-    Route::get('/participant/broadcast', [ParticipantController::class, 'broadcast']);
+    Route::post('/participant/broadcast', [ParticipantController::class, 'broadcast']);
     Route::post('/participant/store', [ParticipantController::class, 'store']);
     Route::post('/participant/edit/{participant}', [ParticipantController::class, 'edit']);
     Route::put('/participant/update/{participant}', [ParticipantController::class, 'update']);

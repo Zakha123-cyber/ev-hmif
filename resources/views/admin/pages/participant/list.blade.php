@@ -93,7 +93,10 @@
     <div class="card">
         <div class="card-header flex flex-row justify-between">
             <h1 class="h6">List Participant</h1>
-            <a href="{{ url('/back-admin-logged/participant/broadcast') }}" id="sendEmailBtn" onclick="disableButton(this)" class="btn-shadow w-56 py-3 inline">Send Email</a>
+            <form method="POST" action="{{ url('/back-admin-logged/participant/broadcast') }}" class="inline" onsubmit="return confirmBroadcast(this)">
+                @csrf
+                <button type="submit" id="sendEmailBtn" class="btn-shadow w-56 py-3 inline">Send Email</button>
+            </form>
         </div>
         <div class="card-body">
             <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
@@ -248,10 +251,15 @@
     }
 </script>
 <script>
-    function disableButton(button) {
-        button.style.opacity = "0.5"; 
-        button.style.pointerEvents = "none"; 
+    function confirmBroadcast(form) {
+        if (!confirm('Buat akun & kirim email ke semua peserta yang belum punya akun?')) {
+            return false;
+        }
+        const button = form.querySelector('button');
+        button.style.opacity = "0.5";
+        button.style.pointerEvents = "none";
         button.textContent = 'Sending...';
+        return true;
     }
 </script>
 @endsection

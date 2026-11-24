@@ -166,7 +166,7 @@ it('does not create a second account in broadcast for a participant who already 
     giveAccount($participant, 'akunlama');
     $fresh = makeParticipant('2210002', 'not verified');
 
-    $this->actingAs($this->admin)->get('/back-admin-logged/participant/broadcast');
+    $this->actingAs($this->admin)->post('/back-admin-logged/participant/broadcast');
 
     expect(User::where('participant_id', $participant->id)->count())->toBe(1);
     expect(User::where('participant_id', $fresh->id)->count())->toBe(1);
