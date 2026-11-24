@@ -11,7 +11,7 @@ class Participant extends Model
     use HasFactory, HasRoles;
     protected $table = 'participants';
     protected $primaryKey = 'id';
-    protected $fillable = ['participant_name', 'nim', 'whatsapp_number', 'username_old', 'password_old', 'status', 'image'];
+    protected $fillable = ['participant_name', 'nim', 'whatsapp_number', 'email_backup', 'username_old', 'password_old', 'status', 'image'];
 
     public function user(){
         return $this->hasOne('App\Models\User', 'participant_id', 'id');

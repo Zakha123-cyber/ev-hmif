@@ -128,9 +128,10 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **Rencana fix:** Loop `do { ... } while (User::where('username', $u)->exists())`; jadikan service class biasa; hapus kedua route publik (atau pindah ke grup admin).
 - **✅ Selesai (24 Nov 2026):** service `App\Services\CredentialGenerator` (`username()` mengulang sampai tidak bentrok, `password()` tanpa cek ke kolom username). Route publik `/generateNewUsername` & `/generateNewPassword` dihapus; tombol "generate ulang" di form edit verifikasi kini memanggil `/back-admin-logged/generate-username|password` (khusus Admin). Test: `tests/Feature/CredentialGeneratorTest.php` (8 test).
 
-### [ ] #13 Fitur email backup membaca kolom yang tidak ada
+### [x] #13 Fitur email backup membaca kolom yang tidak ada
 - **Lokasi:** `ParticipantController::email_backup` (`:143`)
 - **Rencana fix:** Pilih salah satu: tambah migration kolom `email_backup` + input di form peserta, **atau** hapus fitur & tombolnya.
+- **✅ Selesai (24 Nov 2026) — fitur dilengkapi:** migration `add_email_backup_to_participants_table` (nullable), input "Email Backup (opsional)" di form tambah & edit peserta (validasi format email). Tombol kirim: error jika email backup kosong atau peserta belum punya akun (email akan berisi kredensial kosong); kegagalan kirim di-`report()`. Test: `tests/Feature/EmailBackupTest.php` (6 test).
 
 ### [ ] #14 Redirect setelah login bisa error
 - **Lokasi:** `app/Http/Controllers/RedirectRoleController.php:16, 22`

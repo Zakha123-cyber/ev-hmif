@@ -36,6 +36,15 @@
                     @enderror
                 </div>
                 <div class="mt-3">
+                    <label class="text-gray-700 ml-1"> Email Backup (opsional) : </label>
+                    <input type="email" name="email_backup" class="form-input w-full block rounded mt-1 p-3 border-2 @error('email_backup') border-red-500 @enderror focus:outline-none focus:border-teal-500" placeholder="email pribadi, dipakai jika email kampus bermasalah" value="{{old('email_backup')}}">
+                    @error('email_backup')
+                    <span class="pl-1 text-xs text-red-600 text-bold">
+                        {{$message}}
+                    </span>
+                    @enderror
+                </div>
+                <div class="mt-3">
                     <label class="text-gray-700 ml-1">Status : </label>
                     <select name="status" class="form-input mt-1 p-3 border-2 @error('status') border-red-500 @enderror focus:outline-none focus:border-teal-500 form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0">
                         <option value="not verified">Not Verified</option>

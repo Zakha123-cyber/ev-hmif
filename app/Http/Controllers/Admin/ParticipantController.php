@@ -154,6 +154,7 @@ class ParticipantController extends Controller
                 'whatsapp_number' => 'required',
                 'status' => 'required',
                 'image' => self::IMAGE_RULES,
+                'email_backup' => 'nullable|email',
             ],
             [
                 'required' => ':attribute harus diisi.',
@@ -161,6 +162,7 @@ class ParticipantController extends Controller
                 'image' => ':attribute harus berupa gambar.',
                 'mimes' => ':attribute harus berformat JPG, PNG, atau WEBP.',
                 'max' => ':attribute maksimal 10 MB.',
+                'email' => ':attribute harus berupa alamat email yang valid.',
             ],
             [
                 'participant_name' => 'Nama Participant',
@@ -168,6 +170,7 @@ class ParticipantController extends Controller
                 'whatsapp_number' => 'Nomor Whatsapp',
                 'status' => 'Status',
                 'image' => 'Foto',
+                'email_backup' => 'Email Backup',
             ],
         );
         try {
@@ -175,6 +178,7 @@ class ParticipantController extends Controller
             $participant->participant_name = $request->participant_name;
             $participant->nim = $request->nim;
             $participant->whatsapp_number = $request->whatsapp_number;
+            $participant->email_backup = $request->email_backup;
             $participant->status = $request->status;
             
             if ($request->file('image')) {
@@ -194,19 +198,21 @@ class ParticipantController extends Controller
     }
     
     public function email_backup(Participant $participant){
-        $getDetailParticipant = Participant::where('id', '=', $participant->id)->first();
-        try {
-            if ($getDetailParticipant->email_backup != null) {
-                Mail::to($getDetailParticipant->email_backup)->queue(new BroadcastMail($participant));
-            } 
-            else {
-                // dd($getDetailParticipant->email_backup);
-                return redirect()->back()->withStatus('Email Backup tidak ditemukan');
-            }
-            
-        } catch (\Throwable $th) {
-            return redirect()->back()->withError($th->getMessage());
+        if (! $participant->email_backup) {
+            return redirect()->back()->withError('Email backup peserta ini belum diisi. Isi lewat menu edit peserta.');
         }
+
+        if (! $participant->user()->exists()) {
+            return redirect()->back()->withError('Peserta ini belum memiliki akun, jadi belum ada yang bisa dikirim.');
+        }
+
+        try {
+            Mail::to($participant->email_backup)->queue(new BroadcastMail($participant));
+        } catch (\Throwable $th) {
+            report($th);
+            return redirect()->back()->withError('Gagal mengirim email backup: ' . $th->getMessage());
+        }
+
         return redirect()->back()->withStatus('Berhasil mengirimkan email backup.');
     }
 
@@ -229,6 +235,7 @@ class ParticipantController extends Controller
                 'whatsapp_number' => 'required',
                 'status' => 'required',
                 'image' => self::IMAGE_RULES,
+                'email_backup' => 'nullable|email',
             ],
             [
                 'required' => ':attribute harus diisi.',
@@ -236,6 +243,7 @@ class ParticipantController extends Controller
                 'image' => ':attribute harus berupa gambar.',
                 'mimes' => ':attribute harus berformat JPG, PNG, atau WEBP.',
                 'max' => ':attribute maksimal 10 MB.',
+                'email' => ':attribute harus berupa alamat email yang valid.',
             ],
             [
                 'participant_name' => 'Nama Participant',
@@ -243,6 +251,7 @@ class ParticipantController extends Controller
                 'whatsapp_number' => 'Nomor Whatsapp',
                 'status' => 'Status',
                 'image' => 'Foto',
+                'email_backup' => 'Email Backup',
             ],
         );
         try {
@@ -250,6 +259,7 @@ class ParticipantController extends Controller
             $participant->participant_name = $request->participant_name;
             $participant->nim = $request->nim;
             $participant->whatsapp_number = $request->whatsapp_number;
+            $participant->email_backup = $request->email_backup;
             $participant->status = $request->status;
             
             if ($request->file('image')) {
