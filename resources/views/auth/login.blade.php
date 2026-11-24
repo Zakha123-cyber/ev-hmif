@@ -77,10 +77,6 @@
 </head>
 
 <body>
-    <?php
-    $current_time = \Carbon\Carbon::now();
-    $wib_time = $current_time->setTimezone('Asia/Jakarta');
-    ?>
     <div class="limiter">
         <div class="container-login100" style="background-image: url({{ asset('frontend/images/bg-compress.jpg') }})">
             {{-- <div class="container-login100"> --}}
@@ -90,7 +86,7 @@
                 </div>
                 <form class="login100-form validate-form" method="POST" action="{{ route('login') }}">
                     @csrf
-                    @if ($wib_time->greaterThanOrEqualTo(\Carbon\Carbon::parse('15:30')))
+                    @if ($voting_closed)
                         <span class="login100-form-title" style="color: white;">Election Vote Selesai!</span>
                     @else
                         <span class="login100-form-title" style="color: white;">Election Login</span>

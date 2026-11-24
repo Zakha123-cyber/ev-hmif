@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Participant;
+use App\Services\ElectionStats;
 
 class CountController extends Controller
 {
@@ -22,9 +23,9 @@ class CountController extends Controller
             ->join('candidates', 'candidates.id', '=', 'counts.candidate_id')
             ->groupBy('counts.candidate_id')
             ->get();
-            $this->param['countVoted'] = User::where('status', 'voted')->count();
-            $this->param['countNotVoted'] = User::where('status', 'not voted')->count();
-            $this->param['countParticipant'] = Participant::count();
+            $this->param['countVoted'] = ElectionStats::voted();
+            $this->param['countNotVoted'] = ElectionStats::notVoted();
+            $this->param['countParticipant'] = ElectionStats::participants();
             
             return view('admin.pages.count.list', $this->param);
         } catch (\Exception $e) {

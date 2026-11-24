@@ -143,9 +143,10 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 
 ## ⚪ Rendah — perapian
 
-### [ ] #15 Logika waktu & statistik
+### [x] #15 Logika waktu & statistik
 - Cek 15:30 di `welcome.blade.php` dan `auth/login.blade.php` berlaku setiap hari → ganti dengan jadwal dari #1.
 - Dashboard & live count: `countVoted` ikut menghitung admin → filter hanya role `Participant`.
+- **✅ Selesai (24 Nov 2026):** judul login "Election Vote Selesai!" kini mengikuti status jadwal (`welcome` sudah di #2) — tidak ada lagi cek jam 15:30 di kode. Statistik dashboard & live count lewat `App\Services\ElectionStats`: sudah/belum memilih hanya role Participant, total peserta tanpa peserta milik admin. Test: `tests/Feature/ScheduleAndStatsTest.php` (5 test).
 
 ### [ ] #16 Kode Breeze yang tidak terpakai
 - Route `register`, `forgot-password`, `reset-password`, `ProfileController`, dan test bawaan Breeze mengacu ke kolom `name`/`email` yang sudah dihapus.

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Candidate;
 use App\Models\Participant;
+use App\Services\ElectionStats;
 
 class DashboardController extends Controller
 {
@@ -22,10 +23,10 @@ class DashboardController extends Controller
                 $thisRole->where('name', 'Admin');
             })->count();
             
-            $this->param['countParticipant'] = Participant::count();
+            $this->param['countParticipant'] = ElectionStats::participants();
             $this->param['countCandidate'] = Candidate::count();
-            $this->param['countVoted'] = User::where('status', 'voted')->count();
-            $this->param['countNotVoted'] = User::where('status', 'not voted')->count();
+            $this->param['countVoted'] = ElectionStats::voted();
+            $this->param['countNotVoted'] = ElectionStats::notVoted();
 
             $this->param['getLiveCount'] = \DB::table('counts')
                                             ->select(\DB::raw('count(counts.candidate_id) as total_suara'), 'candidates.leader_name as nama_ketua')
