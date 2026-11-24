@@ -88,10 +88,12 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **Selesai jika:** `GET /back-admin-logged/participant/broadcast` mengembalikan 405.
 - **✅ Selesai (24 Nov 2026):** route jadi `POST`, tombol jadi form `@csrf` + `confirm()`; `Cache::lock('participant-broadcast')` menolak broadcast kedua selama yang pertama berjalan. Test: `tests/Feature/BroadcastTest.php` (4 test).
 
-### [ ] #8 Upload file tanpa validasi tipe
+### [x] #8 Upload file tanpa validasi tipe
 - **Lokasi:** `CandidateController.php:72, 133`, `ParticipantController.php:127, 200`
 - **Rencana fix:** Validasi `image|mimes:jpg,jpeg,png,webp|max:5120`; simpan dengan `hashName()` (bukan nama asli); tambahkan `.htaccess` di `public/assets/upload/` yang menolak eksekusi PHP.
 - **Selesai jika:** Upload `.php` / file non-gambar ditolak validasi.
+- **✅ Selesai (24 Nov 2026):** validasi `nullable|image|mimes:jpg,jpeg,png,webp|max:10240` (10 MB karena poster lama ada yang ±7 MB; SVG ditolak). File disimpan dengan `hashName()` ke `public_path(...)` — sebelumnya path relatif sehingga lokasi bergantung working directory. `public/assets/upload/.htaccess` menolak eksekusi skrip. Test: `tests/Feature/UploadValidationTest.php` (8 test).
+  - Deploy: salin `public/assets/upload/.htaccess` ke folder upload di server (lihat `docs/DEPLOY.md`).
 
 ### [ ] #9 Penanganan kredensial
 - **Lokasi:** `database/seeders/UserSeeder.php`, `GeneratorController.php:17`, kolom `participants.password_old`

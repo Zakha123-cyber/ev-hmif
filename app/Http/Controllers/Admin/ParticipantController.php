@@ -31,6 +31,21 @@ class ParticipantController extends Controller
     {
         $this->middleware(['role:Admin']);
     }
+
+    // SVG sengaja tidak diizinkan (bisa berisi JavaScript).
+    private const IMAGE_RULES = 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240';
+
+    /**
+     * Simpan foto dengan nama acak (bukan nama asli dari pengguna) di folder public.
+     */
+    private function storeImage(Request $request): string
+    {
+        $file = $request->file('image');
+        $name = $file->hashName();
+        $file->move(public_path('assets/upload/participant'), $name);
+
+        return $name;
+    }
     
     private $param;
     public function index(){
@@ -121,22 +136,24 @@ class ParticipantController extends Controller
                 'nim' => 'required|unique:participants,nim',
                 'whatsapp_number' => 'required',
                 'status' => 'required',
+                'image' => self::IMAGE_RULES,
             ],
             [
                 'required' => ':attribute harus diisi.',
                 'unique' => ':attribute sudah terdaftar.',
+                'image' => ':attribute harus berupa gambar.',
+                'mimes' => ':attribute harus berformat JPG, PNG, atau WEBP.',
+                'max' => ':attribute maksimal 10 MB.',
             ],
             [
                 'participant_name' => 'Nama Participant',
                 'nim' => 'NIM',
                 'whatsapp_number' => 'Nomor Whatsapp',
                 'status' => 'Status',
+                'image' => 'Foto',
             ],
         );
         try {
-            $date = date('H-i-s');
-            $random = \Str::random(5);
-
             $participant = new Participant();
             $participant->participant_name = $request->participant_name;
             $participant->nim = $request->nim;
@@ -144,8 +161,7 @@ class ParticipantController extends Controller
             $participant->status = $request->status;
             
             if ($request->file('image')) {
-                $request->file('image')->move('assets/upload/participant', $date.$random.$request->file('image')->getClientOriginalName());
-                $participant->image = $date.$random.$request->file('image')->getClientOriginalName();
+                $participant->image = $this->storeImage($request);
             } else {
                 $participant->image = 'avatar.png';
             }
@@ -195,22 +211,24 @@ class ParticipantController extends Controller
                 'nim' => ['required', Rule::unique('participants', 'nim')->ignore($participant->id)],
                 'whatsapp_number' => 'required',
                 'status' => 'required',
+                'image' => self::IMAGE_RULES,
             ],
             [
                 'required' => ':attribute harus diisi.',
                 'unique' => ':attribute sudah terdaftar.',
+                'image' => ':attribute harus berupa gambar.',
+                'mimes' => ':attribute harus berformat JPG, PNG, atau WEBP.',
+                'max' => ':attribute maksimal 10 MB.',
             ],
             [
                 'participant_name' => 'Nama Participant',
                 'nim' => 'NIM',
                 'whatsapp_number' => 'Nomor Whatsapp',
                 'status' => 'Status',
+                'image' => 'Foto',
             ],
         );
         try {
-            $date = date('H-i-s');
-            $random = \Str::random(5);
-
             $participant = Participant::find($participant->id);
             $participant->participant_name = $request->participant_name;
             $participant->nim = $request->nim;
@@ -218,8 +236,7 @@ class ParticipantController extends Controller
             $participant->status = $request->status;
             
             if ($request->file('image')) {
-                $request->file('image')->move('assets/upload/participant', $date.$random.$request->file('image')->getClientOriginalName());
-                $participant->image = $date.$random.$request->file('image')->getClientOriginalName();
+                $participant->image = $this->storeImage($request);
             }
             
             $participant->save();

@@ -29,7 +29,8 @@ Cek hasilnya: buka URL yang tidak ada / picu error → harus tampil halaman erro
 2. Upload isi `public/` ke document root subdomain, lalu timpa:
    - `deploy/cpanel-index.php` → `index.php`
    - `deploy/cpanel.htaccess` → `.htaccess` (berisi handler PHP 8.3 — server wajib PHP ≥ 8.3)
-3. Jangan timpa folder upload yang sudah ada di server (`assets/upload/`, `files/`).
+3. Jangan timpa isi folder upload yang sudah ada di server (`assets/upload/`, `files/`),
+   **tetapi pastikan `assets/upload/.htaccess` ikut tersalin** — file ini mencegah skrip hasil upload dieksekusi.
 
 ## 3. Dependensi (via Terminal cPanel)
 

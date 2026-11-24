@@ -10,9 +10,24 @@ use App\Models\Count;
 
 class CandidateController extends Controller
 {
+    // SVG sengaja tidak diizinkan (bisa berisi JavaScript).
+    private const POSTER_RULES = 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240';
+
     public function __construct()
     {
         $this->middleware(['role:Admin']);
+    }
+
+    /**
+     * Simpan poster dengan nama acak (bukan nama asli dari pengguna) di folder public.
+     */
+    private function storePoster(Request $request): string
+    {
+        $file = $request->file('poster');
+        $name = $file->hashName();
+        $file->move(public_path('assets/upload/kandidat'), $name);
+
+        return $name;
     }
     
     private $param;
@@ -46,9 +61,13 @@ class CandidateController extends Controller
                 'vice_leader_name' => 'required',
                 'vision' => 'required',
                 'mission' => 'required',
+                'poster' => self::POSTER_RULES,
             ],
             [
                 'required' => ':attribute harus diisi.',
+                'image' => ':attribute harus berupa gambar.',
+                'mimes' => ':attribute harus berformat JPG, PNG, atau WEBP.',
+                'max' => ':attribute maksimal 10 MB.',
             ],
             [
                 'candidate_pair' => 'Nomor Kandidat',
@@ -56,12 +75,10 @@ class CandidateController extends Controller
                 'vice_leader_name' => 'Nama Wakil Ketua',
                 'vision' => 'Visi',
                 'mission' => 'Misi',
+                'poster' => 'Poster',
             ],
         );
         try {
-            $date = date('H-i-s');
-            $random = \Str::random(5);
-
             $candidate = new Candidate();
             $candidate->candidate_pair = $request->candidate_pair;
             $candidate->leader_name = $request->leader_name;
@@ -70,8 +87,7 @@ class CandidateController extends Controller
             $candidate->mission = $request->mission;
             
             if ($request->file('poster')) {
-                $request->file('poster')->move('assets/upload/kandidat', $date.$random.$request->file('poster')->getClientOriginalName());
-                $candidate->poster = $date.$random.$request->file('poster')->getClientOriginalName();
+                $candidate->poster = $this->storePoster($request);
             } else {
                 $candidate->poster = 'default.png';
             }
@@ -106,9 +122,13 @@ class CandidateController extends Controller
                 'vice_leader_name' => 'required',
                 'vision' => 'required',
                 'mission' => 'required',
+                'poster' => self::POSTER_RULES,
             ],
             [
                 'required' => ':attribute harus diisi.',
+                'image' => ':attribute harus berupa gambar.',
+                'mimes' => ':attribute harus berformat JPG, PNG, atau WEBP.',
+                'max' => ':attribute maksimal 10 MB.',
             ],
             [
                 'candidate_pair' => 'Nomor Kandidat',
@@ -116,12 +136,10 @@ class CandidateController extends Controller
                 'vice_leader_name' => 'Nama Wakil Ketua',
                 'vision' => 'Visi',
                 'mission' => 'Misi',
+                'poster' => 'Poster',
             ],
         );
         try {
-            $date = date('H-i-s');
-            $random = \Str::random(5);
-
             $candidate = Candidate::find($candidate->id);
             $candidate->candidate_pair = $request->candidate_pair;
             $candidate->leader_name = $request->leader_name;
@@ -130,8 +148,7 @@ class CandidateController extends Controller
             $candidate->mission = $request->mission;
             
             if ($request->file('poster')) {
-                $request->file('poster')->move('assets/upload/kandidat', $date.$random.$request->file('poster')->getClientOriginalName());
-                $candidate->poster = $date.$random.$request->file('poster')->getClientOriginalName();
+                $candidate->poster = $this->storePoster($request);
             }
             
             $candidate->save();

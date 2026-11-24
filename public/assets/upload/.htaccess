@@ -1,0 +1,15 @@
+# Folder ini hanya berisi gambar hasil upload: jangan pernah mengeksekusi skrip.
+# (Lapisan kedua di samping validasi tipe file di controller.)
+
+Options -ExecCGI -Indexes
+
+# Lepas handler PHP yang dipasang cPanel di .htaccess root.
+<IfModule mime_module>
+    RemoveHandler .php .php3 .php4 .php5 .php7 .php8 .phtml .phar .pht
+    RemoveType .php .php3 .php4 .php5 .php7 .php8 .phtml .phar .pht
+</IfModule>
+
+# Tolak akses ke file skrip apa pun.
+<FilesMatch "(?i)\.(php\d*|phtml|phar|pht|cgi|pl|py|sh|asp|aspx|jsp)$">
+    Require all denied
+</FilesMatch>
