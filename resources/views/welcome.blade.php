@@ -46,10 +46,6 @@
     <div class="gtco-loader"></div>
 
     <div id="page">
-        <?php
-        $current_time = \Carbon\Carbon::now();
-        $wib_time = $current_time->setTimezone('Asia/Jakarta');
-        ?>
         <nav class="gtco-nav" role="navigation">
             <div class="container">
                 <div style="display: flex; justify-content: space-between;	">
@@ -74,7 +70,7 @@
                                     </form>
                                 </a>
                             @else
-                                @if ($wib_time->greaterThanOrEqualTo(\Carbon\Carbon::parse('15:30')))
+                                @if ($results_visible)
                                     <a class="button-custom" style="padding:0.5rem 2.5rem" href="#">Pemilihan
                                         Selesai</a>
                                 @else
@@ -167,10 +163,8 @@
                     </div>
                 </div>
                 <div class="row" style="text-align: center;align-items:center">
-                    {{-- @dd($wibTime) --}}
-                    @if ($wib_time->greaterThanOrEqualTo(\Carbon\Carbon::parse('15:30')))
+                    @if ($results_visible)
                         <div class="col-md-8 col-md-offset-2 animate-box" data-animate-effect="fadeIn">
-                            {{-- <p>{{$counts}}</p> --}}
                             <canvas id="pie-chart" width="600" height="400"></canvas>
                         </div>
                     @else
@@ -189,7 +183,7 @@
                 <div class="row copyright">
                     <div class="col-md-12">
                         <p class="pull-left">
-                            <small class="block">&copy; {{ $wib_time->year }} HMIF Copyright © | Made With
+                            <small class="block">&copy; {{ now()->year }} HMIF Copyright © | Made With
                                 Love.</small>
                         </p>
                     </div>
@@ -203,9 +197,10 @@
             </i></a>
     </div>
 
+    @if ($results_visible)
     <script>
-        var label_candidates = @php echo json_encode($label_candidates) @endphp;
-        var value_candidates = @php echo json_encode($value_candidates) @endphp;
+        var label_candidates = @json($label_candidates);
+        var value_candidates = @json($value_candidates);
 
         new Chart(document.getElementById("pie-chart"), {
             type: 'pie',
@@ -219,6 +214,7 @@
             },
         });
     </script>
+    @endif
 
 
     <!-- jQuery -->

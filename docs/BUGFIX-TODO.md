@@ -25,11 +25,12 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **✅ Selesai (24 Nov 2026):** model `ElectionSetting`, middleware `voting.open` (`EnsureVotingOpen`), `VoteController@vote_page`, halaman admin `/back-admin-logged/election-schedule`. Jika jadwal belum diatur → pemilihan dianggap **belum dibuka**. Test: `tests/Feature/VotingScheduleTest.php` (12 test).
   - Deploy: jalankan `php artisan migrate` di server, lalu atur jadwal di panel admin.
 
-### [ ] #2 Hasil suara bocor sebelum pemilihan selesai
+### [x] #2 Hasil suara bocor sebelum pemilihan selesai
 - **Lokasi:** `app/Http/Controllers/HomeController.php`, `resources/views/welcome.blade.php:206-207`
 - **Masalah:** Cek jam 15:30 hanya menyembunyikan `<canvas>`; `value_candidates` selalu tercetak di JS halaman.
 - **Rencana fix:** Hitung & kirim data hasil **hanya** jika pemilihan sudah selesai (cek di controller, bukan di view). Bungkus `<script>` chart di dalam kondisi yang sama.
 - **Selesai jika:** View source halaman `/` sebelum jadwal selesai tidak memuat angka suara.
+- **✅ Selesai (24 Nov 2026):** `HomeController` hanya menghitung & mengirim hasil saat status jadwal `closed`; chart dan `<script>`-nya dibungkus `@if ($results_visible)`. Cek jam 15:30 di `welcome.blade.php` (chart & tombol "Pemilihan Selesai") diganti jadwal admin. Test: `tests/Feature/ResultsVisibilityTest.php` (4 test). Cek 15:30 di `auth/login.blade.php` masih ada → item #15.
 
 ### [ ] #3 Satu orang bisa punya lebih dari satu akun → memilih berkali-kali
 - **Lokasi:** migration `participants` (nim tidak unique), `ParticipantController::sendVerified` (`:269-305`), `ParticipantController::broadcast`, form `participant-verification/list.blade.php` (opsi status "not verified")

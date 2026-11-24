@@ -1,6 +1,13 @@
 <?php
 
+use App\Models\Candidate;
+use App\Models\ElectionSetting;
+use App\Models\Participant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /*
@@ -42,7 +49,48 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function seedRoles(): void
 {
-    // ..
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+    Role::create(['name' => 'Admin']);
+    Role::create(['name' => 'Participant']);
+}
+
+function makeCandidate(int $pair): Candidate
+{
+    return Candidate::forceCreate([
+        'candidate_pair' => $pair,
+        'leader_name' => "Ketua {$pair}",
+        'vice_leader_name' => "Wakil {$pair}",
+        'vision' => 'Visi',
+        'mission' => 'Misi',
+        'poster' => 'default.png',
+    ]);
+}
+
+function makeUserWithRole(string $role, string $username): User
+{
+    $participant = Participant::create([
+        'participant_name' => $username,
+        'nim' => fake()->unique()->numerify('##########'),
+        'status' => 'verified',
+    ]);
+
+    $user = User::create([
+        'participant_id' => $participant->id,
+        'username' => $username,
+        'password' => bcrypt('secret'),
+        'status' => $role === 'Admin' ? 'voted' : 'not voted',
+    ]);
+    $user->assignRole($role);
+
+    return $user;
+}
+
+function setSchedule(string $start, string $end): void
+{
+    ElectionSetting::current()->fill([
+        'vote_start' => Carbon::parse($start),
+        'vote_end' => Carbon::parse($end),
+    ])->save();
 }

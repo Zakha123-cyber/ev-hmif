@@ -1,55 +1,13 @@
 <?php
 
-use App\Models\Candidate;
 use App\Models\Count;
 use App\Models\ElectionSetting;
-use App\Models\Participant;
-use App\Models\User;
 use Illuminate\Support\Carbon;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function () {
-    app(PermissionRegistrar::class)->forgetCachedPermissions();
-    Role::create(['name' => 'Admin']);
-    Role::create(['name' => 'Participant']);
-
-    $this->candidate = Candidate::forceCreate([
-        'candidate_pair' => 1,
-        'leader_name' => 'Ketua',
-        'vice_leader_name' => 'Wakil',
-        'vision' => 'Visi',
-        'mission' => 'Misi',
-        'poster' => 'default.png',
-    ]);
+    seedRoles();
+    $this->candidate = makeCandidate(1);
 });
-
-function makeUserWithRole(string $role, string $username): User
-{
-    $participant = Participant::create([
-        'participant_name' => $username,
-        'nim' => fake()->unique()->numerify('##########'),
-        'status' => 'verified',
-    ]);
-
-    $user = User::create([
-        'participant_id' => $participant->id,
-        'username' => $username,
-        'password' => bcrypt('secret'),
-        'status' => $role === 'Admin' ? 'voted' : 'not voted',
-    ]);
-    $user->assignRole($role);
-
-    return $user;
-}
-
-function setSchedule(string $start, string $end): void
-{
-    ElectionSetting::current()->fill([
-        'vote_start' => Carbon::parse($start),
-        'vote_end' => Carbon::parse($end),
-    ])->save();
-}
 
 // --- POST /vote-paslon harus menolak suara di luar jadwal ---
 
