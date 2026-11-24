@@ -1,238 +1,234 @@
-<!DOCTYPE HTML>
-<html>
+@php
+    use App\Models\ElectionSetting;
+
+    $start = $setting->vote_start?->copy()->locale('id');
+    $end = $setting->vote_end?->copy()->locale('id');
+    $sameDay = $start && $end && $start->isSameDay($end);
+    $dateLabel = fn ($date) => $date->translatedFormat('l, j F Y');
+
+    $user = auth()->user();
+    $userLink = url('/back-admin-logged/redirect-role');
+    $userLinkLabel = $user?->hasRole('Admin') ? 'Panel admin' : 'Buka surat suara';
+@endphp
+<!DOCTYPE html>
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Election vote</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Website pemilihan ketua dan wakil ketua umum HMIF" />
-    <meta name="keywords" content="free website templates, HMIF, himpunan, Informatika, fakultas, ilmu, komputer" />
-    <meta name="author" content="teknologi HMIF UNEJ" />
+    <title>Pemilihan Ketua HMIF 2025/2026 | Election Vote</title>
+    <meta name="description" content="Jadwal, pasangan calon, dan hasil pemilihan Ketua dan Wakil Ketua Umum Himpunan Mahasiswa Informatika Universitas Jember periode 2025/2026.">
+    <link rel="icon" href="{{ asset('frontend/images/logo_election_vote.png') }}" type="image/png">
 
-    <!-- Facebook and Twitter integration -->
-    <meta property="og:title" content="" />
-    <meta property="og:image" content="" />
-    <meta property="og:url" content="" />
-    <meta property="og:site_name" content="" />
-    <meta property="og:description" content="" />
-    <meta name="twitter:title" content="" />
-    <meta name="twitter:image" content="" />
-    <meta name="twitter:url" content="" />
-    <meta name="twitter:card" content="" />
-
-    <link rel="icon" href="/frontend/images/logo_election_vote.png" type="image/x-icon">
-
-    <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400, 900" rel="stylesheet"> -->
-
-    <link href='https://fonts.googleapis.com/css?family=Space Grotesk' rel='stylesheet'>
-    <link rel="stylesheet" href="/frontend/css/animate.css">
-    <link rel="stylesheet" href="/frontend/css/bootstrap.css">
-    <link rel="stylesheet" href="/frontend/css/owl.theme.default.min.css">
-
-    <!-- Theme style  -->
-    <link rel="stylesheet" href="/frontend/css/style.css">
-    <link rel="stylesheet" href="/frontend/css/animation-custom.css">
-
-    <!-- Modernizr JS -->
-    <script src="/frontend/js/modernizr-2.6.2.min.js"></script>
-    <!-- Chart -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Plus+Jakarta+Sans:wght@400;600&display=swap">
+    <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}">
+    <script src="{{ asset('frontend/js/home.js') }}" defer></script>
 </head>
 
 <body>
+    <a class="skip-link" href="#paslon">Langsung ke daftar pasangan calon</a>
 
-    <div class="gtco-loader"></div>
+    <header class="site-header">
+        <div class="container site-header__inner">
+            <a href="{{ url('/') }}" class="site-header__logo">
+                <img src="{{ asset('frontend/images/logo_election_vote.png') }}" width="810" height="810"
+                    alt="Election Vote HMIF">
+            </a>
+            <nav class="site-header__actions" aria-label="Akun">
+                @auth
+                    <a class="btn btn--on-photo" href="{{ $userLink }}">{{ $userLinkLabel }}</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn--on-photo btn--quiet">Keluar</button>
+                    </form>
+                @else
+                    <a class="btn btn--on-photo" href="{{ route('login') }}">Masuk</a>
+                @endauth
+            </nav>
+        </div>
+    </header>
 
-    <div id="page">
-        <nav class="gtco-nav" role="navigation">
-            <div class="container">
-                <div style="display: flex; justify-content: space-between;	">
-                    <div>
-                        <div id="gtco-logo">
-                            <a href="#">
-                                <img src="/frontend/images/logo_election_vote.png" class="logo-nav"
-                                    alt="logo election vote HMIF">
-                            </a>
-                        </div>
-                    </div>
-                    <div style="display: flex; margin: auto 0;">
-                        @if (Route::has('login'))
-                            @auth
-                                <a class="button-custom" style="margin-right: 1rem" href="{{ url('/vote') }}">Vote</a>
-                                <a class="" href="#">
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button class="button-custom" type="submit" href="#">
-                                            log out
-                                        </button>
-                                    </form>
-                                </a>
-                            @else
-                                @if ($results !== null)
-                                    <a class="button-custom" style="padding:0.5rem 2.5rem" href="#">Pemilihan
-                                        Selesai</a>
-                                @else
-                                    <a class="button-custom" style="padding:0.5rem 2.5rem"
-                                        href="{{ route('login') }}">Login</a>
-                                @endif
-                            @endauth
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <section id="gtco-hero" class="gtco-cover"
-            style="background-image: url('{{ asset('frontend/images/Desktop.png') }}'); background-position: center; background-attachment: fixed;
-		">
-            <div class="overlay"></div>
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 col-md-offset-0 text-center">
-                        <div class="display-t">
-                            <div class="display-tc">
-                                <h1 class="animate-box" data-animate-effect="fadeIn"
-                                    style="font-family: 'Space Grotesk'; font-weight:bold;">Ayo Gunakan Hak Pilihmu,
-                                    Jadilah Pemilih Yang Cerdas !</h1>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="gtco-our-team" data-section="our-team">
-            <div class="container">
-                @foreach ($candidates as $item)
-                    <div class="" style="margin-top: 100px">
-                        <div class="row row-pb-lg" style="margin-bottom: 0px">
-                            <div class="col-md-8 col-md-offset-2 heading animate-box" data-animate-effect="fadeIn">
-                                <p class="subtle-text animate-box" data-animate-effect="fadeIn">Paslon
-                                    {{ $item->candidate_pair }}</p>
-                            </div>
-                        </div>
-                        <div class="row team-item gtco-team-reverse">
-                            <div class="col-md-6 col-md-push-7 animate-box" data-animate-effect="fadeInRight">
-                                <div class="img-shadow">
-                                    <img src="{{ asset('assets/upload/kandidat/' . $item->poster) }}"
-                                        class="img-responsive radius-image floating" alt="Foto paslon">
-                                </div>
-                                <div class="circle-custom-1"></div>
-                                <div class="circle-custom-1-2"></div>
-                            </div>
-                            <div class="col-md-6 col-md-pull-6 animate-box" data-animate-effect="fadeInRight">
-                                <span>
-                                    <h2>{{ $item->leader_name }} & {{ $item->vice_leader_name }}</h2>
-                                    <div class="circle-text"></div>
-                                </span>
-                                <h3>Visi</h3>
-                                <p>{{ $item->vision }}
-                                </p>
-                                <h3>Misi</h3>
-                                <ul>
-                                    <?php
-                                    if (substr($item->mission, -1) === '.') {
-                                        $mission = rtrim($item->mission, '.');
-                                    } else {
-                                        $mission = $item->mission;
-                                    }
-                                    $item_mission = explode('.', $mission);
-                                    ?>
-                                    @foreach ($item_mission as $mission_item)
-                                        <li>{{ $mission_item }}.</li>
-                                    @endforeach
-
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+    <main>
+        <section class="hero" aria-labelledby="judul">
+            <div class="hero__slides" data-slider>
+                @foreach ([1, 2, 3] as $n)
+                    <img class="hero__slide{{ $n === 1 ? ' is-active' : '' }}"
+                        src="{{ asset("frontend/images/home/foto-{$n}-1200.webp") }}"
+                        srcset="{{ asset("frontend/images/home/foto-{$n}-1200.webp") }} 1200w, {{ asset("frontend/images/home/foto-{$n}-2400.webp") }} 2400w"
+                        sizes="100vw" width="2400" height="1350"
+                        @if ($n === 1) fetchpriority="high" alt="Pengurus HMIF berfoto bersama di depan gerbang Universitas Jember"
+                        @else loading="lazy" alt="" @endif>
                 @endforeach
+            </div>
+            <div class="hero__scrim" aria-hidden="true"></div>
 
+            <div class="container hero__inner">
+                <h1 id="judul" class="hero__title">
+                    Pemilihan Ketua dan Wakil Ketua Umum HMIF
+                    <span class="hero__period">Periode 2025/2026</span>
+                </h1>
+                <button type="button" class="slider-toggle" data-slider-toggle hidden>Jeda foto</button>
             </div>
         </section>
 
-        <section>
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-8 col-md-offset-2 animate-box text-center" data-animate-effect="fadeIn">
-                        <h2>Hasil Perhitungan</h2>
-                        <p class="subtle-text animate-box" data-animate-effect="fadeIn">Hasil perhitungan dari suara
-                            yang masuk</p>
-                    </div>
+        <div class="container slip-row">
+            <section class="slip" aria-labelledby="jadwal">
+                <h2 id="jadwal" class="slip__label">Jadwal pemilihan</h2>
+
+                @switch($status)
+                    @case(ElectionSetting::STATUS_UPCOMING)
+                        <p class="slip__status">Dibuka {{ $start->diffForHumans(now(), ['syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE, 'parts' => 1]) }} lagi</p>
+                        @if ($sameDay)
+                            <p class="slip__when">{{ $dateLabel($start) }}<br>{{ $start->format('H.i') }}–{{ $end->format('H.i') }} WIB</p>
+                        @else
+                            <p class="slip__when">Dibuka {{ $dateLabel($start) }} pukul {{ $start->format('H.i') }} WIB<br>Ditutup {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB</p>
+                        @endif
+                        @break
+
+                    @case(ElectionSetting::STATUS_OPEN)
+                        <p class="slip__status">Pemilihan sedang berlangsung</p>
+                        <p class="slip__when">Ditutup {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
+                        @auth
+                            <a class="btn btn--primary" href="{{ $userLink }}">{{ $userLinkLabel }}</a>
+                        @else
+                            <a class="btn btn--primary" href="{{ route('login') }}">Masuk untuk memilih</a>
+                        @endauth
+                        @break
+
+                    @case(ElectionSetting::STATUS_CLOSED)
+                        <p class="slip__status">Pemilihan ditutup</p>
+                        <p class="slip__when">{{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
+                        <a class="btn btn--primary" href="#hasil">Lihat hasil</a>
+                        @break
+
+                    @default
+                        <p class="slip__status slip__status--quiet">Jadwal pemilihan belum diumumkan panitia.</p>
+                        <p class="slip__when">Akun pemilihan dikirim ke email kampus masing-masing saat pemilihan dibuka.</p>
+                @endswitch
+            </section>
+
+            @if ($mascotUrl)
+                <model-viewer class="mascot" src="{{ $mascotUrl }}" alt="COGITO, maskot HMIF. Geser untuk memutar."
+                    camera-controls disable-zoom disable-pan interaction-prompt="none" touch-action="pan-y"
+                    shadow-intensity="0.6"></model-viewer>
+            @endif
+        </div>
+
+        <section id="paslon" class="ballot-section" aria-labelledby="surat-suara">
+            <div class="container ballot-section__inner">
+                <div class="ballot-section__intro">
+                    <h2 id="surat-suara" class="section-title">Surat suara</h2>
+                    <p>Kenali pasangan calon sebelum memilih. Suara hanya bisa dikirim satu kali dan tidak dapat diubah.</p>
                 </div>
-                <div class="row" style="text-align: center;align-items:center">
-                    @if ($results !== null)
-                        <div class="col-md-8 col-md-offset-2 animate-box" data-animate-effect="fadeIn">
-                            <canvas id="pie-chart" width="600" height="400"></canvas>
-                        </div>
+
+                @if ($candidates->isEmpty())
+                    <p class="ballot__empty">Daftar pasangan calon belum diumumkan.</p>
+                @else
+                    <ol class="ballot ballot--{{ min($candidates->count(), 3) }}">
+                        @foreach ($candidates as $candidate)
+                            @php $hasPoster = $candidate->poster && file_exists(public_path('assets/upload/kandidat/' . $candidate->poster)); @endphp
+                            <li class="ballot__cell">
+                                <p class="hex-number" aria-label="Nomor urut {{ $candidate->candidate_pair }}">
+                                    <span aria-hidden="true">{{ $candidate->candidate_pair }}</span>
+                                </p>
+
+                                @if ($hasPoster)
+                                    <img class="ballot__poster" src="{{ asset('assets/upload/kandidat/' . $candidate->poster) }}"
+                                        width="600" height="800" loading="lazy"
+                                        alt="Poster pasangan calon nomor {{ $candidate->candidate_pair }}, {{ $candidate->leader_name }} dan {{ $candidate->vice_leader_name }}">
+                                @else
+                                    <div class="ballot__poster ballot__placeholder">Foto pasangan calon belum tersedia</div>
+                                @endif
+
+                                <dl class="ballot__names">
+                                    <div>
+                                        <dt>Ketua</dt>
+                                        <dd>{{ $candidate->leader_name }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Wakil ketua</dt>
+                                        <dd>{{ $candidate->vice_leader_name }}</dd>
+                                    </div>
+                                </dl>
+
+                                <h3 class="ballot__heading">Visi</h3>
+                                <p class="ballot__vision">{{ $candidate->vision }}</p>
+
+                                @php $missions = $candidate->missionItems(); @endphp
+                                @if ($missions)
+                                    <details class="ballot__mission">
+                                        <summary>Misi ({{ count($missions) }} butir)</summary>
+                                        <ul>
+                                            @foreach ($missions as $mission)
+                                                <li>{{ $mission }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </details>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ol>
+                @endif
+            </div>
+        </section>
+
+        <section id="hasil" class="results" aria-labelledby="hasil-judul">
+            <div class="container results__inner">
+                <div class="results__intro">
+                    <h2 id="hasil-judul" class="section-title">Hasil penghitungan</h2>
+                    @if ($results === null && $end)
+                        <p>Hasil penghitungan tampil di sini setelah pemilihan ditutup pada {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
+                    @elseif ($results === null)
+                        <p>Hasil penghitungan tampil di sini setelah pemilihan ditutup.</p>
+                    @elseif ($totalVotes === 0)
+                        <p>Belum ada suara tercatat.</p>
                     @else
-                        <div class="container alert alert-info animate-box" data-animate-effect="fadeIn"
-                            role="alert">
-                            <p data-animate-effect="fadeIn">Hasil perhitungan suara akan ditampilkan ketika pemilihan
-                                selesai &#128079;</p>
-                        </div>
+                        <p>Total {{ $totalVotes }} suara masuk.</p>
                     @endif
                 </div>
+
+                @if ($results !== null && $totalVotes > 0)
+                    <ol class="tally">
+                        @foreach ($results as $row)
+                            <li class="tally__row">
+                                <p class="tally__name">
+                                    <span class="tally__pair">Paslon {{ $row['candidate']->candidate_pair }}</span>
+                                    {{ $row['candidate']->leader_name }} &amp; {{ $row['candidate']->vice_leader_name }}
+                                </p>
+                                <div class="tally__bar" aria-hidden="true"><span style="width: {{ $row['percent'] }}%"></span></div>
+                                <p class="tally__count"><strong>{{ $row['percent'] }}%</strong> {{ $row['votes'] }} suara</p>
+                            </li>
+                        @endforeach
+                    </ol>
+                @endif
             </div>
         </section>
+    </main>
 
-        <footer id="gtco-footer" role="contentinfo">
-            <div class="container">
-                <div class="row copyright">
-                    <div class="col-md-12">
-                        <p class="pull-left">
-                            <small class="block">&copy; {{ now()->year }} HMIF Copyright © | Made With
-                                Love.</small>
-                        </p>
-                    </div>
-                </div>
+    <footer class="site-footer">
+        <div class="container site-footer__inner">
+            <div class="site-footer__org">
+                <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="320" height="320" loading="lazy"
+                    alt="Logo Himpunan Mahasiswa Informatika">
+                <p>Himpunan Mahasiswa Informatika<br>Universitas Jember</p>
             </div>
-        </footer>
-    </div>
+            <div class="site-footer__help">
+                <h2 class="site-footer__title">Kendala login atau belum menerima email akun?</h2>
+                <p>Hubungi panitia lewat WhatsApp:</p>
+                <ul>
+                    <li><a href="https://wa.me/6283823093973">Farda, 0838 2309 3973</a></li>
+                    <li><a href="https://wa.me/6283852061105">Dewi, 0838 5206 1105</a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="container site-footer__copy">&copy; {{ now()->year }} Election Vote HMIF</p>
+    </footer>
 
-    <div class="gototop js-top">
-        <a href="#" class="js-gotop" style="display: flex; justify-content: center; align-items: center"> ↑
-            </i></a>
-    </div>
-
-    @if ($results !== null)
-    <script>
-        var label_candidates = @json(collect($results)->map(fn ($r) => "Paslon " . $r["candidate"]->candidate_pair)->all());
-        var value_candidates = @json(collect($results)->pluck("votes")->all());
-
-        new Chart(document.getElementById("pie-chart"), {
-            type: 'pie',
-            data: {
-                labels: label_candidates,
-                datasets: [{
-                    label: "Population (millions)",
-                    backgroundColor: ["#f48c06", "#31BDAA", "#FF5733", "#6C3483", "#3498DB "],
-                    data: value_candidates
-                }]
-            },
-        });
-    </script>
+    @if ($mascotUrl)
+        <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
     @endif
-
-
-    <!-- jQuery -->
-    <script src="/frontend/js/jquery.min.js"></script>
-    <!-- jQuery Easing -->
-    <script src="/frontend/js/jquery.easing.1.3.js"></script>
-    <!-- Bootstrap -->
-    <script src="/frontend/js/bootstrap.min.js"></script>
-    <!-- Waypoints -->
-    <script src="/frontend/js/jquery.waypoints.min.js"></script>
-    <!-- Stellar -->
-    <script src="/frontend/js/jquery.stellar.min.js"></script>
-    <!-- Magnific Popup -->
-    <script src="/frontend/js/jquery.magnific-popup.min.js"></script>
-    <script src="/frontend/js/magnific-popup-options.js"></script>
-    <!-- Main -->
-    <script src="/frontend/js/main.js"></script>
-
 </body>
 
 </html>

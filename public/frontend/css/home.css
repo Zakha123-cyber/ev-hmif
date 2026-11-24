@@ -1,0 +1,704 @@
+/*
+ * Halaman awal Election Vote HMIF.
+ * Arah: surat suara resmi bertema teal–kuning HMIF.
+ * Warna diambil dari aset HMIF: teal seragam, kuning logo, teal gelap untuk latar logo putih.
+ */
+
+:root {
+    --teal: #31BDAA;       /* seragam HMIF; bidang & garis, bukan teks di atas putih */
+    --teal-ink: #1C6B63;   /* teks/link di atas putih */
+    --deep: #0E3532;       /* latar gelap: scrim, hasil */
+    --yellow: #FFE500;     /* aksen tunggal: nomor heksagon + tombol aksi utama */
+    --yellow-press: #E6CE00;
+    --paper: #FFFFFF;
+    --ink: #122423;
+    --ink-soft: #3F5553;   /* teks sekunder di atas putih */
+
+    --font-display: 'Archivo', 'Arial Narrow', sans-serif;
+    --font-text: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+
+    --radius: 6px;
+    --container: 1200px;
+    --gutter: 20px;
+
+    /* Hexagon pointy-top seperti logo HMIF */
+    --hexagon: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+a,
+button,
+summary {
+    cursor: pointer;
+}
+
+a {
+    color: var(--teal-ink);
+    text-underline-offset: 3px;
+}
+
+:focus-visible {
+    outline: 3px solid var(--teal-ink);
+    outline-offset: 3px;
+}
+
+.site-header :focus-visible,
+.hero :focus-visible,
+.results :focus-visible {
+    outline-color: var(--yellow);
+}
+
+.container {
+    width: 100%;
+    max-width: calc(var(--container) + 2 * var(--gutter));
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+}
+
+.skip-link {
+    position: absolute;
+    left: var(--gutter);
+    top: -100px;
+    z-index: 20;
+    padding: 12px 16px;
+    background: var(--yellow);
+    color: var(--ink);
+    font-weight: 600;
+    border-radius: var(--radius);
+}
+
+.skip-link:focus {
+    top: 12px;
+}
+
+/* ---------- Tombol ---------- */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 22px;
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    font-variation-settings: 'wdth' 100;
+    text-decoration: none;
+    line-height: 1;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.btn--primary {
+    background: var(--yellow);
+    color: var(--ink);
+}
+
+.btn--primary:hover {
+    background: var(--yellow-press);
+}
+
+.btn--primary:active {
+    background: var(--ink);
+    color: var(--yellow);
+}
+
+.btn--on-photo {
+    background: rgba(14, 53, 50, .55);
+    border-color: var(--paper);
+    color: var(--paper);
+}
+
+.btn--on-photo:hover {
+    background: var(--paper);
+    color: var(--deep);
+}
+
+.btn--on-photo:active {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--ink);
+}
+
+.btn--quiet {
+    border-color: transparent;
+    background: transparent;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 5;
+    padding-block: 14px;
+}
+
+.site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.site-header__logo img {
+    width: 64px;
+    height: 64px;
+}
+
+.site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.site-header__actions form {
+    margin: 0;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+    position: relative;
+    min-height: 62svh;
+    display: flex;
+    align-items: flex-start;
+    overflow: hidden;
+    background: var(--deep);
+    color: var(--paper);
+}
+
+.hero__slides,
+.hero__slide,
+.hero__scrim {
+    position: absolute;
+    inset: 0;
+}
+
+.hero__slide {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 60%;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+}
+
+.hero__slide.is-active {
+    opacity: 1;
+}
+
+/* Gelap di atas (area pepohonan, tempat judul) agar teks putih terbaca; foto orang tetap terang */
+.hero__scrim {
+    background: linear-gradient(180deg, rgba(14, 53, 50, .92) 0%, rgba(14, 53, 50, .78) 34%, rgba(14, 53, 50, .1) 62%, rgba(14, 53, 50, 0) 100%);
+}
+
+.hero__inner {
+    position: relative;
+    z-index: 1;
+    padding-top: 104px;
+    padding-bottom: 96px;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.hero__title {
+    margin: 0;
+    max-width: 16ch;
+    font-family: var(--font-display);
+    font-size: clamp(30px, 6.4vw, 64px);
+    font-weight: 800;
+    font-variation-settings: 'wdth' 112;
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+}
+
+.hero__period {
+    display: block;
+    margin-top: 12px;
+    font-family: var(--font-text);
+    font-size: clamp(16px, 2vw, 20px);
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+.slider-toggle {
+    align-self: flex-end;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 2px solid rgba(255, 255, 255, .8);
+    border-radius: var(--radius);
+    background: rgba(14, 53, 50, .6);
+    color: var(--paper);
+    font: 600 14px/1 var(--font-text);
+}
+
+.slider-toggle:hover {
+    background: var(--paper);
+    color: var(--deep);
+}
+
+/* ---------- Slip status ---------- */
+
+.slip-row {
+    position: relative;
+    z-index: 2;
+    margin-top: -48px;
+    display: grid;
+    gap: 16px;
+}
+
+.slip {
+    max-width: 560px;
+    padding: 20px 22px 24px;
+    background: var(--paper);
+    border-radius: var(--radius);
+    /* Satu-satunya elemen yang melayang: slip menumpang di atas foto */
+    box-shadow: 0 12px 32px rgba(14, 53, 50, .22);
+    /* Pita teal: motif yang sama dengan garis atas footer */
+    border-top: 6px solid var(--teal);
+}
+
+.slip__label {
+    margin: 0 0 6px;
+    font: 600 14px/1.4 var(--font-text);
+    color: var(--ink-soft);
+}
+
+.slip__status {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(24px, 4vw, 28px);
+    font-weight: 800;
+    font-variation-settings: 'wdth' 100;
+    line-height: 1.15;
+}
+
+.slip__status--quiet {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.slip__when {
+    margin: 8px 0 0;
+    color: var(--ink-soft);
+}
+
+.slip .btn {
+    margin-top: 18px;
+}
+
+.mascot {
+    width: 100%;
+    max-width: 260px;
+    height: 260px;
+    justify-self: end;
+    --poster-color: transparent;
+}
+
+/* ---------- Surat suara ---------- */
+
+.ballot-section {
+    padding-block: 72px 96px;
+}
+
+.ballot-section__inner {
+    display: grid;
+    gap: 32px;
+}
+
+.section-title {
+    margin: 0 0 12px;
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 800;
+    font-variation-settings: 'wdth' 100;
+    line-height: 1.1;
+}
+
+.ballot-section__intro p {
+    margin: 0;
+    max-width: 38ch;
+    color: var(--ink-soft);
+}
+
+.ballot__empty {
+    margin: 0;
+    padding: 32px;
+    border: 2px dashed var(--ink-soft);
+    font-weight: 600;
+}
+
+/* Kertas surat suara: garis tinta 2px antar kolom dibuat dari celah grid di atas latar tinta */
+.ballot {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    background: var(--ink);
+    border: 2px solid var(--ink);
+}
+
+.ballot__cell {
+    background: var(--paper);
+    padding: 20px 20px 24px;
+    min-width: 0;
+}
+
+.hex-number {
+    width: 64px;
+    height: 72px;
+    margin: 0 0 16px;
+    display: grid;
+    place-items: center;
+    clip-path: var(--hexagon);
+    background: var(--yellow);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 900;
+    font-variation-settings: 'wdth' 125;
+    line-height: 1;
+}
+
+.ballot__poster {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    background: #E7EFEE;
+}
+
+.ballot__placeholder {
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-weight: 600;
+    border: 2px dashed #9AB1AE;
+}
+
+.ballot__names {
+    margin: 20px 0 0;
+    display: grid;
+    gap: 10px;
+}
+
+.ballot__names div {
+    display: grid;
+    gap: 0;
+}
+
+.ballot__names dt {
+    font-size: 14px;
+    color: var(--ink-soft);
+}
+
+.ballot__names dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    font-variation-settings: 'wdth' 100;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.ballot__heading {
+    margin: 20px 0 4px;
+    padding-top: 16px;
+    border-top: 2px solid var(--ink);
+    font: 600 14px/1.4 var(--font-text);
+    color: var(--ink-soft);
+}
+
+.ballot__vision {
+    margin: 0;
+    max-width: 70ch;
+}
+
+.ballot__mission {
+    margin-top: 16px;
+}
+
+.ballot__mission summary {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
+    color: var(--teal-ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.ballot__mission summary:hover {
+    color: var(--ink);
+}
+
+.ballot__mission ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+}
+
+.ballot__mission li + li {
+    margin-top: 8px;
+}
+
+/* ---------- Hasil ---------- */
+
+.results {
+    background: var(--deep);
+    color: var(--paper);
+    padding-block: 64px 72px;
+}
+
+.results__inner {
+    display: grid;
+    gap: 32px;
+}
+
+.results__intro p {
+    margin: 0;
+    max-width: 40ch;
+    color: #CFE3E0;
+}
+
+.tally {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 24px;
+}
+
+.tally__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px 16px;
+    align-items: end;
+}
+
+.tally__name {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.tally__pair {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.tally__count {
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.tally__count strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 900;
+    font-variation-settings: 'wdth' 112;
+    line-height: 1;
+}
+
+.tally__bar {
+    grid-column: 1 / -1;
+    height: 14px;
+    background: rgba(255, 255, 255, .14);
+}
+
+.tally__bar span {
+    display: block;
+    height: 100%;
+    background: var(--teal);
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+    padding-block: 48px 24px;
+    border-top: 6px solid var(--teal);
+}
+
+.site-footer__inner {
+    display: grid;
+    gap: 32px;
+}
+
+.site-footer__org {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 600;
+}
+
+.site-footer__org img {
+    width: 88px;
+    height: 88px;
+}
+
+.site-footer__org p {
+    margin: 0;
+}
+
+.site-footer__title {
+    margin: 0 0 4px;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.site-footer__help p {
+    margin: 0 0 8px;
+    color: var(--ink-soft);
+}
+
+.site-footer__help ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+}
+
+.site-footer__help a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
+}
+
+.site-footer__help a:hover {
+    color: var(--ink);
+}
+
+.site-footer__copy {
+    margin-top: 32px;
+    font-size: 14px;
+    color: var(--ink-soft);
+}
+
+/* ---------- Tablet ---------- */
+
+@media (min-width: 720px) {
+    :root {
+        --gutter: 32px;
+    }
+
+    .site-header__logo img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .hero {
+        min-height: 78svh;
+    }
+
+    .hero__inner {
+        padding-top: 136px;
+    }
+
+    .slip-row {
+        margin-top: -72px;
+        grid-template-columns: minmax(0, 560px) 1fr;
+        align-items: end;
+    }
+
+    .slip {
+        padding: 24px 28px 28px;
+    }
+
+    .ballot--2,
+    .ballot--3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .site-footer__inner {
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 48px;
+    }
+}
+
+/* ---------- Desktop ---------- */
+
+@media (min-width: 1080px) {
+    .hero {
+        min-height: 88svh;
+    }
+
+    .ballot-section__inner {
+        grid-template-columns: 280px 1fr;
+        gap: 48px;
+        align-items: start;
+    }
+
+    .ballot-section__intro {
+        position: sticky;
+        top: 32px;
+    }
+
+    .ballot--3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .results__inner {
+        grid-template-columns: 280px 1fr;
+        gap: 48px;
+    }
+
+    .mascot {
+        max-width: 300px;
+        height: 300px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .hero__slide,
+    .btn {
+        transition: none;
+    }
+}
