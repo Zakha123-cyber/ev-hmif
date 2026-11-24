@@ -52,12 +52,14 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
   - Test: `tests/Feature/ParticipantAccountsTest.php` (10 test). Test broadcast masih memakai GET → sesuaikan saat mengerjakan #7.
   - Deploy: **sebelum** `php artisan migrate` di server, cek duplikat: `SELECT nim, COUNT(*) FROM participants GROUP BY nim HAVING COUNT(*) > 1;`
 
-### [ ] #4 Menghapus kandidat/peserta ikut menghapus suara
+### [x] #4 Menghapus kandidat/peserta ikut menghapus suara
 - **Lokasi:** `database/migrations/2022_10_23_193938_create_counts_table.php:22-23` (`cascadeOnDelete`)
 - **Rencana fix:**
   - Migration baru: ubah FK `counts` menjadi `restrictOnDelete`.
   - Controller `destroy` kandidat/peserta: tolak dengan pesan jelas jika sudah ada suara terkait.
 - **Selesai jika:** Menghapus kandidat yang punya suara gagal dengan pesan error, jumlah `counts` tidak berubah.
+- **✅ Selesai (24 Nov 2026):** migration `restrict_vote_deletion_on_counts_table` (FK `counts.candidate_id` & `counts.user_id` → RESTRICT; rollback diuji). `CandidateController::destroy` & `ParticipantController::destroy` menolak dengan pesan jika ada suara terkait. Test: `tests/Feature/VotePreservationTest.php` (6 test).
+  - ⚠️ Konsekuensi: kandidat/peserta dari pemilihan sebelumnya yang sudah punya suara **tidak bisa dihapus lewat panel**. Untuk memulai periode baru perlu cara reset suara yang disengaja (lihat catatan "Fitur lanjutan" di bawah).
 
 ### [ ] #5 Proses voting tidak atomik & tanpa validasi
 - **Lokasi:** `app/Http/Controllers/VoteController.php:32-50`
@@ -134,6 +136,10 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **Rencana fix:** Hapus route/controller/view/test yang tidak dipakai; ganti dengan test fitur nyata (login, vote, admin).
 
 ---
+
+## Fitur lanjutan (bukan bug)
+
+- [ ] **Reset / arsip periode pemilihan**: setelah #4, suara tidak bisa hilang lewat hapus kandidat/peserta. Perlu tombol admin yang disengaja (dengan konfirmasi ganda, hanya saat jadwal `closed`/`not_set`) untuk mengarsipkan/mengosongkan `counts`, akun peserta, dan jadwal sebelum periode baru. Sementara itu: lakukan manual via database (backup dulu).
 
 ## Setelah semua selesai
 

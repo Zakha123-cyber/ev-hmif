@@ -8,6 +8,7 @@ use App\Imports\ImportParticipant;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 
+use App\Models\Count;
 use App\Models\Participant;
 use App\Models\User;
 
@@ -217,6 +218,10 @@ class ParticipantController extends Controller
     }
 
     public function destroy(Participant $participant){
+        if (Count::whereIn('user_id', $participant->user()->select('id'))->exists()) {
+            return redirect()->back()->withError('Peserta ini sudah memberikan suara sehingga tidak dapat dihapus.');
+        }
+
         try {
             Participant::find($participant->id)->delete();
             return redirect('/back-admin-logged/participant')->withStatus('Berhasil menghapus data.');

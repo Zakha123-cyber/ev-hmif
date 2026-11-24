@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Candidate;
+use App\Models\Count;
 
 class CandidateController extends Controller
 {
@@ -146,6 +147,10 @@ class CandidateController extends Controller
 
     public function destroy(Candidate $candidate)
     {
+        if (Count::where('candidate_id', $candidate->id)->exists()) {
+            return redirect()->back()->withError('Kandidat ini sudah memiliki suara sehingga tidak dapat dihapus.');
+        }
+
         try {
             Candidate::find($candidate->id)->delete();
             return redirect('/back-admin-logged/candidate')->withStatus('Berhasil menghapus data.');
