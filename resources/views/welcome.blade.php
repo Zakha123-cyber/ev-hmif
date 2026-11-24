@@ -70,7 +70,7 @@
                                     </form>
                                 </a>
                             @else
-                                @if ($results_visible)
+                                @if ($results !== null)
                                     <a class="button-custom" style="padding:0.5rem 2.5rem" href="#">Pemilihan
                                         Selesai</a>
                                 @else
@@ -163,7 +163,7 @@
                     </div>
                 </div>
                 <div class="row" style="text-align: center;align-items:center">
-                    @if ($results_visible)
+                    @if ($results !== null)
                         <div class="col-md-8 col-md-offset-2 animate-box" data-animate-effect="fadeIn">
                             <canvas id="pie-chart" width="600" height="400"></canvas>
                         </div>
@@ -197,10 +197,10 @@
             </i></a>
     </div>
 
-    @if ($results_visible)
+    @if ($results !== null)
     <script>
-        var label_candidates = @json($label_candidates);
-        var value_candidates = @json($value_candidates);
+        var label_candidates = @json(collect($results)->map(fn ($r) => "Paslon " . $r["candidate"]->candidate_pair)->all());
+        var value_candidates = @json(collect($results)->pluck("votes")->all());
 
         new Chart(document.getElementById("pie-chart"), {
             type: 'pie',

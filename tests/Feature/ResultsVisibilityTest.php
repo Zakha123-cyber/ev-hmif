@@ -8,7 +8,7 @@ beforeEach(function () {
     $first = makeCandidate(1);
     $second = makeCandidate(2);
 
-    // Paslon 1 = 3 suara, Paslon 2 = 1 suara → data chart "[3,1]"
+    // Paslon 1 = 3 suara, Paslon 2 = 1 suara
     foreach ([$first, $first, $first, $second] as $i => $candidate) {
         $voter = makeUserWithRole('Participant', "voter{$i}");
         Count::create(['candidate_id' => $candidate->id, 'user_id' => $voter->id]);
@@ -18,8 +18,8 @@ beforeEach(function () {
 it('hides vote results on the home page when no schedule has been set', function () {
     $this->get('/')
         ->assertOk()
-        ->assertViewMissing('value_candidates')
-        ->assertDontSee('[3,1]', false);
+        ->assertViewHas('results', null)
+        ->assertDontSee('3 suara');
 });
 
 it('hides vote results on the home page before voting opens', function () {
@@ -28,8 +28,8 @@ it('hides vote results on the home page before voting opens', function () {
 
     $this->get('/')
         ->assertOk()
-        ->assertViewMissing('value_candidates')
-        ->assertDontSee('[3,1]', false);
+        ->assertViewHas('results', null)
+        ->assertDontSee('3 suara');
 });
 
 it('hides vote results on the home page while voting is open', function () {
@@ -38,8 +38,8 @@ it('hides vote results on the home page while voting is open', function () {
 
     $this->get('/')
         ->assertOk()
-        ->assertViewMissing('value_candidates')
-        ->assertDontSee('[3,1]', false);
+        ->assertViewHas('results', null)
+        ->assertDontSee('3 suara');
 });
 
 it('shows vote results on the home page after voting closes', function () {
@@ -48,5 +48,5 @@ it('shows vote results on the home page after voting closes', function () {
 
     $this->get('/')
         ->assertOk()
-        ->assertSee('[3,1]', false);
+        ->assertSee('3 suara');
 });
