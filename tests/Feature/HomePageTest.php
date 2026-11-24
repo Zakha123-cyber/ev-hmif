@@ -167,7 +167,7 @@ it('renders the page frame without the old libraries', function () {
         ->assertSee('data-slider-toggle', false)
         ->assertSee('wa.me/6283823093973', false)
         ->assertSee('wa.me/6283852061105', false)
-        ->assertSee('frontend/images/logo_election_vote.png', false)
+        ->assertSee('frontend/images/home/logo-election-vote.webp', false)
         ->assertSee('frontend/images/home/logo-hmif-320.webp', false)
         ->assertSee('fetchpriority="high"', false)
         ->assertDontSee('Chart.min.js', false)

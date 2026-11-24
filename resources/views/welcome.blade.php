@@ -33,7 +33,7 @@
     <header class="site-header">
         <div class="container site-header__inner">
             <a href="{{ url('/') }}" class="site-header__logo">
-                <img src="{{ asset('frontend/images/logo_election_vote.png') }}" width="810" height="810"
+                <img src="{{ asset('frontend/images/home/logo-election-vote.webp') }}" width="313" height="160"
                     alt="Election Vote HMIF">
             </a>
             <nav class="site-header__actions" aria-label="Akun">
@@ -174,7 +174,7 @@
             </div>
         </section>
 
-        <section id="hasil" class="results" aria-labelledby="hasil-judul">
+        <section id="hasil" class="results{{ $results !== null && $totalVotes > 0 ? '' : ' results--pending' }}" aria-labelledby="hasil-judul">
             <div class="container results__inner">
                 <div class="results__intro">
                     <h2 id="hasil-judul" class="section-title">Hasil penghitungan</h2>
@@ -197,8 +197,8 @@
                                     <span class="tally__pair">Paslon {{ $row['candidate']->candidate_pair }}</span>
                                     {{ $row['candidate']->leader_name }} &amp; {{ $row['candidate']->vice_leader_name }}
                                 </p>
-                                <div class="tally__bar" aria-hidden="true"><span style="width: {{ $row['percent'] }}%"></span></div>
                                 <p class="tally__count"><strong>{{ $row['percent'] }}%</strong> {{ $row['votes'] }} suara</p>
+                                <div class="tally__bar" aria-hidden="true"><span style="width: {{ $row['percent'] }}%"></span></div>
                             </li>
                         @endforeach
                     </ol>
@@ -210,7 +210,7 @@
     <footer class="site-footer">
         <div class="container site-footer__inner">
             <div class="site-footer__org">
-                <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="320" height="320" loading="lazy"
+                <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" loading="lazy"
                     alt="Logo Himpunan Mahasiswa Informatika">
                 <p>Himpunan Mahasiswa Informatika<br>Universitas Jember</p>
             </div>
