@@ -31,3 +31,13 @@ it('returns no items for an empty mission', function () {
     expect(candidateWithMission('')->missionItems())->toBe([]);
     expect(candidateWithMission(null)->missionItems())->toBe([]);
 });
+
+it('drops list numbers that admins type before each mission', function () {
+    expect(candidateWithMission('1. Membangun himpunan. 2. Mendukung anggota.')->missionItems())
+        ->toBe(['Membangun himpunan.', 'Mendukung anggota.']);
+});
+
+it('drops list numbers written with a parenthesis', function () {
+    expect(candidateWithMission('1) Membangun himpunan. 2) Mendukung anggota.')->missionItems())
+        ->toBe(['Membangun himpunan.', 'Mendukung anggota.']);
+});

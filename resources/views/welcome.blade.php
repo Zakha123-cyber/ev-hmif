@@ -130,9 +130,7 @@
                         @foreach ($candidates as $candidate)
                             @php $hasPoster = $candidate->poster && file_exists(public_path('assets/upload/kandidat/' . $candidate->poster)); @endphp
                             <li class="ballot__cell">
-                                <p class="hex-number" aria-label="Nomor urut {{ $candidate->candidate_pair }}">
-                                    <span aria-hidden="true">{{ $candidate->candidate_pair }}</span>
-                                </p>
+                                <p class="hex-number"><span class="visually-hidden">Nomor urut </span>{{ $candidate->candidate_pair }}</p>
 
                                 @if ($hasPoster)
                                     <img class="ballot__poster" src="{{ asset('assets/upload/kandidat/' . $candidate->poster) }}"

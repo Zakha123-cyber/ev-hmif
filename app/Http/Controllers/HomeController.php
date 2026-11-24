@@ -42,7 +42,17 @@ class HomeController extends Controller
             'candidates' => $candidates,
             'results' => $results,
             'totalVotes' => $totalVotes,
-            'mascotUrl' => file_exists(public_path('frontend/3d/cogito.glb')) ? asset('frontend/3d/cogito.glb') : null,
+            'mascotUrl' => $this->mascotUrl(),
         ]);
+    }
+
+    /**
+     * URL maskot COGITO, hanya jika file .glb sudah ditaruh di folder public.
+     */
+    private function mascotUrl(): ?string
+    {
+        $path = config('election.mascot_path');
+
+        return $path && file_exists(public_path($path)) ? asset($path) : null;
     }
 }

@@ -80,6 +80,19 @@ a {
     padding-inline: var(--gutter);
 }
 
+/* Teks untuk pembaca layar saja */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .skip-link {
     position: absolute;
     left: var(--gutter);
@@ -673,6 +686,16 @@ a {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    /* 3 paslon di 2 kolom: paslon terakhir dibentangkan agar tidak ada sel kosong
+       (latar tinta grid akan tampil sebagai blok hitam) */
+    .ballot--3 > .ballot__cell:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .ballot--3 > .ballot__cell:last-child .ballot__poster {
+        max-width: calc(50% - 20px);
+    }
+
     .site-footer__inner {
         grid-template-columns: auto 1fr;
         align-items: center;
@@ -697,6 +720,14 @@ a {
 
     .ballot--3 {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ballot--3 > .ballot__cell:last-child {
+        grid-column: auto;
+    }
+
+    .ballot--3 > .ballot__cell:last-child .ballot__poster {
+        max-width: none;
     }
 
     .results__inner {

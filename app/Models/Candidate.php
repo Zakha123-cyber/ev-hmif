@@ -21,8 +21,9 @@ class Candidate extends Model
     public function missionItems(): array
     {
         return collect(preg_split('/\.\s+/', (string) $this->mission))
-            ->map(fn ($item) => rtrim(trim($item), '.'))
-            ->filter(fn ($item) => $item !== '')
+            // Nomor daftar yang diketik admin ("1." / "2)") bukan isi misi.
+            ->map(fn ($item) => rtrim(preg_replace('/^\d+[.)]\s*/', '', trim($item)), '.'))
+            ->filter(fn ($item) => $item !== '' && ! ctype_digit($item))
             ->map(fn ($item) => $item . '.')
             ->values()
             ->all();

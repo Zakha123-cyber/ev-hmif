@@ -68,7 +68,7 @@ it('reports zero percent instead of dividing by zero when nobody voted', functio
 });
 
 it('has no mascot when the 3D model file is missing', function () {
-    expect(file_exists(public_path('frontend/3d/cogito.glb')))->toBeFalse();
+    config(['election.mascot_path' => 'frontend/3d/__tidak-ada.glb']);
 
     $this->get('/')->assertViewHas('mascotUrl', null);
 });
@@ -162,6 +162,8 @@ it('shows the candidate names, roles and vision', function () {
 // --- Kerangka halaman ---
 
 it('renders the page frame without the old libraries', function () {
+    config(['election.mascot_path' => 'frontend/3d/__tidak-ada.glb']);
+
     $this->get('/')
         ->assertSee('Periode 2025/2026')
         ->assertSee('data-slider-toggle', false)
@@ -176,16 +178,30 @@ it('renders the page frame without the old libraries', function () {
 });
 
 it('shows the rotatable COGITO mascot once the 3D model file exists', function () {
-    $path = public_path('frontend/3d/cogito.glb');
+    // File uji tersendiri: jangan pernah menyentuh cogito.glb milik pengguna.
+    config(['election.mascot_path' => 'frontend/3d/__test-mascot.glb']);
+    $path = public_path('frontend/3d/__test-mascot.glb');
     file_put_contents($path, 'glb');
 
     try {
         $this->get('/')
             ->assertSee('<model-viewer', false)
-            ->assertSee('frontend/3d/cogito.glb', false)
+            ->assertSee('frontend/3d/__test-mascot.glb', false)
             ->assertSee('@google/model-viewer@3.5.0', false)
             ->assertDontSee('auto-rotate', false);
     } finally {
         unlink($path);
     }
+});
+
+it('looks for the mascot at public/frontend/3d/cogito.glb by default', function () {
+    expect(config('election.mascot_path'))->toBe('frontend/3d/cogito.glb');
+});
+
+it('announces the ballot number to screen readers as real text', function () {
+    makeCandidate(2);
+
+    $this->get('/')
+        ->assertSee('<span class="visually-hidden">Nomor urut </span>2', false)
+        ->assertDontSee('aria-label="Nomor urut', false);
 });
