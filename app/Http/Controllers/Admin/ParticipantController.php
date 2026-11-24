@@ -17,6 +17,7 @@ use Carbon\Exceptions\Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Traits\HasRoles;
@@ -53,7 +54,8 @@ class ParticipantController extends Controller
     }
 
     public function broadcast(){
-        $participants = Participant::where("status", "not verified")->get();     
+        // Hanya peserta yang belum punya akun: mencegah akun kedua untuk orang yang sama.
+        $participants = Participant::where("status", "not verified")->whereDoesntHave('user')->get();
         foreach($participants as $participant){
             DB::beginTransaction();
             try{
@@ -99,12 +101,13 @@ class ParticipantController extends Controller
         $this->validate($request,
             [
                 'participant_name' => 'required',
-                'nim' => 'required',
+                'nim' => 'required|unique:participants,nim',
                 'whatsapp_number' => 'required',
                 'status' => 'required',
             ],
             [
                 'required' => ':attribute harus diisi.',
+                'unique' => ':attribute sudah terdaftar.',
             ],
             [
                 'participant_name' => 'Nama Participant',
@@ -172,12 +175,13 @@ class ParticipantController extends Controller
         $this->validate($request,
             [
                 'participant_name' => 'required',
-                'nim' => 'required',
+                'nim' => ['required', Rule::unique('participants', 'nim')->ignore($participant->id)],
                 'whatsapp_number' => 'required',
                 'status' => 'required',
             ],
             [
                 'required' => ':attribute harus diisi.',
+                'unique' => ':attribute sudah terdaftar.',
             ],
             [
                 'participant_name' => 'Nama Participant',
@@ -269,13 +273,14 @@ class ParticipantController extends Controller
     public function sendVerified(Request $request){
         $this->validate($request,
             [
-                'nim' => 'required',
+                'nim' => 'required|exists:participants,id',
                 'username' => 'required',
                 'password' => 'required',
                 'whatsapp_number' => 'required',
             ],
             [
                 'required' => ':attribute harus diisi.',
+                'exists' => ':attribute tidak ditemukan.',
             ],
             [
                 'nim' => 'Participant',
@@ -286,23 +291,29 @@ class ParticipantController extends Controller
         );
         try {
             $participant = Participant::find($request->nim);
-            $participant->whatsapp_number = $request->whatsapp_number;
-            $participant->username_old = $request->username;
-            $participant->password_old = $request->password;
-            $participant->status = $request->status;
-            $participant->save();
 
-            $user = User::create([
-                'participant_id' => $request->nim,
-                'username' => $request->username,
-                'password' => bcrypt($request->password),
-                'remember_token' => \Str::random(60),
-                'status' => 'not voted',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-            event(new Registered($user));
-            $user->assignRole('Participant');
+            if ($participant->user()->exists()) {
+                return redirect()->back()->withError('Peserta ini sudah memiliki akun. Gunakan menu edit untuk mengubah akunnya.');
+            }
+
+            DB::transaction(function () use ($participant, $request) {
+                $participant->whatsapp_number = $request->whatsapp_number;
+                $participant->username_old = $request->username;
+                $participant->password_old = $request->password;
+                // Peserta yang sudah dibuatkan akun selalu "verified" agar broadcast tidak membuat akun kedua.
+                $participant->status = 'verified';
+                $participant->save();
+
+                $user = User::create([
+                    'participant_id' => $participant->id,
+                    'username' => $request->username,
+                    'password' => bcrypt($request->password),
+                    'remember_token' => \Str::random(60),
+                    'status' => 'not voted',
+                ]);
+                event(new Registered($user));
+                $user->assignRole('Participant');
+            });
 
             return redirect('/back-admin-logged/participant-verification')->withStatus('Berhasil menambah data.');
         } catch (\Exception $e) {

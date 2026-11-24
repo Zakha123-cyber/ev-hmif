@@ -137,18 +137,6 @@
                     </span>
                     @enderror
                 </div>
-                <div class="mt-3">
-                    <label class="text-gray-700 ml-1">Status : </label>
-                    <select name="status" class="form-input mt-1 p-3 border-2 @error('status') border-red-500 @enderror focus:outline-none focus:border-teal-500 form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0">
-                        <option value="verified">Verified</option>
-                        <option value="not verified">Not Verified</option>
-                    </select>
-                    @error('status')
-                    <span class="pl-1 text-xs text-red-600 text-bold">
-                        {{$message}}
-                    </span>
-                    @enderror
-                </div>
                 <div class="mt-5">
                     <button type="submit" class="btn-shadow">Simpan</button>
                 </div>

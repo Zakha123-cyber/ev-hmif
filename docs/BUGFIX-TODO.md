@@ -32,7 +32,7 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
 - **Selesai jika:** View source halaman `/` sebelum jadwal selesai tidak memuat angka suara.
 - **✅ Selesai (24 Nov 2026):** `HomeController` hanya menghitung & mengirim hasil saat status jadwal `closed`; chart dan `<script>`-nya dibungkus `@if ($results_visible)`. Cek jam 15:30 di `welcome.blade.php` (chart & tombol "Pemilihan Selesai") diganti jadwal admin. Test: `tests/Feature/ResultsVisibilityTest.php` (4 test). Cek 15:30 di `auth/login.blade.php` masih ada → item #15.
 
-### [ ] #3 Satu orang bisa punya lebih dari satu akun → memilih berkali-kali
+### [x] #3 Satu orang bisa punya lebih dari satu akun → memilih berkali-kali
 - **Lokasi:** migration `participants` (nim tidak unique), `ParticipantController::sendVerified` (`:269-305`), `ParticipantController::broadcast`, form `participant-verification/list.blade.php` (opsi status "not verified")
 - **Masalah:**
   - Import Excel dua kali → peserta dengan NIM sama dobel.
@@ -43,6 +43,14 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
   - `sendVerified`: tolak jika peserta sudah punya user; status selalu di-set `verified` (hapus opsi "not verified" di form).
   - `broadcast`: hanya proses peserta yang **belum punya user** (`whereDoesntHave('user')`).
 - **Selesai jika:** Tidak mungkin membuat 2 user untuk 1 peserta / 1 NIM lewat jalur mana pun; test untuk import ganda, verifikasi ulang, dan verifikasi manual + broadcast.
+- **✅ Selesai (24 Nov 2026):**
+  - Migration `add_unique_constraints_to_participants_and_users`: unique `participants.nim` & `users.participant_id`. **Migrasi berhenti dengan daftar duplikat (tanpa menghapus data) jika data lama masih dobel** → bersihkan manual lalu migrate ulang. Rollback sudah diuji.
+  - Import Excel melewati NIM yang sudah ada (termasuk baris ganda di file yang sama).
+  - Tambah/edit peserta: validasi NIM unik.
+  - Verifikasi manual: ditolak jika peserta sudah punya akun; status selalu `verified`; disimpan dalam transaksi. Dropdown status di form dihapus.
+  - Broadcast: hanya peserta tanpa akun (`whereDoesntHave('user')`) — menutup juga jalur "admin mengedit status kembali ke not verified".
+  - Test: `tests/Feature/ParticipantAccountsTest.php` (10 test). Test broadcast masih memakai GET → sesuaikan saat mengerjakan #7.
+  - Deploy: **sebelum** `php artisan migrate` di server, cek duplikat: `SELECT nim, COUNT(*) FROM participants GROUP BY nim HAVING COUNT(*) > 1;`
 
 ### [ ] #4 Menghapus kandidat/peserta ikut menghapus suara
 - **Lokasi:** `database/migrations/2022_10_23_193938_create_counts_table.php:22-23` (`cascadeOnDelete`)

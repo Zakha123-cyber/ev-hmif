@@ -14,6 +14,12 @@ class ImportParticipant implements ToModel
     */
     public function model(array $row)
     {
+        // Lewati NIM yang sudah terdaftar (import ulang / baris ganda di file yang sama).
+        // Tanpa WithBatchInserts setiap baris langsung disimpan, jadi duplikat dalam file ikut terdeteksi.
+        if (Participant::where('nim', $row[1])->exists()) {
+            return null;
+        }
+
         return new Participant([
             'participant_name' => $row[0],
             'nim' => $row[1],
