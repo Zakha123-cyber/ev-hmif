@@ -3,47 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Services\CredentialGenerator;
 
-use App\Models\User;
-
+/**
+ * Endpoint admin untuk tombol "generate ulang" di form verifikasi peserta.
+ */
 class GeneratorController extends Controller
 {
-    // Tanpa karakter yang mirip (0/O, 1/l/I) agar mudah diketik ulang dari email.
-    private const ALPHABET = '23456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
-    private const LENGTH = 8;
-
-    /**
-     * String acak yang aman secara kriptografis (random_int, bukan rand()).
-     */
-    private function randomString(): string
+    public function __construct(private CredentialGenerator $generator)
     {
-        $max = strlen(self::ALPHABET) - 1;
-        $result = '';
-        for ($i = 0; $i < self::LENGTH; $i++) {
-            $result .= self::ALPHABET[random_int(0, $max)];
-        }
-
-        return $result;
+        $this->middleware(['role:Admin']);
     }
 
-    public function generateUsername(){
-        $randomString = $this->randomString();
-
-        if($randomString == User::where('username', $randomString)->first()){
-            $this->generateUsername();
-        } else {
-            return $randomString;
-        }
+    public function generateUsername()
+    {
+        return response($this->generator->username(), 200, ['Content-Type' => 'text/plain']);
     }
 
-    public function generatePassword(){
-        $randomString = $this->randomString();
-
-        if($randomString == User::where('username', $randomString)->first()){
-            $this->generatePassword();
-        } else {
-            return $randomString;
-        }
+    public function generatePassword()
+    {
+        return response($this->generator->password(), 200, ['Content-Type' => 'text/plain']);
     }
 }

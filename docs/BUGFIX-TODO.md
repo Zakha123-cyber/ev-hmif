@@ -122,10 +122,11 @@ Urutan pengerjaan: **Kritis → Tinggi → Sedang → Rendah**. Setiap item krit
   - **Perubahan perilaku:** kolom C (status) diabaikan — semua peserta hasil import `not verified`, karena "verified" = sudah punya akun (peserta "verified" tanpa akun tidak akan pernah diproses broadcast/verifikasi manual).
   - **Privasi:** file Excel (berisi NIM) tidak lagi disalin ke `public/files/` dengan nama asli (sebelumnya bisa diunduh publik). Cek & hapus file lama di folder `files/` pada server.
 
-### [ ] #12 Generator username/password
+### [x] #12 Generator username/password
 - **Lokasi:** `GeneratorController.php`, `routes/web.php:30-31`
 - **Masalah:** Cek keunikan tidak berfungsi (bandingkan string dengan model, hasil rekursi tidak di-return, password dicek ke kolom username); route terbuka untuk publik.
 - **Rencana fix:** Loop `do { ... } while (User::where('username', $u)->exists())`; jadikan service class biasa; hapus kedua route publik (atau pindah ke grup admin).
+- **✅ Selesai (24 Nov 2026):** service `App\Services\CredentialGenerator` (`username()` mengulang sampai tidak bentrok, `password()` tanpa cek ke kolom username). Route publik `/generateNewUsername` & `/generateNewPassword` dihapus; tombol "generate ulang" di form edit verifikasi kini memanggil `/back-admin-logged/generate-username|password` (khusus Admin). Test: `tests/Feature/CredentialGeneratorTest.php` (8 test).
 
 ### [ ] #13 Fitur email backup membaca kolom yang tidak ada
 - **Lokasi:** `ParticipantController::email_backup` (`:143`)

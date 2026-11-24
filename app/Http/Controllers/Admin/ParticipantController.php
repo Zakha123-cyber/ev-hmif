@@ -12,7 +12,7 @@ use App\Models\Count;
 use App\Models\Participant;
 use App\Models\User;
 
-use App\Http\Controllers\Admin\GeneratorController;
+use App\Services\CredentialGenerator;
 use App\Mail\BroadcastMail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Cache;
@@ -91,7 +91,7 @@ class ParticipantController extends Controller
         // Pengiriman email sinkron bisa lama untuk banyak peserta.
         @set_time_limit(0);
 
-        $generator = new GeneratorController;
+        $generator = new CredentialGenerator;
         $succeeded = 0;
         $failed = [];
 
@@ -100,8 +100,8 @@ class ParticipantController extends Controller
                 // Satu transaksi per peserta: jika akun/email gagal, peserta ini di-rollback
                 // penuh (tetap "not verified") sehingga bisa dicoba lagi, peserta lain tetap jalan.
                 DB::transaction(function () use ($participant, $generator) {
-                    $username = $generator->generateUsername();
-                    $password = $generator->generatePassword();
+                    $username = $generator->username();
+                    $password = $generator->password();
 
                     $participant->update([
                         'username_old' => $username,
@@ -318,8 +318,8 @@ class ParticipantController extends Controller
     public function verification(){
         try {
             $this->param['getParticipant'] = Participant::where('status', 'not verified')->get();
-            $this->param['getRandUsername'] = (new GeneratorController)->generateUsername();
-            $this->param['getRandPassword'] = (new GeneratorController)->generatePassword();
+            $this->param['getRandUsername'] = (new CredentialGenerator)->username();
+            $this->param['getRandPassword'] = (new CredentialGenerator)->password();
             
             $this->param['getParticpantVerified'] = Participant::where('status', 'verified')->get();
 
@@ -388,8 +388,8 @@ class ParticipantController extends Controller
         try {
             $this->param['getParticipant'] = Participant::all();
             $this->param['getDetailParticipant'] = Participant::find($participant->id);
-            $this->param['getRandUsername'] = (new GeneratorController)->generateUsername();
-            $this->param['getRandPassword'] = (new GeneratorController)->generatePassword();
+            $this->param['getRandUsername'] = (new CredentialGenerator)->username();
+            $this->param['getRandPassword'] = (new CredentialGenerator)->password();
             
             $this->param['getParticpantVerified'] = Participant::where('status', 'verified')->get();
 

@@ -104,7 +104,7 @@
     function getUsername(){
         $.ajax({
             type:'GET',
-            url:'/generateNewUsername',
+            url:'{{ url('/back-admin-logged/generate-username') }}',
             success:function(data){
                 $('#new_username').val(data);
             }
@@ -114,7 +114,7 @@
     function getPassword(){
         $.ajax({
             type:'GET',
-            url:'/generateNewPassword',
+            url:'{{ url('/back-admin-logged/generate-password') }}',
             success:function(data){
                 $('#new_password').val(data);
             }

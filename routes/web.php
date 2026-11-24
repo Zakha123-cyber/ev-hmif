@@ -25,8 +25,6 @@ use App\Http\Controllers\HomeController;
 */
 
 Route::get('/', [HomeController::class, 'index']);
-Route::get('/generateNewUsername', [GeneratorController::class, 'generateUsername']);
-Route::get('/generateNewPassword', [GeneratorController::class, 'generatePassword']);
 
 Route::get('/vote', [VoteController::class, 'vote_page'])->middleware('auth');
 Route::post('/vote-paslon', [VoteController::class, 'vote'])->middleware(['auth', 'voting.open']);
@@ -60,6 +58,9 @@ Route::prefix('/back-admin-logged')->group(function () {
     Route::get('/participant-verification/info/print/{participant}', [ParticipantController::class, 'printVerification']);
 
     Route::get('/live-count', [CountController::class, 'index']);
+
+    Route::get('/generate-username', [GeneratorController::class, 'generateUsername']);
+    Route::get('/generate-password', [GeneratorController::class, 'generatePassword']);
 
     Route::get('/election-schedule', [ElectionScheduleController::class, 'edit']);
     Route::put('/election-schedule', [ElectionScheduleController::class, 'update']);

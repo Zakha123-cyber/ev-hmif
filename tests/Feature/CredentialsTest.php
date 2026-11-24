@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\GeneratorController;
+use App\Services\CredentialGenerator;
 use App\Models\User;
 use Database\Seeders\ParticipantSeeder;
 use Database\Seeders\RoleSeeder;
@@ -36,24 +36,24 @@ it('never seeds admin accounts with the old hardcoded password', function () {
 // --- Generator username / password peserta ---
 
 it('generates participant usernames of at least 8 characters', function () {
-    $username = (new GeneratorController)->generateUsername();
+    $username = (new CredentialGenerator)->username();
 
     expect(strlen($username))->toBeGreaterThanOrEqual(8);
     expect($username)->toMatch('/^[a-zA-Z0-9]+$/');
 });
 
 it('generates participant passwords of at least 8 characters', function () {
-    $password = (new GeneratorController)->generatePassword();
+    $password = (new CredentialGenerator)->password();
 
     expect(strlen($password))->toBeGreaterThanOrEqual(8);
     expect($password)->toMatch('/^[a-zA-Z0-9]+$/');
 });
 
 it('avoids look-alike characters so participants can type credentials from the email', function () {
-    $generator = new GeneratorController;
+    $generator = new CredentialGenerator;
     $sample = '';
     for ($i = 0; $i < 50; $i++) {
-        $sample .= $generator->generateUsername() . $generator->generatePassword();
+        $sample .= $generator->username() . $generator->password();
     }
 
     expect($sample)->not->toMatch('/[0O1lI]/');
