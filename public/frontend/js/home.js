@@ -49,3 +49,41 @@
         start();
     });
 })();
+
+// Amplop paslon: tutup amplop terbuka dulu, baru surat (dialog) muncul.
+// Terpisah dari slider agar tetap jalan saat "kurangi gerakan" aktif.
+(function () {
+    const FLAP_MS = 220;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        document.querySelectorAll('[data-envelope]').forEach(function (envelope) {
+            const letter = document.getElementById(envelope.getAttribute('commandfor'));
+            if (!letter || typeof letter.showModal !== 'function') return;
+
+            // JS mengambil alih dari atribut bawaan agar animasi sempat jalan.
+            envelope.removeAttribute('command');
+            envelope.removeAttribute('commandfor');
+
+            envelope.addEventListener('click', function () {
+                // Klik ganda selama tutup amplop bergerak tidak membuka dua kali.
+                if (letter.open || envelope.classList.contains('is-opening')) return;
+                envelope.classList.add('is-opening');
+                window.setTimeout(function () {
+                    letter.showModal();
+                }, reduceMotion.matches ? 0 : FLAP_MS);
+            });
+
+            // Klik di latar gelap (di luar kertas) menutup surat.
+            letter.addEventListener('click', function (event) {
+                if (event.target === letter) letter.close();
+            });
+
+            letter.addEventListener('close', function () {
+                envelope.classList.remove('is-opening');
+                envelope.focus();
+            });
+        });
+    });
+})();

@@ -130,7 +130,10 @@
                         @foreach ($candidates as $candidate)
                             @php
                                 $letterId = 'surat-' . $candidate->id;
-                                $hasPoster = $candidate->poster && file_exists(public_path('assets/upload/kandidat/' . $candidate->poster));
+                                $posterPath = public_path('assets/upload/kandidat/' . $candidate->poster);
+                                $hasPoster = $candidate->poster && file_exists($posterPath);
+                                // Ukuran asli poster agar surat tidak bergeser saat gambar dimuat.
+                                [$posterWidth, $posterHeight] = ($hasPoster ? @getimagesize($posterPath) : false) ?: [600, 800];
                                 $missions = $candidate->missionItems();
                             @endphp
                             <li>
@@ -156,7 +159,7 @@
 
                                         @if ($hasPoster)
                                             <img class="letter__poster" src="{{ asset('assets/upload/kandidat/' . $candidate->poster) }}"
-                                                width="600" height="800" loading="lazy"
+                                                width="{{ $posterWidth }}" height="{{ $posterHeight }}" loading="lazy"
                                                 alt="Poster pasangan calon nomor {{ $candidate->candidate_pair }}, {{ $candidate->leader_name }} dan {{ $candidate->vice_leader_name }}">
                                         @else
                                             <div class="letter__poster letter__placeholder">Foto pasangan calon belum tersedia</div>

@@ -377,9 +377,13 @@ a {
     line-height: 1.1;
 }
 
+.ballot-section__intro {
+    text-align: center;
+}
+
 .ballot-section__intro p {
-    margin: 0;
-    max-width: 38ch;
+    margin: 0 auto;
+    max-width: 60ch;
     color: var(--ink-soft);
 }
 
@@ -388,30 +392,12 @@ a {
     padding: 32px;
     border: 2px dashed var(--ink-soft);
     font-weight: 600;
-}
-
-/* Kertas surat suara: garis tinta 2px antar kolom dibuat dari celah grid di atas latar tinta */
-.ballot {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2px;
-    background: var(--ink);
-    border: 2px solid var(--ink);
-}
-
-.ballot__cell {
-    background: var(--paper);
-    padding: 20px 20px 24px;
-    min-width: 0;
+    text-align: center;
 }
 
 .hex-number {
     width: 64px;
     height: 72px;
-    margin: 0 0 16px;
     display: grid;
     place-items: center;
     clip-path: var(--hexagon);
@@ -424,14 +410,255 @@ a {
     line-height: 1;
 }
 
-.ballot__poster {
+/* Amplop: tombol yang membuka surat paslon. Hanya nomor, tanpa nama. */
+.envelopes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+}
+
+.envelopes--1 {
     width: 100%;
-    aspect-ratio: 3 / 4;
-    object-fit: cover;
+    max-width: 420px;
+    margin-inline: auto;
+}
+
+/* Ukuran tutup & segel dihitung dari lebar amplop, jadi teks tidak pernah tertimpa segel */
+.envelopes > li {
+    container-type: inline-size;
+    --flap: calc(100cqi / 2.6);
+}
+
+.envelope {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: calc(var(--flap) + 44px) 16px 24px;
+    border: 2px solid var(--teal-ink);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+    perspective: 800px;
+    transition: transform .2s ease-out, border-color .2s ease-out;
+}
+
+/* Tutup amplop: segitiga teal berengsel di tepi atas */
+.envelope__flap {
+    position: absolute;
+    inset: -2px -2px auto;
+    height: var(--flap);
+    background: var(--teal);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transition: transform .22s ease-out;
+}
+
+.envelope__seal {
+    position: absolute;
+    top: var(--flap);
+    left: 50%;
+    width: 56px;
+    height: 64px;
+    font-size: 30px;
+    transform: translate(-50%, -50%);
+    transition: transform .22s ease-out, opacity .22s ease-out;
+}
+
+.envelope__label {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 800;
+    font-variation-settings: 'wdth' 100;
+    line-height: 1.1;
+}
+
+.envelope__hint {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--teal-ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* Hover tidak hanya warna: amplop terangkat dan tutupnya sedikit terbuka */
+.envelope:hover {
+    transform: translateY(-4px);
+    border-color: var(--ink);
+}
+
+.envelope:hover .envelope__flap,
+.envelope:focus-visible .envelope__flap {
+    transform: rotateX(18deg);
+}
+
+.envelope:hover .envelope__hint {
+    text-decoration-thickness: 3px;
+}
+
+.envelope:focus-visible {
+    outline-offset: 4px;
+}
+
+.envelope:active {
+    transform: translateY(1px);
+}
+
+/* Saat dibuka: tutup terangkat penuh, segel lepas, lalu surat muncul */
+.envelope.is-opening .envelope__flap {
+    transform: rotateX(180deg);
+}
+
+.envelope.is-opening .envelope__seal {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.6);
+}
+
+/* Surat paslon (modal) */
+html:has(.letter[open]) {
+    overflow: hidden;
+}
+
+.letter {
+    width: min(640px, 100% - 32px);
+    max-width: none;
+    max-height: 90svh;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-top: 6px solid var(--teal);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+    overflow: auto;
+    overscroll-behavior: contain;
+    /* Elevasi: surat melayang di atas halaman yang digelapkan */
+    box-shadow: 0 24px 64px rgb(14 53 50 / .35);
+}
+
+.letter[open] {
+    animation: letter-rise .26s cubic-bezier(.2, .8, .2, 1);
+}
+
+.letter::backdrop {
+    background: rgb(14 53 50 / .72);
+}
+
+@keyframes letter-rise {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+}
+
+.letter__paper {
+    padding: 0 20px 24px;
+}
+
+/* Tombol Tutup atas tetap terlihat saat isi surat digulir */
+.letter__paper > form:first-child {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: flex-end;
+    margin-inline: -20px;
+    padding: 12px 12px 8px;
+    background: var(--paper);
+}
+
+.letter__paper > form:last-child {
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+}
+
+.letter__close {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+    font: 600 15px/1 var(--font-text);
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.letter__close:hover {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.letter__close:active {
+    background: var(--deep);
+    color: var(--paper);
+    transform: translateY(1px);
+}
+
+/* Kop surat */
+.letter__kop {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 14px;
+    border-bottom: 4px double var(--ink);
+}
+
+.letter__kop img {
+    width: 52px;
+    height: auto;
+    flex: none;
+}
+
+.letter__kop p {
+    margin: 0;
+    display: grid;
+    line-height: 1.3;
+}
+
+.letter__kop strong {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 800;
+    font-variation-settings: 'wdth' 100;
+}
+
+.letter__kop span {
+    font-size: 14px;
+    color: var(--ink-soft);
+}
+
+.letter__title {
+    margin: 24px 0 20px;
+    font-family: var(--font-display);
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 800;
+    font-variation-settings: 'wdth' 100;
+    line-height: 1.15;
+    text-align: center;
+}
+
+/* Poster adalah karya desain paslon: tampil utuh, tidak dipotong */
+.letter__poster {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    margin-inline: auto;
+    border-radius: var(--radius);
     background: #E7EFEE;
 }
 
-.ballot__placeholder {
+.letter__placeholder {
+    aspect-ratio: 3 / 4;
     display: grid;
     place-items: center;
     padding: 24px;
@@ -441,23 +668,22 @@ a {
     border: 2px dashed #9AB1AE;
 }
 
-.ballot__names {
-    margin: 20px 0 0;
+.letter__names {
+    margin: 24px 0 0;
     display: grid;
-    gap: 10px;
+    gap: 12px;
 }
 
-.ballot__names div {
+.letter__names div {
     display: grid;
-    gap: 0;
 }
 
-.ballot__names dt {
+.letter__names dt {
     font-size: 14px;
     color: var(--ink-soft);
 }
 
-.ballot__names dd {
+.letter__names dd {
     margin: 0;
     font-family: var(--font-display);
     font-size: 20px;
@@ -467,49 +693,26 @@ a {
     overflow-wrap: anywhere;
 }
 
-.ballot__heading {
-    margin: 20px 0 4px;
+.letter__heading {
+    margin: 24px 0 6px;
     padding-top: 16px;
     border-top: 2px solid var(--ink);
     font: 600 14px/1.4 var(--font-text);
     color: var(--ink-soft);
 }
 
-.ballot__vision {
+.letter__vision {
     margin: 0;
-    max-width: 70ch;
+    overflow-wrap: anywhere;
 }
 
-.ballot__mission {
-    margin-top: 16px;
+.letter__mission {
+    margin: 0;
+    padding-left: 22px;
+    overflow-wrap: anywhere;
 }
 
-.ballot__mission summary {
-    display: flex;
-    align-items: center;
-    min-height: 44px;
-    font-weight: 600;
-    color: var(--teal-ink);
-    text-decoration: underline;
-    text-underline-offset: 4px;
-}
-
-.ballot__mission summary:hover {
-    color: var(--ink);
-    text-decoration-thickness: 3px;
-}
-
-.ballot__mission summary:active {
-    color: var(--deep);
-    text-decoration-style: double;
-}
-
-.ballot__mission ul {
-    margin: 8px 0 0;
-    padding-left: 20px;
-}
-
-.ballot__mission li + li {
+.letter__mission li + li {
     margin-top: 8px;
 }
 
@@ -706,19 +909,22 @@ a {
         padding: 24px 28px 28px;
     }
 
-    .ballot--2,
-    .ballot--3 {
+    .envelopes--2,
+    .envelopes--3 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    /* 3 paslon di 2 kolom: paslon terakhir dibentangkan agar tidak ada sel kosong
-       (latar tinta grid akan tampil sebagai blok hitam) */
-    .ballot--3 > .ballot__cell:last-child {
-        grid-column: 1 / -1;
+    .envelopes--2 {
+        max-width: 880px;
+        width: 100%;
+        margin-inline: auto;
     }
 
-    .ballot--3 > .ballot__cell:last-child .ballot__poster {
-        max-width: calc(50% - 20px);
+    /* 3 paslon di 2 kolom: amplop ketiga di tengah baris kedua */
+    .envelopes--3 > li:last-child {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 12px);
     }
 
     .site-footer__inner {
@@ -732,27 +938,13 @@ a {
 
 @media (min-width: 1080px) {
 
-    .ballot-section__inner {
-        grid-template-columns: 280px 1fr;
-        gap: 48px;
-        align-items: start;
-    }
-
-    .ballot-section__intro {
-        position: sticky;
-        top: 32px;
-    }
-
-    .ballot--3 {
+    .envelopes--3 {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .ballot--3 > .ballot__cell:last-child {
+    .envelopes--3 > li:last-child {
         grid-column: auto;
-    }
-
-    .ballot--3 > .ballot__cell:last-child .ballot__poster {
-        max-width: none;
+        width: auto;
     }
 
     .results__inner {
@@ -776,7 +968,24 @@ a {
     }
 
     .hero__slide,
-    .btn {
+    .btn,
+    .envelope,
+    .envelope__flap,
+    .envelope__seal,
+    .letter__close {
         transition: none;
+    }
+
+    .envelope:hover,
+    .envelope:active,
+    .envelope:hover .envelope__flap,
+    .envelope:focus-visible .envelope__flap,
+    .envelope.is-opening .envelope__flap,
+    .letter__close:active {
+        transform: none;
+    }
+
+    .letter[open] {
+        animation: none;
     }
 }
