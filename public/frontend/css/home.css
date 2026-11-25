@@ -177,7 +177,9 @@ a {
 /* ---------- Header ---------- */
 
 /* Navbar tetap di atas. Tanpa JS selalu solid; dengan JS transparan di atas foto
-   dan menjadi solid + lebih ringkas begitu halaman digulir. */
+   dan menjadi kaca buram + lebih ringkas begitu halaman digulir. Satu-satunya
+   elemen kaca di halaman. Tetap diberi warna hijau tua agar logo & teks putih
+   terbaca saat melewati section putih. */
 .site-header {
     position: fixed;
     inset: 0 0 auto;
@@ -193,6 +195,16 @@ a {
 
 .site-header.is-scrolled {
     padding-block: 8px;
+    background: rgba(14, 53, 50, .62);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* Browser tanpa blur: kaca dibuat lebih pekat supaya teks tetap terbaca */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .site-header.is-scrolled {
+        background: rgba(14, 53, 50, .92);
+    }
 }
 
 .site-header.is-scrolled .site-header__logo img {

@@ -16,5 +16,5 @@ Status: disetujui user 2026-11-25 ("oke silahkan"). Melanjutkan `2026-11-24-home
 - Overlay ikut pindah: elips gelap 900x400 berpusat di belakang judul (74→66→30→0%) + gradasi tipis 40% di atas. Kontras terukur min 5.18 (1920x870, 1440x900, 1366x657, 390x844).
 
 ## Revisi: navbar tetap & tanpa tombol jeda (permintaan user)
-- Navbar `position: fixed`: transparan di atas foto saat di puncak halaman, solid `--deep` dan lebih ringkas (logo 40px) begitu digulir > 8px. Tanpa JS selalu solid (kelas `js` dipasang di `<head>` sebelum render). `scroll-padding-top: 72px` agar #paslon/#hasil tidak tertutup.
+- Navbar `position: fixed`: transparan di atas foto saat di puncak halaman; begitu digulir > 8px menjadi kaca buram (`rgba(14,53,50,.62)` + `backdrop-filter: blur(14px)`, 92% bila blur tidak didukung) dan lebih ringkas (logo 40px). Satu-satunya elemen kaca di halaman. Tanpa JS selalu solid (kelas `js` dipasang di `<head>` sebelum render). `scroll-padding-top: 72px` agar #paslon/#hasil tidak tertutup.
 - Tombol "Jeda foto" dihapus atas keputusan user, meski WCAG 2.2.2 meminta kontrol jeda untuk gerak otomatis > 5 detik. Slider tetap tidak berjalan dengan `prefers-reduced-motion` dan berhenti saat tab tersembunyi.
