@@ -120,14 +120,41 @@
         };
         const pad = function (n) { return String(n).padStart(2, '0'); };
 
+        function remainingMs() {
+            return target - (Date.now() + offset);
+        }
+
+        // Saat waktunya tiba, muat ulang agar status & tombol mengikuti server
+        // ("Masuk untuk memilih" muncul / hilang). Pengaman: paling sering sekali
+        // per 15 detik, supaya jam yang sedikit meleset tidak memicu muat ulang beruntun.
+        function reloadForNewStatus() {
+            const key = 'countdown-reload:' + box.dataset.countdown;
+            try {
+                const last = Number(sessionStorage.getItem(key));
+                if (last && Date.now() - last < 15000) return;
+                sessionStorage.setItem(key, String(Date.now()));
+            } catch (e) { /* tanpa storage: tetap muat ulang sekali */ }
+            window.location.reload();
+        }
+
         function update() {
-            const left = Math.max(0, Math.floor((target - (Date.now() + offset)) / 60000));
+            const ms = remainingMs();
+            if (ms <= 0) {
+                reloadForNewStatus();
+                return;
+            }
+            const left = Math.floor(ms / 60000);
             values.days.textContent = Math.floor(left / 1440);
             values.hours.textContent = pad(Math.floor(left % 1440 / 60));
             values.minutes.textContent = pad(left % 60);
         }
 
         update();
+        // Satu pengingat tepat di saat dibuka/ditutup (bukan hitungan berdetik).
+        const ms = remainingMs();
+        if (ms > 0 && ms < 2147483647) {
+            window.setTimeout(reloadForNewStatus, ms + 1500);
+        }
         document.addEventListener('visibilitychange', function () {
             if (!document.hidden) update();
         });
