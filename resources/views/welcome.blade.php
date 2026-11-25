@@ -234,18 +234,12 @@
             </div>
         </section>
 
-        <section id="hasil" class="results{{ $results !== null && $totalVotes > 0 ? '' : ' results--pending' }}" aria-labelledby="hasil-judul">
+        <section id="hasil" class="results" aria-labelledby="hasil-judul">
             <div class="container results__inner">
                 <div class="results__intro">
                     <h2 id="hasil-judul" class="section-title">Hasil penghitungan</h2>
-                    @if ($results === null && $end)
-                        <p>Hasil penghitungan tampil di sini setelah pemilihan ditutup pada {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
-                    @elseif ($results === null)
-                        <p>Hasil penghitungan tampil di sini setelah pemilihan ditutup.</p>
-                    @elseif ($totalVotes === 0)
-                        <p>Belum ada suara tercatat.</p>
-                    @else
-                        <p>Total {{ $totalVotes }} suara masuk.</p>
+                    @if ($results !== null && $totalVotes > 0)
+                        <p class="results__total">Total {{ $totalVotes }} suara masuk.</p>
                     @endif
                 </div>
 
@@ -253,6 +247,7 @@
                     <ol class="tally">
                         @foreach ($results as $row)
                             <li class="tally__row">
+                                <span class="hex-number tally__seal" aria-hidden="true">{{ $row['candidate']->candidate_pair }}</span>
                                 <p class="tally__name">
                                     <span class="tally__pair">Paslon {{ $row['candidate']->candidate_pair }}</span>
                                     {{ $row['candidate']->leader_name }} &amp; {{ $row['candidate']->vice_leader_name }}
@@ -262,6 +257,12 @@
                             </li>
                         @endforeach
                     </ol>
+                @elseif ($results === null && $end)
+                    <p class="results__note">Hasil penghitungan tampil di sini setelah pemilihan ditutup pada {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
+                @elseif ($results === null)
+                    <p class="results__note">Hasil penghitungan tampil di sini setelah pemilihan ditutup.</p>
+                @else
+                    <p class="results__note">Belum ada suara tercatat.</p>
                 @endif
             </div>
         </section>

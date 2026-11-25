@@ -68,8 +68,7 @@ a {
 }
 
 .site-header :focus-visible,
-.hero :focus-visible,
-.results :focus-visible {
+.hero :focus-visible {
     outline-color: var(--yellow);
 }
 
@@ -143,7 +142,7 @@ a {
 }
 
 .btn--on-photo {
-    background: rgba(14, 53, 50, .55);
+    background: rgba(14, 53, 50, .7);
     border-color: var(--paper);
     color: var(--paper);
 }
@@ -240,8 +239,10 @@ a {
 /* Gelap di atas (area pepohonan, tempat judul) agar teks putih terbaca; foto orang tetap terang.
    Titik gradasi dalam px mengikuti tinggi blok judul, bukan tinggi layar, agar kontras tetap
    terjaga di layar pendek (diukur: >= 4.5:1 pada 1440x900, 1366x768, 390x844 di ketiga foto). */
+/* Overlay seperlunya: hanya menggelap di area judul agar foto tetap terlihat.
+   HP: judul selebar layar di atas, jadi gradasi dari atas. */
 .hero__scrim {
-    background: linear-gradient(180deg, rgba(14, 53, 50, .92) 0, rgba(14, 53, 50, .84) 300px, rgba(14, 53, 50, .15) 440px, rgba(14, 53, 50, 0) 560px);
+    background: linear-gradient(180deg, rgba(14, 53, 50, .74) 0, rgba(14, 53, 50, .66) 250px, rgba(14, 53, 50, 0) 400px);
 }
 
 .hero__inner {
@@ -807,14 +808,11 @@ html {
 
 /* ---------- Hasil ---------- */
 
+/* Latar teal sangat muda: terpisah dari surat suara (putih) dan footer (gelap) */
 .results {
-    background: var(--deep);
-    color: var(--paper);
-    padding-block: 64px 72px;
-}
-
-.results--pending {
-    padding-block: 56px;
+    background: #E8F4F2;
+    color: var(--ink);
+    padding-block: 72px 88px;
 }
 
 .results__inner {
@@ -822,64 +820,109 @@ html {
     gap: 32px;
 }
 
-.results__intro p {
-    margin: 0;
-    max-width: 52ch;
-    color: #CFE3E0;
+.results__intro {
+    text-align: center;
 }
 
+.results__total {
+    margin: 0;
+    color: var(--ink-soft);
+}
+
+.results__total,
+.results__note {
+    font-size: 17px;
+}
+
+.results__note {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 28px 24px;
+    border: 2px dashed #9AB1AE;
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink-soft);
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Papan rekapitulasi */
 .tally {
     list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 24px;
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 8px 20px;
+    border-top: 6px solid var(--teal);
+    border-radius: var(--radius);
+    background: var(--paper);
 }
 
 .tally__row {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 8px 16px;
-    align-items: end;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px 16px;
+    padding-block: 20px;
+}
+
+.tally__row + .tally__row {
+    border-top: 1px solid #CFE3E0;
+}
+
+.tally__seal {
+    grid-row: span 2;
+    width: 48px;
+    height: 54px;
+    font-size: 26px;
 }
 
 .tally__name {
     margin: 0;
     overflow-wrap: anywhere;
+    color: var(--ink-soft);
 }
 
 .tally__pair {
     display: block;
+    color: var(--ink);
     font-family: var(--font-display);
     font-size: 20px;
     font-weight: 800;
+    font-variation-settings: 'wdth' 100;
 }
 
 .tally__count {
     margin: 0;
+    color: var(--ink-soft);
     text-align: right;
     white-space: nowrap;
 }
 
 .tally__count strong {
     display: block;
+    color: var(--ink);
     font-family: var(--font-display);
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 900;
     font-variation-settings: 'wdth' 112;
     line-height: 1;
 }
 
+/* Bar teal gelap: teal biasa hanya 2.1:1 di atas latar terang (grafik perlu 3:1) */
 .tally__bar {
-    grid-column: 1 / -1;
+    grid-column: 2 / -1;
     height: 14px;
-    background: rgba(255, 255, 255, .14);
+    border-radius: 7px;
+    background: #CFE3E0;
+    overflow: hidden;
 }
 
 .tally__bar span {
     display: block;
     height: 100%;
-    background: var(--teal);
+    background: var(--teal-ink);
 }
 
 /* ---------- Footer ---------- */
@@ -982,6 +1025,17 @@ html {
 
     .hero__slide {
         object-position: 50% 62%;
+    }
+
+    /* Tablet & desktop: gelap pekat hanya di blok judul (kiri atas), memudar ke kanan
+       dan ke bawah; sisi kanan foto dan barisan orang di bawah dibiarkan jernih.
+       Garis tipis di atas menjaga logo & tombol Masuk tetap terbaca. */
+    .hero__scrim {
+        background:
+            linear-gradient(90deg, rgba(14, 53, 50, .74) 0, rgba(14, 53, 50, .66) max(48%, 660px), rgba(14, 53, 50, .2) calc(max(48%, 660px) + 160px), rgba(14, 53, 50, 0) calc(max(48%, 660px) + 280px)),
+            linear-gradient(180deg, rgba(14, 53, 50, .4) 0, rgba(14, 53, 50, 0) 140px);
+        -webkit-mask-image: linear-gradient(180deg, #000 0, #000 420px, transparent 560px);
+        mask-image: linear-gradient(180deg, #000 0, #000 420px, transparent 560px);
     }
 
     .hero__inner {
@@ -1125,15 +1179,6 @@ html {
     .envelopes--3 > li:last-child {
         grid-column: auto;
         width: auto;
-    }
-
-    .results__inner {
-        grid-template-columns: 280px 1fr;
-        gap: 48px;
-    }
-
-    .results--pending .results__inner {
-        grid-template-columns: 1fr;
     }
 
     .mascot {

@@ -326,3 +326,25 @@ it('groups the hero and the schedule band into the first screen', function () {
     expect($html)->toMatch('#<div class="first-screen">\s*<section class="hero"#');
     expect(strpos($html, 'class="slip-band"'))->toBeLessThan(strpos($html, 'id="paslon"'));
 });
+
+// --- Hasil penghitungan ---
+
+it('marks each result row with the same numbered hexagon seal as the envelopes', function () {
+    $first = makeCandidate(1);
+    voteFor($first, 2);
+    voteFor(makeCandidate(2), 1);
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-12-01 16:00'));
+
+    $this->get('/')
+        ->assertSee('<span class="hex-number tally__seal" aria-hidden="true">1</span>', false)
+        ->assertSee('<span class="hex-number tally__seal" aria-hidden="true">2</span>', false)
+        ->assertSeeInOrder(['Total 3 suara masuk.', 'Paslon 1', '67%', '2 suara', 'Paslon 2', '33%', '1 suara']);
+});
+
+it('shows the waiting message for results inside its own note box', function () {
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
+
+    $this->get('/')->assertSee('<p class="results__note">Hasil penghitungan tampil di sini setelah pemilihan ditutup', false);
+});
