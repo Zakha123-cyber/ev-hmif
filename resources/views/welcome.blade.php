@@ -120,51 +120,76 @@
             <div class="container ballot-section__inner">
                 <div class="ballot-section__intro">
                     <h2 id="surat-suara" class="section-title">Surat suara</h2>
-                    <p>Kenali pasangan calon sebelum memilih. Suara hanya bisa dikirim satu kali dan tidak dapat diubah.</p>
+                    <p>Buka amplop untuk mengenal tiap pasangan calon. Suara hanya bisa dikirim satu kali dan tidak dapat diubah.</p>
                 </div>
 
                 @if ($candidates->isEmpty())
                     <p class="ballot__empty">Daftar pasangan calon belum diumumkan.</p>
                 @else
-                    <ol class="ballot ballot--{{ min($candidates->count(), 3) }}">
+                    <ol class="envelopes envelopes--{{ min($candidates->count(), 3) }}">
                         @foreach ($candidates as $candidate)
-                            @php $hasPoster = $candidate->poster && file_exists(public_path('assets/upload/kandidat/' . $candidate->poster)); @endphp
-                            <li class="ballot__cell">
-                                <p class="hex-number"><span class="visually-hidden">Nomor urut </span>{{ $candidate->candidate_pair }}</p>
+                            @php
+                                $letterId = 'surat-' . $candidate->id;
+                                $hasPoster = $candidate->poster && file_exists(public_path('assets/upload/kandidat/' . $candidate->poster));
+                                $missions = $candidate->missionItems();
+                            @endphp
+                            <li>
+                                <button type="button" class="envelope" data-envelope commandfor="{{ $letterId }}" command="show-modal">
+                                    <span class="envelope__flap" aria-hidden="true"></span>
+                                    <span class="hex-number envelope__seal" aria-hidden="true">{{ $candidate->candidate_pair }}</span>
+                                    <span class="envelope__label">Paslon {{ $candidate->candidate_pair }}</span>
+                                    <span class="envelope__hint">Buka amplop</span>
+                                </button>
 
-                                @if ($hasPoster)
-                                    <img class="ballot__poster" src="{{ asset('assets/upload/kandidat/' . $candidate->poster) }}"
-                                        width="600" height="800" loading="lazy"
-                                        alt="Poster pasangan calon nomor {{ $candidate->candidate_pair }}, {{ $candidate->leader_name }} dan {{ $candidate->vice_leader_name }}">
-                                @else
-                                    <div class="ballot__poster ballot__placeholder">Foto pasangan calon belum tersedia</div>
-                                @endif
+                                <dialog id="{{ $letterId }}" class="letter" aria-labelledby="{{ $letterId }}-judul">
+                                    <div class="letter__paper">
+                                        <form method="dialog">
+                                            <button class="letter__close letter__close--top">Tutup</button>
+                                        </form>
 
-                                <dl class="ballot__names">
-                                    <div>
-                                        <dt>Ketua</dt>
-                                        <dd>{{ $candidate->leader_name }}</dd>
+                                        <header class="letter__kop">
+                                            <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="" loading="lazy">
+                                            <p><strong>Himpunan Mahasiswa Informatika</strong><span>Universitas Jember</span></p>
+                                        </header>
+
+                                        <h3 id="{{ $letterId }}-judul" class="letter__title">Pasangan Calon Nomor Urut {{ $candidate->candidate_pair }}</h3>
+
+                                        @if ($hasPoster)
+                                            <img class="letter__poster" src="{{ asset('assets/upload/kandidat/' . $candidate->poster) }}"
+                                                width="600" height="800" loading="lazy"
+                                                alt="Poster pasangan calon nomor {{ $candidate->candidate_pair }}, {{ $candidate->leader_name }} dan {{ $candidate->vice_leader_name }}">
+                                        @else
+                                            <div class="letter__poster letter__placeholder">Foto pasangan calon belum tersedia</div>
+                                        @endif
+
+                                        <dl class="letter__names">
+                                            <div>
+                                                <dt>Ketua</dt>
+                                                <dd>{{ $candidate->leader_name }}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>Wakil ketua</dt>
+                                                <dd>{{ $candidate->vice_leader_name }}</dd>
+                                            </div>
+                                        </dl>
+
+                                        <h4 class="letter__heading">Visi</h4>
+                                        <p class="letter__vision">{{ $candidate->vision }}</p>
+
+                                        @if ($missions)
+                                            <h4 class="letter__heading">Misi</h4>
+                                            <ol class="letter__mission">
+                                                @foreach ($missions as $mission)
+                                                    <li>{{ $mission }}</li>
+                                                @endforeach
+                                            </ol>
+                                        @endif
+
+                                        <form method="dialog">
+                                            <button class="letter__close">Tutup</button>
+                                        </form>
                                     </div>
-                                    <div>
-                                        <dt>Wakil ketua</dt>
-                                        <dd>{{ $candidate->vice_leader_name }}</dd>
-                                    </div>
-                                </dl>
-
-                                <h3 class="ballot__heading">Visi</h3>
-                                <p class="ballot__vision">{{ $candidate->vision }}</p>
-
-                                @php $missions = $candidate->missionItems(); @endphp
-                                @if ($missions)
-                                    <details class="ballot__mission">
-                                        <summary>Misi ({{ count($missions) }} butir)</summary>
-                                        <ul>
-                                            @foreach ($missions as $mission)
-                                                <li>{{ $mission }}</li>
-                                            @endforeach
-                                        </ul>
-                                    </details>
-                                @endif
+                                </dialog>
                             </li>
                         @endforeach
                     </ol>

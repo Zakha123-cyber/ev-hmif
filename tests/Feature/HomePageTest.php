@@ -141,16 +141,7 @@ it('shows a numbered placeholder instead of a broken image when the poster file 
 
     $this->get('/')
         ->assertDontSee('assets/upload/kandidat/default.png', false)
-        ->assertSee('ballot__placeholder', false);
-});
-
-it('lists every mission item inside an expandable section', function () {
-    $candidate = makeCandidate(1);
-    $candidate->forceFill(['mission' => 'Membangun himpunan. Mendukung anggota.'])->save();
-
-    $this->get('/')
-        ->assertSee('<details', false)
-        ->assertSeeInOrder(['Membangun himpunan.', 'Mendukung anggota.']);
+        ->assertSee('letter__placeholder', false);
 });
 
 it('shows the candidate names, roles and vision', function () {
@@ -198,10 +189,66 @@ it('looks for the mascot at public/frontend/3d/cogito.glb by default', function 
     expect(config('election.mascot_path'))->toBe('frontend/3d/cogito.glb');
 });
 
-it('announces the ballot number to screen readers as real text', function () {
+// --- Amplop dan surat ---
+
+function envelopeMarkup(string $html, int $pair): string
+{
+    preg_match_all('#<button[^>]*class="envelope"[^>]*>.*?</button>#s', $html, $m);
+
+    return collect($m[0])->first(fn ($b) => str_contains($b, "Paslon {$pair}<")) ?? '';
+}
+
+it('centers an intro that tells visitors to open the envelopes', function () {
+    $this->get('/')->assertSee('Buka amplop untuk mengenal tiap pasangan calon.');
+});
+
+it('shows one sealed envelope per candidate without their names', function () {
+    makeCandidate(1);
     makeCandidate(2);
+    $html = $this->get('/')->getContent();
+
+    expect(substr_count($html, 'class="envelope"'))->toBe(2);
+    expect(envelopeMarkup($html, 1))->toContain('Paslon 1')->toContain('Buka amplop')
+        ->not->toContain('Ketua 1')->not->toContain('Wakil 1');
+    expect($html)->not->toContain('aria-label="Nomor urut');
+});
+
+it('links each envelope to its own letter dialog', function () {
+    $candidate = makeCandidate(1);
 
     $this->get('/')
-        ->assertSee('<span class="visually-hidden">Nomor urut </span>2', false)
-        ->assertDontSee('aria-label="Nomor urut', false);
+        ->assertSee('commandfor="surat-' . $candidate->id . '" command="show-modal"', false)
+        ->assertSee('<dialog id="surat-' . $candidate->id . '" class="letter"', false);
+});
+
+it('writes the letter with a letterhead, title, names, vision and numbered missions', function () {
+    $candidate = makeCandidate(1);
+    $candidate->forceFill(['mission' => 'Membangun himpunan. Mendukung anggota.'])->save();
+
+    $this->get('/')->assertSeeInOrder([
+        'letter__kop', 'Himpunan Mahasiswa Informatika', 'Pasangan Calon Nomor Urut 1',
+        'Ketua', 'Ketua 1', 'Wakil', 'Wakil 1', 'Visi', 'Misi',
+        '<ol class="letter__mission">', 'Membangun himpunan.', 'Mendukung anggota.',
+    ], false);
+});
+
+it('shows the candidate poster inside the letter when the file exists', function () {
+    $file = '__test-poster.png';
+    $path = public_path('assets/upload/kandidat/' . $file);
+    file_put_contents($path, 'png');
+    makeCandidate(1)->forceFill(['poster' => $file])->save();
+
+    try {
+        $this->get('/')
+            ->assertSee('class="letter__poster" src="' . asset('assets/upload/kandidat/' . $file) . '"', false)
+            ->assertDontSee('letter__placeholder', false);
+    } finally {
+        unlink($path);
+    }
+});
+
+it('lets visitors close the letter with a button', function () {
+    makeCandidate(1);
+
+    $this->get('/')->assertSee('<form method="dialog">', false)->assertSee('Tutup');
 });
