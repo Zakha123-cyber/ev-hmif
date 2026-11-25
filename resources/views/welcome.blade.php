@@ -73,47 +73,49 @@
             </div>
         </section>
 
-        <div class="container slip-row">
-            <section class="slip" aria-labelledby="jadwal">
-                <h2 id="jadwal" class="slip__label">Jadwal pemilihan</h2>
+        <div class="slip-band">
+            <div class="container slip-band__inner">
+                <section class="slip" aria-labelledby="jadwal">
+                    <h2 id="jadwal" class="slip__label">Jadwal pemilihan</h2>
 
-                @switch($status)
-                    @case(ElectionSetting::STATUS_UPCOMING)
-                        <p class="slip__status">Dibuka {{ $start->diffForHumans(now(), ['syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE, 'parts' => 1]) }} lagi</p>
-                        @if ($sameDay)
-                            <p class="slip__when">{{ $dateLabel($start) }}<br>{{ $start->format('H.i') }}–{{ $end->format('H.i') }} WIB</p>
-                        @else
-                            <p class="slip__when">Dibuka {{ $dateLabel($start) }} pukul {{ $start->format('H.i') }} WIB<br>Ditutup {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB</p>
-                        @endif
-                        @break
+                    @switch($status)
+                        @case(ElectionSetting::STATUS_UPCOMING)
+                            <p class="slip__status">Dibuka {{ $start->diffForHumans(now(), ['syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE, 'parts' => 1]) }} lagi</p>
+                            @if ($sameDay)
+                                <p class="slip__when">{{ $dateLabel($start) }}<br>{{ $start->format('H.i') }}–{{ $end->format('H.i') }} WIB</p>
+                            @else
+                                <p class="slip__when">Dibuka {{ $dateLabel($start) }} pukul {{ $start->format('H.i') }} WIB<br>Ditutup {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB</p>
+                            @endif
+                            @break
 
-                    @case(ElectionSetting::STATUS_OPEN)
-                        <p class="slip__status">Pemilihan sedang berlangsung</p>
-                        <p class="slip__when">Ditutup {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
-                        @auth
-                            <a class="btn btn--primary" href="{{ $userLink }}">{{ $userLinkLabel }}</a>
-                        @else
-                            <a class="btn btn--primary" href="{{ route('login') }}">Masuk untuk memilih</a>
-                        @endauth
-                        @break
+                        @case(ElectionSetting::STATUS_OPEN)
+                            <p class="slip__status">Pemilihan sedang berlangsung</p>
+                            <p class="slip__when">Ditutup {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
+                            @auth
+                                <a class="btn btn--primary" href="{{ $userLink }}">{{ $userLinkLabel }}</a>
+                            @else
+                                <a class="btn btn--primary" href="{{ route('login') }}">Masuk untuk memilih</a>
+                            @endauth
+                            @break
 
-                    @case(ElectionSetting::STATUS_CLOSED)
-                        <p class="slip__status">Pemilihan ditutup</p>
-                        <p class="slip__when">{{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
-                        <a class="btn btn--primary" href="#hasil">Lihat hasil</a>
-                        @break
+                        @case(ElectionSetting::STATUS_CLOSED)
+                            <p class="slip__status">Pemilihan ditutup</p>
+                            <p class="slip__when">{{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
+                            <a class="btn btn--primary" href="#hasil">Lihat hasil</a>
+                            @break
 
-                    @default
-                        <p class="slip__status slip__status--quiet">Jadwal pemilihan belum diumumkan panitia.</p>
-                        <p class="slip__when">Akun pemilihan dikirim ke email kampus masing-masing saat pemilihan dibuka.</p>
-                @endswitch
-            </section>
+                        @default
+                            <p class="slip__status slip__status--quiet">Jadwal pemilihan belum diumumkan panitia.</p>
+                            <p class="slip__when">Akun pemilihan dikirim ke email kampus masing-masing saat pemilihan dibuka.</p>
+                    @endswitch
+                </section>
 
-            @if ($mascotUrl)
-                <model-viewer class="mascot" src="{{ $mascotUrl }}" alt="COGITO, maskot HMIF. Geser untuk memutar."
-                    camera-controls disable-zoom disable-pan interaction-prompt="none" touch-action="pan-y"
-                    shadow-intensity="0.6"></model-viewer>
-            @endif
+                @if ($mascotUrl)
+                    <model-viewer class="mascot" src="{{ $mascotUrl }}" alt="COGITO, maskot HMIF. Geser untuk memutar."
+                        camera-controls disable-zoom disable-pan interaction-prompt="none" touch-action="pan-y"
+                        shadow-intensity="0.6"></model-viewer>
+                @endif
+            </div>
         </div>
 
         <section id="paslon" class="ballot-section" aria-labelledby="surat-suara">

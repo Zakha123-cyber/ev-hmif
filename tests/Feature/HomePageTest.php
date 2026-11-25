@@ -273,3 +273,12 @@ it('opens each letter at its title instead of jumping to the close button', func
 
     $this->get('/')->assertSee('id="surat-' . $candidate->id . '-judul" class="letter__title" tabindex="-1" autofocus', false);
 });
+
+it('shows the schedule as a full-width band between the hero and the ballot', function () {
+    $html = $this->get('/')->getContent();
+
+    expect($html)->toContain('<div class="slip-band">')
+        ->not->toContain('slip-row');
+    expect(strpos($html, 'class="hero"'))->toBeLessThan(strpos($html, 'class="slip-band"'));
+    expect(strpos($html, 'class="slip-band"'))->toBeLessThan(strpos($html, 'id="paslon"'));
+});

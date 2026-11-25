@@ -299,37 +299,39 @@ a {
     color: var(--ink);
 }
 
-/* ---------- Slip status ---------- */
+/* ---------- Pita jadwal ---------- */
 
-.slip-row {
-    position: relative;
-    z-index: 2;
-    margin-top: -48px;
+/* Pita teal lebar penuh: garis pemisah antara foto hero dan surat suara */
+.slip-band {
+    background: var(--teal);
+    border-top: 4px solid var(--deep);
+    color: var(--ink);
+}
+
+/* Di atas teal, cincin fokus teal-ink terlalu pudar (2.7:1): pakai tinta */
+.slip-band :focus-visible {
+    outline-color: var(--ink);
+}
+
+.slip-band__inner {
     display: grid;
-    gap: 16px;
+    gap: 8px;
 }
 
 .slip {
-    max-width: 560px;
-    padding: 20px 22px 24px;
-    background: var(--paper);
-    border-radius: var(--radius);
-    /* Satu-satunya elemen yang melayang: slip menumpang di atas foto */
-    box-shadow: 0 12px 32px rgba(14, 53, 50, .22);
-    /* Pita teal: motif yang sama dengan garis atas footer */
-    border-top: 6px solid var(--teal);
+    padding-block: 22px 26px;
 }
 
 .slip__label {
-    margin: 0 0 6px;
+    margin: 0 0 4px;
     font: 600 14px/1.4 var(--font-text);
-    color: var(--ink-soft);
+    color: var(--deep);
 }
 
 .slip__status {
     margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(24px, 4vw, 28px);
+    font-size: clamp(22px, 4vw, 28px);
     font-weight: 800;
     font-variation-settings: 'wdth' 100;
     line-height: 1.15;
@@ -342,11 +344,12 @@ a {
 
 .slip__when {
     margin: 8px 0 0;
-    color: var(--ink-soft);
+    color: var(--deep);
+    font-weight: 500;
 }
 
 .slip .btn {
-    margin-top: 18px;
+    margin-top: 16px;
 }
 
 .mascot {
@@ -915,14 +918,9 @@ html {
         padding-top: 128px;
     }
 
-    .slip-row {
-        margin-top: -72px;
-        grid-template-columns: minmax(0, 560px) 1fr;
-        align-items: end;
-    }
-
-    .slip {
-        padding: 24px 28px 28px;
+    .slip-band__inner {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
     }
 
     .envelopes--2,
@@ -953,6 +951,44 @@ html {
 /* ---------- Desktop ---------- */
 
 @media (min-width: 1080px) {
+
+    /* Satu baris: label + status | waktu | tombol */
+    .slip {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "label when action"
+            "status when action";
+        align-items: center;
+        column-gap: 40px;
+        padding-block: 24px;
+    }
+
+    .slip__label {
+        grid-area: label;
+        align-self: end;
+    }
+
+    .slip__status {
+        grid-area: status;
+        align-self: start;
+    }
+
+    /* Garis pemisah setinggi isi pita, bukan hanya setinggi teks */
+    .slip__when {
+        grid-area: when;
+        align-self: stretch;
+        display: flex;
+        align-items: center;
+        margin: 0;
+        padding-left: 40px;
+        border-left: 2px solid var(--deep);
+    }
+
+    .slip .btn {
+        grid-area: action;
+        margin-top: 0;
+    }
 
     .envelopes--3 {
         grid-template-columns: repeat(3, minmax(0, 1fr));
