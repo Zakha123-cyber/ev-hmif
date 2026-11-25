@@ -500,19 +500,25 @@ a {
     text-underline-offset: 4px;
 }
 
-/* Hover tidak hanya warna: amplop terangkat dan tutupnya sedikit terbuka */
-.envelope:hover {
-    transform: translateY(-4px);
-    border-color: var(--ink);
-}
-
-.envelope:hover .envelope__flap,
 .envelope:focus-visible .envelope__flap {
     transform: rotateX(18deg);
 }
 
-.envelope:hover .envelope__hint {
-    text-decoration-thickness: 3px;
+/* Hover tidak hanya warna: amplop terangkat dan tutupnya sedikit terbuka.
+   Hanya untuk perangkat yang bisa hover, agar tidak "nyangkut" setelah diketuk di HP. */
+@media (hover: hover) {
+    .envelope:hover {
+        transform: translateY(-4px);
+        border-color: var(--ink);
+    }
+
+    .envelope:hover .envelope__flap {
+        transform: rotateX(18deg);
+    }
+
+    .envelope:hover .envelope__hint {
+        text-decoration-thickness: 3px;
+    }
 }
 
 .envelope:focus-visible {
@@ -536,6 +542,11 @@ a {
 /* Surat paslon (modal) */
 html:has(.letter[open]) {
     overflow: hidden;
+}
+
+/* Ruang scrollbar tetap dipesan, jadi halaman tidak bergeser saat scroll dikunci */
+html {
+    scrollbar-gutter: stable;
 }
 
 .letter {

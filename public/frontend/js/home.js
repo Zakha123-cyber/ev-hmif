@@ -67,17 +67,32 @@
             envelope.removeAttribute('commandfor');
 
             envelope.addEventListener('click', function () {
-                // Klik ganda selama tutup amplop bergerak tidak membuka dua kali.
-                if (letter.open || envelope.classList.contains('is-opening')) return;
+                // Satu surat saja dalam satu waktu, termasuk saat dua amplop diketuk cepat.
+                if (document.querySelector('.envelope.is-opening, .letter[open]')) return;
                 envelope.classList.add('is-opening');
+                // Poster mulai diunduh selama tutup amplop bergerak.
+                letter.querySelectorAll('img[loading="lazy"]').forEach(function (img) {
+                    img.loading = 'eager';
+                });
                 window.setTimeout(function () {
                     letter.showModal();
                 }, reduceMotion.matches ? 0 : FLAP_MS);
             });
 
-            // Klik di latar gelap (di luar kertas) menutup surat.
+            // Tutup hanya jika tekan DAN lepas terjadi di latar gelap, bukan saat
+            // menyeleksi teks yang berakhir di luar kertas atau mengklik tepi surat.
+            let pressedOutside = false;
+            function outsidePaper(event) {
+                const box = letter.getBoundingClientRect();
+                return event.target === letter && (event.clientX < box.left || event.clientX > box.right
+                    || event.clientY < box.top || event.clientY > box.bottom);
+            }
+            letter.addEventListener('pointerdown', function (event) {
+                pressedOutside = outsidePaper(event);
+            });
             letter.addEventListener('click', function (event) {
-                if (event.target === letter) letter.close();
+                if (pressedOutside && outsidePaper(event)) letter.close();
+                pressedOutside = false;
             });
 
             letter.addEventListener('close', function () {
