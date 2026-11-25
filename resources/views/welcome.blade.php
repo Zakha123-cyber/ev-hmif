@@ -139,6 +139,7 @@
                             <li>
                                 <button type="button" class="envelope" data-envelope commandfor="{{ $letterId }}" command="show-modal">
                                     <span class="envelope__flap" aria-hidden="true"></span>
+                                    <img class="envelope__logo" src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="" loading="lazy">
                                     <span class="hex-number envelope__seal" aria-hidden="true">{{ $candidate->candidate_pair }}</span>
                                     <span class="envelope__label">Paslon {{ $candidate->candidate_pair }}</span>
                                     <span class="envelope__hint">Buka amplop</span>
@@ -146,16 +147,12 @@
 
                                 <dialog id="{{ $letterId }}" class="letter" aria-labelledby="{{ $letterId }}-judul">
                                     <div class="letter__paper">
-                                        <form method="dialog">
-                                            <button class="letter__close letter__close--top">Tutup</button>
-                                        </form>
-
                                         <header class="letter__kop">
                                             <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="" loading="lazy">
                                             <p><strong>Himpunan Mahasiswa Informatika</strong><span>Universitas Jember</span></p>
                                         </header>
 
-                                        <h3 id="{{ $letterId }}-judul" class="letter__title">Pasangan Calon Nomor Urut {{ $candidate->candidate_pair }}</h3>
+                                        <h3 id="{{ $letterId }}-judul" class="letter__title" tabindex="-1" autofocus>Pasangan Calon Nomor Urut {{ $candidate->candidate_pair }}</h3>
 
                                         @if ($hasPoster)
                                             <img class="letter__poster" src="{{ asset('assets/upload/kandidat/' . $candidate->poster) }}"

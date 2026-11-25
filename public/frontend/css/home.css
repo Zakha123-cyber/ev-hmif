@@ -472,6 +472,15 @@ a {
     transition: transform .22s ease-out, opacity .22s ease-out;
 }
 
+/* Logo himpunan sebagai tanda pengirim di pojok kiri bawah amplop */
+.envelope__logo {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    width: 56px;
+    height: auto;
+}
+
 .envelope__label {
     font-family: var(--font-display);
     font-size: clamp(28px, 5vw, 40px);
@@ -559,19 +568,7 @@ html:has(.letter[open]) {
 }
 
 .letter__paper {
-    padding: 0 20px 24px;
-}
-
-/* Tombol Tutup atas tetap terlihat saat isi surat digulir */
-.letter__paper > form:first-child {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    display: flex;
-    justify-content: flex-end;
-    margin-inline: -20px;
-    padding: 12px 12px 8px;
-    background: var(--paper);
+    padding: 24px 20px;
 }
 
 .letter__paper > form:last-child {
@@ -647,6 +644,11 @@ html:has(.letter[open]) {
 }
 
 /* Poster adalah karya desain paslon: tampil utuh, tidak dipotong */
+/* Judul menerima fokus awal agar surat terbuka dari atas; bukan kontrol, jadi tanpa cincin fokus */
+.letter__title:focus {
+    outline: none;
+}
+
 .letter__poster {
     display: block;
     width: 100%;

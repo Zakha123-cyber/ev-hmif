@@ -252,3 +252,23 @@ it('lets visitors close the letter with a button', function () {
 
     $this->get('/')->assertSee('<form method="dialog">', false)->assertSee('Tutup');
 });
+
+it('marks each envelope with the HMIF logo', function () {
+    makeCandidate(1);
+
+    expect(envelopeMarkup($this->get('/')->getContent(), 1))->toContain('frontend/images/home/logo-hmif-320.webp');
+});
+
+it('gives each letter a single close button at the bottom', function () {
+    makeCandidate(1);
+    $html = $this->get('/')->getContent();
+
+    expect(substr_count($html, 'class="letter__close'))->toBe(1);
+    expect($html)->not->toContain('letter__close--top');
+});
+
+it('opens each letter at its title instead of jumping to the close button', function () {
+    $candidate = makeCandidate(1);
+
+    $this->get('/')->assertSee('id="surat-' . $candidate->id . '-judul" class="letter__title" tabindex="-1" autofocus', false);
+});
