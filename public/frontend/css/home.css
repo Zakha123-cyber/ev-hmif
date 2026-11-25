@@ -472,13 +472,16 @@ a {
     transition: transform .22s ease-out, opacity .22s ease-out;
 }
 
-/* Logo himpunan sebagai tanda pengirim di pojok kiri bawah amplop */
+/* Logo himpunan di tutup amplop, ikut terangkat saat dibuka.
+   Tinggi logo 34% tinggi tutup agar selalu muat di dalam segitiga. */
 .envelope__logo {
     position: absolute;
-    left: 16px;
-    bottom: 16px;
-    width: 56px;
-    height: auto;
+    top: 14%;
+    left: 50%;
+    width: auto;
+    height: 34%;
+    transform: translateX(-50%);
+    backface-visibility: hidden;
 }
 
 .envelope__label {
@@ -643,12 +646,12 @@ html:has(.letter[open]) {
     text-align: center;
 }
 
-/* Poster adalah karya desain paslon: tampil utuh, tidak dipotong */
 /* Judul menerima fokus awal agar surat terbuka dari atas; bukan kontrol, jadi tanpa cincin fokus */
 .letter__title:focus {
     outline: none;
 }
 
+/* Poster adalah karya desain paslon: tampil utuh, tidak dipotong */
 .letter__poster {
     display: block;
     width: 100%;

@@ -253,10 +253,11 @@ it('lets visitors close the letter with a button', function () {
     $this->get('/')->assertSee('<form method="dialog">', false)->assertSee('Tutup');
 });
 
-it('marks each envelope with the HMIF logo', function () {
+it('puts the HMIF logo on the envelope flap so it lifts with it', function () {
     makeCandidate(1);
 
-    expect(envelopeMarkup($this->get('/')->getContent(), 1))->toContain('frontend/images/home/logo-hmif-320.webp');
+    expect(envelopeMarkup($this->get('/')->getContent(), 1))
+        ->toMatch('#<span class="envelope__flap" aria-hidden="true">\s*<img class="envelope__logo" src="[^"]*frontend/images/home/logo-hmif-320\.webp"#');
 });
 
 it('gives each letter a single close button at the bottom', function () {
