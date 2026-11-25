@@ -51,70 +51,104 @@
     </header>
 
     <main>
-        <section class="hero" aria-labelledby="judul">
-            <div class="hero__slides" data-slider>
-                @foreach ([1, 2, 3] as $n)
-                    <img class="hero__slide{{ $n === 1 ? ' is-active' : '' }}"
-                        src="{{ asset("frontend/images/home/foto-{$n}-1200.webp") }}"
-                        srcset="{{ asset("frontend/images/home/foto-{$n}-1200.webp") }} 1200w, {{ asset("frontend/images/home/foto-{$n}-2400.webp") }} 2400w"
-                        sizes="100vw" width="2400" height="1350"
-                        @if ($n === 1) fetchpriority="high" alt="Pengurus HMIF berfoto bersama di depan gerbang Universitas Jember"
-                        @else loading="lazy" alt="" @endif>
-                @endforeach
-            </div>
-            <div class="hero__scrim" aria-hidden="true"></div>
+        <div class="first-screen">
+            <section class="hero" aria-labelledby="judul">
+                <div class="hero__slides" data-slider>
+                    @foreach ([1, 2, 3] as $n)
+                        <img class="hero__slide{{ $n === 1 ? ' is-active' : '' }}"
+                            src="{{ asset("frontend/images/home/foto-{$n}-1200.webp") }}"
+                            srcset="{{ asset("frontend/images/home/foto-{$n}-1200.webp") }} 1200w, {{ asset("frontend/images/home/foto-{$n}-2400.webp") }} 2400w"
+                            sizes="100vw" width="2400" height="1350"
+                            @if ($n === 1) fetchpriority="high" alt="Pengurus HMIF berfoto bersama di depan gerbang Universitas Jember"
+                            @else loading="lazy" alt="" @endif>
+                    @endforeach
+                </div>
+                <div class="hero__scrim" aria-hidden="true"></div>
 
-            <div class="container hero__inner">
-                <h1 id="judul" class="hero__title">
-                    Pemilihan Ketua dan Wakil Ketua Umum HMIF
-                    <span class="hero__period">Periode 2025/2026</span>
-                </h1>
-                <button type="button" class="slider-toggle" data-slider-toggle hidden>Jeda foto</button>
-            </div>
-        </section>
+                <div class="container hero__inner">
+                    <h1 id="judul" class="hero__title">
+                        Pemilihan Ketua dan Wakil Ketua Umum HMIF
+                        <span class="hero__period">Periode 2025/2026</span>
+                    </h1>
+                    <button type="button" class="slider-toggle" data-slider-toggle hidden>Jeda foto</button>
+                </div>
+            </section>
 
-        <div class="slip-band">
-            <div class="container slip-band__inner">
-                <section class="slip" aria-labelledby="jadwal">
-                    <h2 id="jadwal" class="slip__label">Jadwal pemilihan</h2>
+            @php
+                // Hitung mundur ke pembukaan (akan dibuka) atau penutupan (sedang berlangsung).
+                $countdownTarget = match ($status) {
+                    ElectionSetting::STATUS_UPCOMING => $start,
+                    ElectionSetting::STATUS_OPEN => $end,
+                    default => null,
+                };
+                $countdownLeft = $countdownTarget ? now()->diff($countdownTarget) : null;
+            @endphp
+            <div class="slip-band">
+                <div class="container slip-band__inner">
+                    <section class="slip slip--{{ $status }}" aria-labelledby="jadwal">
+                        <div class="slip__stub">
+                            <h2 id="jadwal" class="slip__label">Jadwal pemilihan</h2>
+                            <p class="slip__status">
+                                @switch($status)
+                                    @case(ElectionSetting::STATUS_UPCOMING) Segera dibuka @break
+                                    @case(ElectionSetting::STATUS_OPEN)<span class="live-dot" aria-hidden="true"></span>Sedang berlangsung @break
+                                    @case(ElectionSetting::STATUS_CLOSED) Pemilihan ditutup @break
+                                    @default Belum diumumkan
+                                @endswitch
+                            </p>
+                        </div>
 
-                    @switch($status)
-                        @case(ElectionSetting::STATUS_UPCOMING)
-                            <p class="slip__status">Dibuka {{ $start->diffForHumans(now(), ['syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE, 'parts' => 1]) }} lagi</p>
-                            @if ($sameDay)
-                                <p class="slip__when">{{ $dateLabel($start) }}<br>{{ $start->format('H.i') }}–{{ $end->format('H.i') }} WIB</p>
-                            @else
-                                <p class="slip__when">Dibuka {{ $dateLabel($start) }} pukul {{ $start->format('H.i') }} WIB<br>Ditutup {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB</p>
-                            @endif
-                            @break
+                        @if ($countdownLeft)
+                            <div class="countdown" data-countdown="{{ $countdownTarget->toIso8601String() }}" data-now="{{ now()->toIso8601String() }}">
+                                <p class="countdown__caption">{{ $status === ElectionSetting::STATUS_OPEN ? 'Ditutup dalam' : 'Dibuka dalam' }}</p>
+                                <p class="countdown__tiles">
+                                    <span class="countdown__unit"><span class="countdown__value" data-unit="days">{{ $countdownLeft->days }}</span> <span class="countdown__name">hari</span></span>
+                                    <span class="countdown__unit"><span class="countdown__value" data-unit="hours">{{ sprintf('%02d', $countdownLeft->h) }}</span> <span class="countdown__name">jam</span></span>
+                                    <span class="countdown__unit"><span class="countdown__value" data-unit="minutes">{{ sprintf('%02d', $countdownLeft->i) }}</span> <span class="countdown__name">menit</span></span>
+                                </p>
+                            </div>
+                        @endif
 
-                        @case(ElectionSetting::STATUS_OPEN)
-                            <p class="slip__status">Pemilihan sedang berlangsung</p>
-                            <p class="slip__when">Ditutup {{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
+                        <div class="slip__body">
+                            @switch($status)
+                                @case(ElectionSetting::STATUS_UPCOMING)
+                                    @if ($sameDay)
+                                        <p class="slip__when"><strong>{{ $dateLabel($start) }}</strong><br>{{ $start->format('H.i') }}–{{ $end->format('H.i') }} WIB</p>
+                                    @else
+                                        <p class="slip__when">Dibuka <strong>{{ $dateLabel($start) }}</strong> pukul {{ $start->format('H.i') }} WIB<br>Ditutup <strong>{{ $dateLabel($end) }}</strong> pukul {{ $end->format('H.i') }} WIB</p>
+                                    @endif
+                                    @break
+
+                                @case(ElectionSetting::STATUS_OPEN)
+                                    <p class="slip__when">Ditutup <strong>{{ $dateLabel($end) }}</strong><br>pukul {{ $end->format('H.i') }} WIB</p>
+                                    @break
+
+                                @case(ElectionSetting::STATUS_CLOSED)
+                                    <p class="slip__when">Ditutup <strong>{{ $dateLabel($end) }}</strong><br>pukul {{ $end->format('H.i') }} WIB</p>
+                                    @break
+
+                                @default
+                                    <p class="slip__when"><strong>Jadwal pemilihan belum diumumkan panitia.</strong><br>Akun pemilihan dikirim ke email kampus masing-masing saat pemilihan dibuka.</p>
+                            @endswitch
+                        </div>
+
+                        @if ($status === ElectionSetting::STATUS_OPEN)
                             @auth
-                                <a class="btn btn--primary" href="{{ $userLink }}">{{ $userLinkLabel }}</a>
+                                <a class="btn btn--primary slip__action" href="{{ $userLink }}">{{ $userLinkLabel }}</a>
                             @else
-                                <a class="btn btn--primary" href="{{ route('login') }}">Masuk untuk memilih</a>
+                                <a class="btn btn--primary slip__action" href="{{ route('login') }}">Masuk untuk memilih</a>
                             @endauth
-                            @break
+                        @elseif ($status === ElectionSetting::STATUS_CLOSED)
+                            <a class="btn btn--primary slip__action" href="#hasil">Lihat hasil</a>
+                        @endif
+                    </section>
 
-                        @case(ElectionSetting::STATUS_CLOSED)
-                            <p class="slip__status">Pemilihan ditutup</p>
-                            <p class="slip__when">{{ $dateLabel($end) }} pukul {{ $end->format('H.i') }} WIB.</p>
-                            <a class="btn btn--primary" href="#hasil">Lihat hasil</a>
-                            @break
-
-                        @default
-                            <p class="slip__status slip__status--quiet">Jadwal pemilihan belum diumumkan panitia.</p>
-                            <p class="slip__when">Akun pemilihan dikirim ke email kampus masing-masing saat pemilihan dibuka.</p>
-                    @endswitch
-                </section>
-
-                @if ($mascotUrl)
-                    <model-viewer class="mascot" src="{{ $mascotUrl }}" alt="COGITO, maskot HMIF. Geser untuk memutar."
-                        camera-controls disable-zoom disable-pan interaction-prompt="none" touch-action="pan-y"
-                        shadow-intensity="0.6"></model-viewer>
-                @endif
+                    @if ($mascotUrl)
+                        <model-viewer class="mascot" src="{{ $mascotUrl }}" alt="COGITO, maskot HMIF. Geser untuk memutar."
+                            camera-controls disable-zoom disable-pan interaction-prompt="none" touch-action="pan-y"
+                            shadow-intensity="0.6"></model-viewer>
+                    @endif
+                </div>
             </div>
         </div>
 

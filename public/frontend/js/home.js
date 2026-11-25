@@ -102,3 +102,34 @@
         });
     });
 })();
+
+// Hitung mundur jadwal: dihitung ulang saat halaman dimuat dan saat pengunjung
+// kembali ke tab. Tidak berdetik terus, jadi tidak ada gerak yang perlu dijeda.
+// Memakai jam server (data-now) agar jam HP yang meleset tidak mengubah angka.
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        const box = document.querySelector('[data-countdown]');
+        if (!box) return;
+
+        const target = Date.parse(box.dataset.countdown);
+        const offset = Date.parse(box.dataset.now) - Date.now();
+        const values = {
+            days: box.querySelector('[data-unit="days"]'),
+            hours: box.querySelector('[data-unit="hours"]'),
+            minutes: box.querySelector('[data-unit="minutes"]'),
+        };
+        const pad = function (n) { return String(n).padStart(2, '0'); };
+
+        function update() {
+            const left = Math.max(0, Math.floor((target - (Date.now() + offset)) / 60000));
+            values.days.textContent = Math.floor(left / 1440);
+            values.hours.textContent = pad(Math.floor(left % 1440 / 60));
+            values.minutes.textContent = pad(left % 60);
+        }
+
+        update();
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) update();
+        });
+    });
+})();

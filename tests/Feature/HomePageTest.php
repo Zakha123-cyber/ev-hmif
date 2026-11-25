@@ -87,7 +87,8 @@ it('shows the opening day, hours and time left before voting opens', function ()
         ->assertSee('Selasa, 1 Desember 2026')
         ->assertSee('08.00')
         ->assertSee('15.00 WIB')
-        ->assertSee('1 hari lagi');
+        ->assertSee('Segera dibuka')
+        ->assertSee('Dibuka dalam');
 });
 
 it('invites guests to log in and vote while voting is open', function () {
@@ -95,7 +96,8 @@ it('invites guests to log in and vote while voting is open', function () {
     $this->travelTo(Carbon::parse('2026-12-01 10:00'));
 
     $this->get('/')
-        ->assertSee('Pemilihan sedang berlangsung')
+        ->assertSee('Sedang berlangsung')
+        ->assertSee('Ditutup dalam')
         ->assertSee('Masuk untuk memilih')
         ->assertSee('href="' . url('/login') . '"', false);
 });
@@ -280,5 +282,47 @@ it('shows the schedule as a full-width band between the hero and the ballot', fu
     expect($html)->toContain('<div class="slip-band">')
         ->not->toContain('slip-row');
     expect(strpos($html, 'class="hero"'))->toBeLessThan(strpos($html, 'class="slip-band"'));
+    expect(strpos($html, 'class="slip-band"'))->toBeLessThan(strpos($html, 'id="paslon"'));
+});
+
+// --- Pita jadwal: hitung mundur & layar pertama ---
+
+function countdownValues(string $html): array
+{
+    preg_match_all('#<span class="countdown__value"[^>]*>(\d+)</span>\s*<span class="countdown__name">(\w+)</span>#', $html, $m);
+
+    return array_combine($m[2], $m[1]);
+}
+
+it('counts down to the opening in days, hours and minutes', function () {
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-11-28 05:38'));
+    $html = $this->get('/')->getContent();
+
+    expect(countdownValues($html))->toBe(['hari' => '3', 'jam' => '02', 'menit' => '22']);
+    expect($html)->toContain('data-countdown="' . Carbon::parse('2026-12-01 08:00')->toIso8601String() . '"');
+});
+
+it('counts down to the closing while voting is open', function () {
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-12-01 10:15'));
+    $html = $this->get('/')->getContent();
+
+    expect(countdownValues($html))->toBe(['hari' => '0', 'jam' => '04', 'menit' => '45']);
+    expect($html)->toContain('class="live-dot"');
+});
+
+it('shows no countdown once voting has closed or before a schedule exists', function () {
+    $this->get('/')->assertDontSee('data-countdown', false);
+
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-12-01 16:00'));
+    $this->get('/')->assertDontSee('data-countdown', false);
+});
+
+it('groups the hero and the schedule band into the first screen', function () {
+    $html = $this->get('/')->getContent();
+
+    expect($html)->toMatch('#<div class="first-screen">\s*<section class="hero"#');
     expect(strpos($html, 'class="slip-band"'))->toBeLessThan(strpos($html, 'id="paslon"'));
 });

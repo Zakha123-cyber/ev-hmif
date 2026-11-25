@@ -27,3 +27,12 @@ Tidak ada ticker berjalan/animasi pita; tidak mengubah maskot ke PNG (pekerjaan 
 
 ## Diserahkan ke builder
 Padding, ukuran huruf, pembagian kolom per breakpoint, selama AA, overflowX 0 di 390px, dan tombol aksi tetap terlihat tanpa scroll di 1440×900 dan 1366×768 saat pemilihan dibuka.
+
+## Revisi 2026-11-25 (disetujui user: "oke coba implementasikan dulu")
+User menilai pita polos "terlalu monoton" dan meminta pita berada di paling bawah layar pertama di desktop.
+- **Layar pertama (≥1080px):** hero + pita dibungkus `.first-screen` setinggi `100svh`; tinggi foto menyesuaikan, pita tepat di tepi bawah layar. HP/tablet tidak diubah (hero 68/76svh).
+- **Potongan tiket:** blok `--deep` berisi "Jadwal pemilihan" + status (Segera dibuka / Sedang berlangsung / Pemilihan ditutup / Belum diumumkan), sisi kanan bergaris sobek putus-putus dengan lekukan; di desktop memanjang sampai tepi kiri layar.
+- **Hitung mundur:** heksagon `--deep` berisi hari / jam / menit menuju pembukaan (akan dibuka) atau penutupan (berlangsung); dihitung server, disegarkan JS saat halaman dimuat dan saat kembali ke tab, memakai jam server. Tidak berdetik terus (tidak perlu kontrol jeda).
+- **Titik "langsung":** kuning, hanya saat berlangsung, tanpa kedip/cahaya.
+- **Motif:** tiga heksagon garis dari bentuk logo HMIF, samar, di ujung kanan pita.
+- Kontras: teks di stub putih (13.34) / #CFE3E0 (9.99) di atas deep; teks di teal `--deep` (5.70) / `--ink` (6.9).

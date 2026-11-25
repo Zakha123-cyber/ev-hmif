@@ -301,9 +301,16 @@ a {
 
 /* ---------- Pita jadwal ---------- */
 
-/* Pita teal lebar penuh: garis pemisah antara foto hero dan surat suara */
+/* Pita teal lebar penuh: garis pemisah antara foto hero dan surat suara.
+   Motif tiga heksagon di kanan diambil dari bentuk logo HMIF. */
 .slip-band {
-    background: var(--teal);
+    position: relative;
+    overflow: hidden;
+    background-color: var(--teal);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='%230E3532' stroke-opacity='.16' stroke-width='6'%3E%3Cpath d='M100 8l40 23v46l-40 23-40-23V31z'/%3E%3Cpath d='M58 82l40 23v46l-40 23-40-23v-46z'/%3E%3Cpath d='M142 82l40 23v46l-40 23-40-23v-46z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 180px 180px;
+    background-position: right -72px bottom -48px;
     border-top: 4px solid var(--deep);
     color: var(--ink);
 }
@@ -319,37 +326,100 @@ a {
 }
 
 .slip {
-    padding-block: 22px 26px;
+    display: grid;
+    gap: 18px;
+    padding-bottom: 26px;
+}
+
+/* Potongan tiket: blok hijau tua dengan garis sobek putus-putus */
+.slip__stub {
+    margin-inline: calc(-1 * var(--gutter));
+    padding: 18px var(--gutter) 16px;
+    background: var(--deep);
+    border-bottom: 2px dashed var(--teal);
+    color: var(--paper);
 }
 
 .slip__label {
-    margin: 0 0 4px;
+    margin: 0 0 2px;
     font: 600 14px/1.4 var(--font-text);
-    color: var(--deep);
+    color: #CFE3E0;
 }
 
 .slip__status {
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-family: var(--font-display);
-    font-size: clamp(22px, 4vw, 28px);
+    font-size: clamp(22px, 4vw, 26px);
     font-weight: 800;
     font-variation-settings: 'wdth' 100;
     line-height: 1.15;
 }
 
-.slip__status--quiet {
-    font-size: 20px;
-    font-weight: 700;
+/* Penanda keadaan nyata: hanya tampil saat pemilihan sedang berlangsung, tanpa kedip */
+.live-dot {
+    width: 12px;
+    height: 12px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--yellow);
+}
+
+/* Hitung mundur dalam heksagon (motif logo) */
+.countdown__caption {
+    margin: 0 0 8px;
+    font: 600 14px/1.4 var(--font-text);
+    color: var(--deep);
+}
+
+.countdown__tiles {
+    margin: 0;
+    display: flex;
+    gap: 12px;
+}
+
+.countdown__unit {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+}
+
+.countdown__value {
+    width: 56px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    clip-path: var(--hexagon);
+    background: var(--deep);
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 900;
+    font-variation-settings: 'wdth' 125;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.countdown__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--deep);
 }
 
 .slip__when {
-    margin: 8px 0 0;
+    margin: 0;
     color: var(--deep);
-    font-weight: 500;
 }
 
-.slip .btn {
-    margin-top: 16px;
+.slip__when strong {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.slip__action {
+    justify-self: start;
 }
 
 .mascot {
@@ -923,6 +993,17 @@ html {
         align-items: center;
     }
 
+    /* Tablet: potongan tiket di atas, hitung mundur | waktu | tombol di bawahnya */
+    .slip {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        column-gap: 32px;
+    }
+
+    .slip__stub {
+        grid-column: 1 / -1;
+    }
+
     .envelopes--2,
     .envelopes--3 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -952,42 +1033,72 @@ html {
 
 @media (min-width: 1080px) {
 
-    /* Satu baris: label + status | waktu | tombol */
+    .slip-band {
+        background-size: 220px 220px;
+        background-position: right -48px center;
+    }
+
+    /* Layar pertama: foto + pita pas setinggi layar, pita di paling bawah */
+    .first-screen {
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .first-screen > .hero {
+        flex: 1 0 auto;
+        min-height: 420px;
+    }
+
+    /* Satu baris: potongan tiket | hitung mundur | waktu | tombol */
     .slip {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        grid-template-areas:
-            "label when action"
-            "status when action";
-        align-items: center;
+        grid-template-columns: auto auto minmax(0, 1fr) auto;
         column-gap: 40px;
-        padding-block: 24px;
+        padding-bottom: 0;
     }
 
-    .slip__label {
-        grid-area: label;
-        align-self: end;
+    .slip > :not(.slip__stub) {
+        padding-block: 20px;
     }
 
-    .slip__status {
-        grid-area: status;
-        align-self: start;
-    }
-
-    /* Garis pemisah setinggi isi pita, bukan hanya setinggi teks */
-    .slip__when {
-        grid-area: when;
+    /* Blok tiket memanjang sampai tepi kiri layar; sisi kanan bergaris sobek */
+    .slip__stub {
+        position: relative;
+        grid-column: auto;
         align-self: stretch;
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        justify-content: center;
         margin: 0;
-        padding-left: 40px;
-        border-left: 2px solid var(--deep);
+        padding: 20px 40px 20px 0;
+        border-bottom: 0;
+        border-right: 2px dashed var(--teal);
+        box-shadow: 0 0 0 100vmax var(--deep);
+        clip-path: inset(0 0 0 -100vmax);
     }
 
-    .slip .btn {
-        grid-area: action;
-        margin-top: 0;
+    /* Lekukan sobekan tiket di ujung atas & bawah garis putus-putus */
+    .slip__stub::before,
+    .slip__stub::after {
+        content: "";
+        position: absolute;
+        right: -12px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--teal);
+    }
+
+    .slip__stub::before {
+        top: -11px;
+    }
+
+    .slip__stub::after {
+        bottom: -11px;
+    }
+
+    .slip--not_set .slip__body {
+        grid-column: 2 / -1;
     }
 
     .envelopes--3 {
