@@ -1027,19 +1027,28 @@ html {
         object-position: 50% 62%;
     }
 
-    /* Tablet & desktop: gelap pekat hanya di blok judul (kiri atas), memudar ke kanan
-       dan ke bawah; sisi kanan foto dan barisan orang di bawah dibiarkan jernih.
-       Garis tipis di atas menjaga logo & tombol Masuk tetap terbaca. */
+    /* Tablet & desktop: gelap hanya berupa elips di belakang judul (yang kini di
+       tengah vertikal), sisa foto dibiarkan jernih. Gradasi tipis di atas menjaga
+       logo & tombol Masuk tetap terbaca. */
     .hero__scrim {
         background:
-            linear-gradient(90deg, rgba(14, 53, 50, .74) 0, rgba(14, 53, 50, .66) max(48%, 660px), rgba(14, 53, 50, .2) calc(max(48%, 660px) + 160px), rgba(14, 53, 50, 0) calc(max(48%, 660px) + 280px)),
+            radial-gradient(ellipse 900px 400px at calc(max(var(--gutter), (100% - var(--container)) / 2) + 280px) calc(50% + 42px),
+                rgba(14, 53, 50, .74) 0, rgba(14, 53, 50, .66) 50%, rgba(14, 53, 50, .3) 75%, rgba(14, 53, 50, 0) 100%),
             linear-gradient(180deg, rgba(14, 53, 50, .4) 0, rgba(14, 53, 50, 0) 140px);
-        -webkit-mask-image: linear-gradient(180deg, #000 0, #000 420px, transparent 560px);
-        mask-image: linear-gradient(180deg, #000 0, #000 420px, transparent 560px);
     }
 
+    /* Judul di tengah vertikal area foto (di bawah header setinggi 84px);
+       tombol Jeda foto dipasang tetap di pojok kanan bawah. */
     .hero__inner {
-        padding-top: 128px;
+        justify-content: center;
+        padding-top: 84px;
+        padding-bottom: 0;
+    }
+
+    .slider-toggle {
+        position: absolute;
+        right: var(--gutter);
+        bottom: 28px;
     }
 
     .slip-band__inner {
@@ -1110,13 +1119,8 @@ html {
         min-height: 420px;
     }
 
-    /* Jendela browser laptop sering hanya 600-660px tinggi: jarak & judul ikut
-       menyusut agar foto + pita tetap muat satu layar */
-    .first-screen .hero__inner {
-        padding-top: clamp(96px, 14svh, 128px);
-        padding-bottom: clamp(24px, 6svh, 96px);
-    }
-
+    /* Jendela browser laptop sering hanya 600-660px tinggi: judul ikut menyusut
+       agar foto + pita tetap muat satu layar */
     .first-screen .hero__title {
         font-size: clamp(30px, min(6.4vw, 8.5svh), 64px);
     }
