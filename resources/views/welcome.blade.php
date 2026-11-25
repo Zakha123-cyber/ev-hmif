@@ -23,6 +23,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Plus+Jakarta+Sans:wght@400;600&display=swap">
+    {{-- Ditandai sebelum halaman tergambar: navbar tetap boleh transparan di atas foto hanya bila JS jalan --}}
+    <script>document.documentElement.classList.add('js');</script>
     <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}">
     <script src="{{ asset('frontend/js/home.js') }}" defer></script>
 </head>
@@ -30,7 +32,7 @@
 <body>
     <a class="skip-link" href="#paslon">Langsung ke daftar pasangan calon</a>
 
-    <header class="site-header">
+    <header class="site-header" data-site-header>
         <div class="container site-header__inner">
             <a href="{{ url('/') }}" class="site-header__logo">
                 <img src="{{ asset('frontend/images/home/logo-election-vote.webp') }}" width="313" height="160"
@@ -70,7 +72,6 @@
                         Pemilihan Ketua dan Wakil Ketua Umum HMIF
                         <span class="hero__period">Periode 2025/2026</span>
                     </h1>
-                    <button type="button" class="slider-toggle" data-slider-toggle hidden>Jeda foto</button>
                 </div>
             </section>
 

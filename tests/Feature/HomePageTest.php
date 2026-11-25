@@ -159,7 +159,8 @@ it('renders the page frame without the old libraries', function () {
 
     $this->get('/')
         ->assertSee('Periode 2025/2026')
-        ->assertSee('data-slider-toggle', false)
+        ->assertDontSee('data-slider-toggle', false)
+        ->assertDontSee('Jeda foto')
         ->assertSee('wa.me/6283823093973', false)
         ->assertSee('wa.me/6283852061105', false)
         ->assertSee('frontend/images/home/logo-election-vote.webp', false)
@@ -347,4 +348,13 @@ it('shows the waiting message for results inside its own note box', function () 
     $this->travelTo(Carbon::parse('2026-12-01 10:00'));
 
     $this->get('/')->assertSee('<p class="results__note">Hasil penghitungan tampil di sini setelah pemilihan ditutup', false);
+});
+
+// --- Navbar tetap ---
+
+it('marks the page as JS-enabled before paint so the fixed navbar starts transparent over the photo', function () {
+    $html = $this->get('/')->getContent();
+
+    expect($html)->toContain('<header class="site-header" data-site-header>');
+    expect(strpos($html, "document.documentElement.classList.add('js')"))->toBeLessThan(strpos($html, '</head>'));
 });

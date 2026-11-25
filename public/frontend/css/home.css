@@ -33,6 +33,8 @@
 
 html {
     scroll-behavior: smooth;
+    /* Lompatan ke #paslon / #hasil tidak tertutup navbar tetap */
+    scroll-padding-top: 72px;
 }
 
 body {
@@ -96,7 +98,7 @@ a {
     position: absolute;
     left: var(--gutter);
     top: -100px;
-    z-index: 20;
+    z-index: 40;
     padding: 12px 16px;
     background: var(--yellow);
     color: var(--ink);
@@ -174,11 +176,27 @@ a {
 
 /* ---------- Header ---------- */
 
+/* Navbar tetap di atas. Tanpa JS selalu solid; dengan JS transparan di atas foto
+   dan menjadi solid + lebih ringkas begitu halaman digulir. */
 .site-header {
-    position: absolute;
+    position: fixed;
     inset: 0 0 auto;
-    z-index: 5;
+    z-index: 30;
     padding-block: 14px;
+    background: var(--deep);
+    transition: background-color .2s ease, padding .2s ease;
+}
+
+.js .site-header:not(.is-scrolled) {
+    background: transparent;
+}
+
+.site-header.is-scrolled {
+    padding-block: 8px;
+}
+
+.site-header.is-scrolled .site-header__logo img {
+    height: 40px;
 }
 
 .site-header__inner {
@@ -191,6 +209,7 @@ a {
 .site-header__logo img {
     width: auto;
     height: 44px;
+    transition: height .2s ease;
 }
 
 .site-header__actions {
@@ -276,28 +295,6 @@ a {
     font-size: clamp(16px, 2vw, 20px);
     font-weight: 600;
     letter-spacing: 0;
-}
-
-.slider-toggle {
-    align-self: flex-end;
-    min-height: 44px;
-    padding: 0 16px;
-    border: 2px solid rgba(255, 255, 255, .8);
-    border-radius: var(--radius);
-    background: var(--deep);
-    color: var(--paper);
-    font: 600 14px/1 var(--font-text);
-}
-
-.slider-toggle:hover {
-    background: var(--paper);
-    color: var(--deep);
-}
-
-.slider-toggle:active {
-    background: var(--yellow);
-    border-color: var(--yellow);
-    color: var(--ink);
 }
 
 /* ---------- Pita jadwal ---------- */
@@ -1037,18 +1034,11 @@ html {
             linear-gradient(180deg, rgba(14, 53, 50, .4) 0, rgba(14, 53, 50, 0) 140px);
     }
 
-    /* Judul di tengah vertikal area foto (di bawah header setinggi 84px);
-       tombol Jeda foto dipasang tetap di pojok kanan bawah. */
+    /* Judul di tengah vertikal area foto (di bawah header setinggi 84px) */
     .hero__inner {
         justify-content: center;
         padding-top: 84px;
         padding-bottom: 0;
-    }
-
-    .slider-toggle {
-        position: absolute;
-        right: var(--gutter);
-        bottom: 28px;
     }
 
     .slip-band__inner {
@@ -1198,6 +1188,8 @@ html {
 
     .hero__slide,
     .btn,
+    .site-header,
+    .site-header__logo img,
     .envelope,
     .envelope__flap,
     .envelope__seal,

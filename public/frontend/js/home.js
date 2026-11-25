@@ -1,12 +1,11 @@
-// Slider foto bersama di hero: crossfade tiap 7 detik, bisa dijeda.
+// Slider foto bersama di hero: crossfade tiap 7 detik.
 // Tidak berjalan sama sekali jika pengguna memilih "kurangi gerakan".
 (function () {
     const INTERVAL = 7000;
 
     document.addEventListener('DOMContentLoaded', function () {
         const slider = document.querySelector('[data-slider]');
-        const toggle = document.querySelector('[data-slider-toggle]');
-        if (!slider || !toggle) return;
+        if (!slider) return;
 
         const slides = Array.from(slider.querySelectorAll('.hero__slide'));
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -14,7 +13,6 @@
 
         let current = 0;
         let timer = null;
-        let pausedByUser = false;
 
         function show(next) {
             slides[current].classList.remove('is-active');
@@ -23,7 +21,7 @@
         }
 
         function start() {
-            if (timer || pausedByUser || document.hidden) return;
+            if (timer || document.hidden) return;
             timer = window.setInterval(function () {
                 show((current + 1) % slides.length);
             }, INTERVAL);
@@ -34,19 +32,34 @@
             timer = null;
         }
 
-        toggle.addEventListener('click', function () {
-            pausedByUser = !pausedByUser;
-            toggle.textContent = pausedByUser ? 'Putar foto' : 'Jeda foto';
-            pausedByUser ? stop() : start();
-        });
-
         // Hemat baterai: berhenti saat tab tidak terlihat.
         document.addEventListener('visibilitychange', function () {
             document.hidden ? stop() : start();
         });
 
-        toggle.hidden = false;
         start();
+    });
+})();
+
+// Navbar tetap: transparan di atas foto, solid begitu halaman digulir.
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        const header = document.querySelector('[data-site-header]');
+        if (!header) return;
+
+        let queued = false;
+        function sync() {
+            header.classList.toggle('is-scrolled', window.scrollY > 8);
+            queued = false;
+        }
+
+        window.addEventListener('scroll', function () {
+            if (queued) return;
+            queued = true;
+            window.requestAnimationFrame(sync);
+        }, { passive: true });
+
+        sync();
     });
 })();
 
