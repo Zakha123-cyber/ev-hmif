@@ -211,3 +211,19 @@ it('says the candidates are not announced yet instead of showing an empty ballot
         ->assertSee('Daftar pasangan calon belum diumumkan.')
         ->assertDontSee('data-ballot', false);
 });
+
+// --- Kerahasiaan di komputer bersama ---
+
+it('is never cached, so Back cannot bring back a filled-in ballot', function () {
+    openVoting();
+
+    $response = $this->actingAs($this->voter)->get('/vote');
+
+    expect($response->headers->get('Cache-Control'))->toContain('no-store');
+});
+
+it('does not let the browser restore a previous choice on the ballot', function () {
+    openVoting();
+
+    $this->actingAs($this->voter)->get('/vote')->assertSee('data-ballot method="POST" action="' . url('/vote-paslon') . '" autocomplete="off"', false);
+});

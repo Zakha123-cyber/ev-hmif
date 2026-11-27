@@ -30,14 +30,16 @@ class VoteController extends Controller
 
         $user = Auth::user();
 
-        return view($view, [
+        // no-store: tombol Kembali selalu meminta ulang ke server, jadi di komputer
+        // bersama surat suara yang sudah dicoblos orang lain tidak muncul lagi.
+        return response()->view($view, [
             'user' => $user,
             'candidates' => Candidate::orderBy('candidate_pair')->get(),
             'setting' => $setting,
             // Untuk tanda terima: kapan suara masuk, tanpa menyebut pilihannya.
             'votedAt' => Count::where('user_id', $user->id)->value('created_at'),
             'justVoted' => (bool) session('just_voted'),
-        ]);
+        ])->header('Cache-Control', 'no-store, private');
     }
 
     public function vote(Request $request)

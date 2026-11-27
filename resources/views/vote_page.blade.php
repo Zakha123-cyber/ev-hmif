@@ -23,8 +23,9 @@
                 @if ($candidates->isEmpty())
                     <p class="ballot__empty ballot__empty--paper">Daftar pasangan calon belum diumumkan.</p>
                 @else
-                    {{-- novalidate: pesan "belum memilih" ditampilkan sendiri oleh vote.js dalam bahasa Indonesia --}}
-                    <form class="ballot" data-ballot method="POST" action="{{ url('/vote-paslon') }}" novalidate>
+                    {{-- novalidate: pesan "belum memilih" ditampilkan sendiri oleh vote.js dalam bahasa Indonesia.
+                         autocomplete="off": browser tidak memulihkan pilihan lama saat halaman dibuka ulang. --}}
+                    <form class="ballot" data-ballot method="POST" action="{{ url('/vote-paslon') }}" autocomplete="off" novalidate>
                         @csrf
                         <div class="ballot__paper">
                             <header class="ballot__kop">
