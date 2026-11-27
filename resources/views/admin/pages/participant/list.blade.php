@@ -30,8 +30,9 @@
         </div>
         <div class="a-card__body">
             <p class="a-lead">
-                "Buat akun &amp; kirim email" membuat akun untuk peserta yang belum terverifikasi lalu mengirim username dan
-                password ke email kampus mereka. Peserta yang sudah punya akun dilewati.
+                "Buat akun &amp; kirim email" membuat akun untuk semua peserta yang belum punya akun lalu mengirim username dan
+                password ke email kampus mereka. Untuk satu orang saja, pakai tombol di barisnya. Email cadangan ikut
+                dikirimi bila diisi.
             </p>
 
             @if ($dataParticipant->isEmpty())
@@ -74,11 +75,11 @@
                                     <td data-label="Aksi">
                                         <div class="a-actions">
                                             <a class="a-btn a-btn--primary a-btn--sm" href="{{ url('/back-admin-logged/participant/edit/' . $item->id) }}">Ubah<span class="visually-hidden"> {{ $item->participant_name }}</span></a>
-                                            <form action="{{ url('/back-admin-logged/participant/email-backup', $item->id) }}" method="POST">
+                                            {{-- Ke email kampus (dari NIM), juga ke email cadangan bila diisi. Belum punya akun: dibuatkan dulu. --}}
+                                            <form action="{{ url('/back-admin-logged/participant/email-backup', $item->id) }}" method="POST" data-busy="Mengirim…"
+                                                @unless ($item->user) data-confirm="Buat akun untuk {{ $item->participant_name }} lalu kirim username dan password ke email kampusnya?" data-confirm-label="Ya, buat dan kirim" @endunless>
                                                 @csrf
-                                                <button type="submit" class="a-btn a-btn--ghost a-btn--sm">
-                                                    Kirim ulang email
-                                                </button>
+                                                <button type="submit" class="a-btn a-btn--ghost a-btn--sm">{{ $item->user ? 'Kirim ulang email' : 'Buat akun & kirim' }}<span class="visually-hidden"> {{ $item->participant_name }}</span></button>
                                             </form>
                                             <form action="{{ url('/back-admin-logged/participant/delete', $item->id) }}" method="POST"
                                                 data-confirm="Hapus peserta {{ $item->participant_name }} ({{ $item->nim }})? Akunnya ikut terhapus."

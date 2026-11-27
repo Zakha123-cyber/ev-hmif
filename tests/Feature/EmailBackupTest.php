@@ -44,34 +44,52 @@ it('rejects an invalid backup email', function () {
         ->assertSessionHasErrors('email_backup');
 });
 
-it('sends the account email to the backup address', function () {
+it('sends the account email to the campus address and also the backup address when filled', function () {
     $voter = makeUserWithRole('Participant', 'pemilih');
     $participant = $voter->details;
-    $participant->forceFill(['email_backup' => 'budi@gmail.com', 'username_old' => 'pemilih', 'password_old' => 'rahasia'])->save();
+    $participant->forceFill(['nim' => '233061', 'email_backup' => 'budi@gmail.com', 'username_old' => 'pemilih', 'password_old' => 'rahasia'])->save();
 
     $this->actingAs($this->admin)
         ->post("/back-admin-logged/participant/email-backup/{$participant->id}")
         ->assertSessionHas('status');
 
+    Mail::assertQueued(BroadcastMail::class, fn ($mail) => $mail->hasTo('232410103061@mail.unej.ac.id'));
     Mail::assertQueued(BroadcastMail::class, fn ($mail) => $mail->hasTo('budi@gmail.com'));
 });
 
-it('reports an error when the participant has no backup email', function () {
+it('resends to the campus address when there is no backup email', function () {
     $voter = makeUserWithRole('Participant', 'pemilih');
+    $voter->details->forceFill(['nim' => '233061'])->save();
 
     $this->actingAs($this->admin)
         ->post("/back-admin-logged/participant/email-backup/{$voter->participant_id}")
-        ->assertSessionHas('error');
+        ->assertSessionHas('status')
+        ->assertSessionMissing('error');
 
-    Mail::assertNothingQueued();
+    Mail::assertQueued(BroadcastMail::class, 1);
+    Mail::assertQueued(BroadcastMail::class, fn ($mail) => $mail->hasTo('232410103061@mail.unej.ac.id'));
 });
 
-it('does not send a backup email to a participant without an account', function () {
-    $participant = Participant::create(participantForm(['email_backup' => 'budi@gmail.com']));
+it('creates the account first for an imported participant, then emails it', function () {
+    $participant = Participant::create(participantForm(['nim' => '233061']));
 
     $this->actingAs($this->admin)
         ->post("/back-admin-logged/participant/email-backup/{$participant->id}")
-        ->assertSessionHas('error');
+        ->assertSessionHas('status');
 
-    Mail::assertNothingQueued();
+    $participant->refresh();
+    expect($participant->status)->toBe('verified');
+    expect($participant->user)->not->toBeNull();
+    expect($participant->user->hasRole('Participant'))->toBeTrue();
+    expect(\Illuminate\Support\Facades\Hash::check($participant->password_old, $participant->user->password))->toBeTrue();
+    Mail::assertQueued(BroadcastMail::class, fn ($mail) => $mail->hasTo('232410103061@mail.unej.ac.id'));
+});
+
+it('labels the row action by whether the participant already has an account', function () {
+    Participant::create(participantForm(['nim' => '233061']));
+    makeUserWithRole('Participant', 'pemilih');
+
+    $this->actingAs($this->admin)->get('/back-admin-logged/participant')
+        ->assertSee('Buat akun &amp; kirim<span class="visually-hidden"> Budi</span>', false)
+        ->assertSee('Kirim ulang email<span class="visually-hidden"> pemilih</span>', false);
 });

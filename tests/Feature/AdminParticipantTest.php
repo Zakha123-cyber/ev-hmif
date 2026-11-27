@@ -17,7 +17,7 @@ it('offers search, import, a confirmed broadcast and labelled row actions', func
         ->assertSee('<dialog', false)
         ->assertSee('id="import"', false)
         ->assertSee('Buat akun dan kirim email ke semua peserta yang belum punya akun?')
-        ->assertSee('Kirim ulang email')
+        ->assertSee('Buat akun &amp; kirim<span', false)
         ->assertSee('Belum terverifikasi');
 });
 

@@ -49,7 +49,7 @@ class ParticipantController extends Controller
     private $param;
     public function index(){
         try {
-            $this->param['dataParticipant'] = Participant::whereDoesntHave('user', fn ($user) => $user->role('Admin'))->get(); // akun admin bukan peserta (dan jangan sampai terhapus dari sini)
+            $this->param['dataParticipant'] = Participant::with('user')->whereDoesntHave('user', fn ($user) => $user->role('Admin'))->get(); // akun admin bukan peserta (dan jangan sampai terhapus dari sini)
 
             return view('admin.pages.participant.list', $this->param);
         } catch (\Exception $e) {
@@ -100,25 +100,7 @@ class ParticipantController extends Controller
                 // Satu transaksi per peserta: jika akun/email gagal, peserta ini di-rollback
                 // penuh (tetap "not verified") sehingga bisa dicoba lagi, peserta lain tetap jalan.
                 DB::transaction(function () use ($participant, $generator) {
-                    $username = $generator->username();
-                    $password = $generator->password();
-
-                    $participant->update([
-                        'username_old' => $username,
-                        'password_old' => $password,
-                        'status' => 'verified',
-                    ]);
-
-                    $user = User::create([
-                        'participant_id' => $participant->id,
-                        'username' => $username,
-                        'password' => bcrypt($password),
-                        'remember_token' => \Str::random(60),
-                        'status' => 'not voted',
-                    ]);
-                    event(new Registered($user));
-                    $user->assignRole('Participant');
-
+                    $this->createAccount($participant, $generator);
                     Mail::to($this->campusEmail($participant))->queue(new BroadcastMail($participant));
                 });
                 $succeeded++;
@@ -136,6 +118,32 @@ class ParticipantController extends Controller
         }
 
         return $response;
+    }
+
+    /**
+     * Buat akun login peserta (username & password acak) dan tandai terverifikasi.
+     * Dipanggil di dalam transaksi oleh pengirim email massal maupun per peserta.
+     */
+    private function createAccount(Participant $participant, CredentialGenerator $generator): void
+    {
+        $username = $generator->username();
+        $password = $generator->password();
+
+        $participant->update([
+            'username_old' => $username,
+            'password_old' => $password,
+            'status' => 'verified',
+        ]);
+
+        $user = User::create([
+            'participant_id' => $participant->id,
+            'username' => $username,
+            'password' => bcrypt($password),
+            'remember_token' => \Str::random(60),
+            'status' => 'not voted',
+        ]);
+        event(new Registered($user));
+        $user->assignRole('Participant');
     }
 
     /**
@@ -197,23 +205,37 @@ class ParticipantController extends Controller
         }
     }
     
+    /**
+     * Kirim email akun satu peserta (tombol di tiap baris daftar Peserta).
+     * Belum punya akun: akun dibuat dulu. Tujuan selalu email kampus dari NIM;
+     * email cadangan (opsional) ikut dikirimi bila diisi.
+     */
     public function email_backup(Participant $participant){
-        if (! $participant->email_backup) {
-            return redirect()->back()->withError('Email backup peserta ini belum diisi. Isi lewat menu edit peserta.');
-        }
-
-        if (! $participant->user()->exists()) {
-            return redirect()->back()->withError('Peserta ini belum memiliki akun, jadi belum ada yang bisa dikirim.');
-        }
+        $campus = $this->campusEmail($participant);
+        $created = false;
 
         try {
-            Mail::to($participant->email_backup)->queue(new BroadcastMail($participant));
+            if (! $participant->user()->exists()) {
+                DB::transaction(function () use ($participant, $campus) {
+                    $this->createAccount($participant, new CredentialGenerator);
+                    Mail::to($campus)->queue(new BroadcastMail($participant));
+                });
+                $created = true;
+            } else {
+                Mail::to($campus)->queue(new BroadcastMail($participant));
+            }
+
+            $sentTo = [$campus];
+            if ($participant->email_backup) {
+                Mail::to($participant->email_backup)->queue(new BroadcastMail($participant));
+                $sentTo[] = $participant->email_backup;
+            }
         } catch (\Throwable $th) {
             report($th);
-            return redirect()->back()->withError('Gagal mengirim email backup: ' . $th->getMessage());
+            return redirect()->back()->withError('Gagal mengirim email ke ' . $participant->participant_name . ': ' . $th->getMessage());
         }
 
-        return redirect()->back()->withStatus('Berhasil mengirimkan email backup.');
+        return redirect()->back()->withStatus(($created ? 'Akun dibuat dan email' : 'Email akun') . ' dikirim ke ' . implode(' dan ', $sentTo) . '.');
     }
 
     public function edit(Participant $participant){
