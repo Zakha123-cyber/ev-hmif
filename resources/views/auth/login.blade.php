@@ -8,7 +8,6 @@
         default => 'Masuk ke akunmu',
     };
     $error = implode(' ', $errors->all());
-    $cogito = \App\Support\CogitoLines::login($setting);
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -25,7 +24,6 @@
     <script>document.documentElement.classList.add('js');</script>
     <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}?v={{ filemtime(public_path('frontend/css/home.css')) }}">
     <link rel="stylesheet" href="{{ asset('frontend/css/login.css') }}?v={{ filemtime(public_path('frontend/css/login.css')) }}">
-    <script src="{{ asset('frontend/js/home.js') }}?v={{ filemtime(public_path('frontend/js/home.js')) }}" defer></script>
     <script src="{{ asset('frontend/js/login.js') }}?v={{ filemtime(public_path('frontend/js/login.js')) }}" defer></script>
 </head>
 
@@ -122,9 +120,6 @@
                 </form>
             </div>
         </section>
-
-        {{-- HP: pojok kanan bawah seperti halaman lain; desktop: kanan atas foto (login.css) --}}
-        @include('partials.cogito', ['pose' => 'salam', 'variant' => 'corner', 'lines' => $cogito['lines']])
     </main>
 </body>
 

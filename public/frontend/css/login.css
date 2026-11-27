@@ -3,7 +3,7 @@
  * Kiri: foto pengurus HMIF dengan judul sesuai jadwal. Kanan: pita teal dengan
  * logo HMIF samar (sama seperti pita /vote) dan kartu bergaya tiket dengan
  * sobekan putus-putus seperti pita jadwal di halaman awal.
- * Token warna, huruf, tombol, live-dot, dan COGITO diambil dari home.css.
+ * Token warna, huruf, tombol, dan live-dot diambil dari home.css.
  */
 
 .login-body {
@@ -378,16 +378,5 @@
     .login__back {
         display: inline-flex;
         margin-bottom: 14px;
-    }
-
-    /* COGITO berdiri di kanan atas foto (pohon & langit), tidak menutupi kartu.
-       Panel kanan = 1 / 2.15 lebar halaman. */
-    .login .cogito--corner {
-        position: absolute;
-        /* cukup ruang di atasnya untuk balon */
-        top: 128px;
-        right: calc(100% / 2.15 + 24px);
-        bottom: auto;
-        width: 190px;
     }
 }
