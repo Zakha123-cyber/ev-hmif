@@ -169,11 +169,16 @@
         $$('input[type="file"][data-file-preview]').forEach(function (input) {
             const scope = input.closest('[data-upload]') || document;
             const img = $('[data-preview]', scope);
+            const empty = $('[data-preview-empty]', scope);
             const name = $('[data-file-name]', scope);
             input.addEventListener('change', function () {
                 const file = input.files && input.files[0];
                 if (!file) return;
-                if (img) img.src = URL.createObjectURL(file);
+                if (img) {
+                    img.src = URL.createObjectURL(file);
+                    img.hidden = false;
+                }
+                if (empty) empty.hidden = true;
                 if (name) name.textContent = file.name;
             });
         });

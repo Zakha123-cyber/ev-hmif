@@ -153,7 +153,7 @@ class CandidateController extends Controller
             
             $candidate->save();
 
-            return redirect('/back-admin-logged/candidate')->withStatus('Berhasil menambah data.');
+            return redirect('/back-admin-logged/candidate')->withStatus('Berhasil memperbarui data.');
 
         } catch (\Exception $e) {
             return redirect()->back()->withError($e->getMessage());
