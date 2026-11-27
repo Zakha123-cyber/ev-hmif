@@ -281,7 +281,32 @@ function closeOnBackdrop(letter) {
                 timer = paused() ? null : window.setTimeout(fn, ms);
             }
 
+            // Animasi keluar (kebalikan animasi muncul), lalu baru disembunyikan.
+            const OUT_MS = 180;
+            let leaving = null;
+            function hideBubble() {
+                if (bubble.hidden) return;
+                const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (reduce) {
+                    bubble.hidden = true;
+                    return;
+                }
+                bubble.classList.add('is-leaving');
+                window.clearTimeout(leaving);
+                leaving = window.setTimeout(function () {
+                    bubble.classList.remove('is-leaving');
+                    bubble.hidden = true;
+                    leaving = null;
+                }, OUT_MS);
+            }
+            function cancelLeaving() {
+                window.clearTimeout(leaving);
+                leaving = null;
+                bubble.classList.remove('is-leaving');
+            }
+
             function show() {
+                cancelLeaving();
                 render(order[pos]);
                 bubble.hidden = false;
                 schedule(rest, SHOW_MS);
@@ -290,7 +315,7 @@ function closeOnBackdrop(letter) {
             function rest() {
                 // Jangan sembunyikan kalimat yang sedang dibaca/difokus.
                 if (focused || hovering) return;
-                bubble.hidden = true;
+                hideBubble();
                 advance();
                 schedule(show, GAP_MS);
             }
@@ -309,7 +334,7 @@ function closeOnBackdrop(letter) {
                 closed = true;
                 window.clearTimeout(timer);
                 timer = null;
-                bubble.hidden = true;
+                hideBubble();
                 figure.focus();
             }
 
