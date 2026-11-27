@@ -14,14 +14,14 @@
             <div class="container vote-hero__inner">
                 <div class="vote-hero__text">
                     <h1 id="judul" class="vote-hero__title">Berikan suaramu</h1>
-                    {{-- Sapaan & cara memilih diucapkan COGITO di sampingnya; di sini aturan pentingnya saja --}}
+                    {{-- Sapaan & cara memilih diucapkan COGITO; di sini aturan pentingnya saja --}}
                     <p class="vote-hero__lead">Suara hanya bisa dikirim satu kali dan tidak dapat diubah.</p>
                 </div>
-                {{-- Di dalam pita, bukan di pojok: tidak menutupi "Kirim suara" maupun animasi kotak suara --}}
-                @php $cogito = \App\Support\CogitoLines::vote('ballot', $setting, $user); @endphp
-                @include('partials.cogito', ['pose' => 'salam', 'variant' => 'inline', 'lines' => $cogito['lines']])
             </div>
         </section>
+
+        @php $cogito = \App\Support\CogitoLines::vote('ballot', $setting, $user); @endphp
+        @include('partials.cogito', ['pose' => 'salute', 'variant' => 'corner', 'lines' => $cogito['lines']])
 
         <div class="ballot-area">
             <div class="container">

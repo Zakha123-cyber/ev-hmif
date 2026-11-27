@@ -266,15 +266,14 @@ it('has COGITO say the schedule is not announced yet', function () {
     $this->actingAs($this->voter)->get('/vote')->assertSee('Jadwal pemilihan belum diumumkan panitia.');
 });
 
-it('keeps COGITO inside the ballot hero instead of the corner while voting', function () {
+it('shows a saluting COGITO in the corner while voting', function () {
     openVoting();
 
-    $html = $this->actingAs($this->voter)->get('/vote')
+    $this->actingAs($this->voter)->get('/vote')
         ->assertSee('Halo, voter1! Ketuk foto paslon pilihanmu.')
-        ->assertDontSee('cogito--corner', false)
-        ->getContent();
-
-    expect(cogitoNode($html, '//section[contains(@class,"vote-hero--ballot")]//aside[@data-cogito]')->length)->toBe(1);
+        ->assertSee('cogito--corner', false)
+        ->assertSee('cogito/salute.webp', false)
+        ->assertDontSee('cogito/salam.webp', false);
 });
 
 it('has COGITO point to the results when voting closed without a vote', function () {
@@ -293,8 +292,9 @@ it('has a saluting COGITO on the receipt without naming the choice', function ()
     $html = $this->get('/vote')
         ->assertSee('Terima kasih sudah memilih!')
         ->assertSee('cogito/salute.webp', false)
+        ->assertSee('cogito--corner', false)
         ->assertDontSee('Ketua 1')
         ->getContent();
 
-    expect(cogitoNode($html, '//section[contains(@class,"receipt")]//aside[@data-cogito]')->length)->toBe(1);
+    expect(cogitoNode($html)->length)->toBe(1);
 });

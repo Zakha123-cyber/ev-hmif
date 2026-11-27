@@ -6,15 +6,11 @@
 @endphp
 <section class="vote-hero vote-hero--center receipt" aria-labelledby="judul" @if ($justVoted) data-just-voted @endif>
     <div class="container vote-hero__inner">
-        <div class="receipt__scene">
-            <div class="receipt__art" aria-hidden="true">
-                <span class="receipt__paper"><span class="hex-number receipt__seal"></span></span>
-                <span class="receipt__box">
-                    <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="">
-                </span>
-            </div>
-            @php $cogito = \App\Support\CogitoLines::vote('receipt', $setting, auth()->user()); @endphp
-            @include('partials.cogito', ['pose' => 'salute', 'variant' => 'inline', 'lines' => $cogito['lines']])
+        <div class="receipt__art" aria-hidden="true">
+            <span class="receipt__paper"><span class="hex-number receipt__seal"></span></span>
+            <span class="receipt__box">
+                <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="">
+            </span>
         </div>
 
         <h1 id="judul" class="vote-hero__title">Suaramu sudah tercatat</h1>
@@ -41,3 +37,6 @@
         @endif
     </div>
 </section>
+
+@php $cogito = \App\Support\CogitoLines::vote('receipt', $setting, auth()->user()); @endphp
+@include('partials.cogito', ['pose' => 'salute', 'variant' => 'corner', 'lines' => $cogito['lines']])
