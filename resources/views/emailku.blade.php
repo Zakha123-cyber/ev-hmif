@@ -3,9 +3,9 @@
     // Gmail, Outlook, dan aplikasi email HP (CSS eksternal/flex tidak didukung).
     $period = $setting->periodLabel();
     $campusNim = $data->campusNim();
-    // Ke halaman awal dulu (jadwal, paslon), baru masuk. Alamat mengikuti domain
-    // situs saat email dikirim (APP_URL saat lewat antrean/terminal).
-    $siteUrl = url('/');
+    // Ke halaman awal situs resmi dulu (jadwal, paslon), baru masuk.
+    // Alamat dari config('election.site_url'), tidak bergantung dari mana email dikirim.
+    $siteUrl = config('election.site_url');
     // Logo disisipkan ke dalam email (CID), bukan ditautkan ke situs: tetap tampil
     // walau situs belum online / APP_URL masih localhost. $message hanya ada saat
     // email benar-benar dikirim; saat dirender untuk pratinjau dipakai URL biasa.

@@ -25,4 +25,16 @@ return [
 
     'period' => '2025/2026',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Alamat situs pemilihan untuk tautan di email
+    |--------------------------------------------------------------------------
+    |
+    | Tombol di email akun peserta selalu menuju alamat ini (halaman awal), dari
+    | mana pun email dikirim, termasuk saat diuji dari komputer lokal.
+    |
+    */
+
+    'site_url' => env('ELECTION_SITE_URL', 'https://election-vote.hmifunej.id/'),
+
 ];

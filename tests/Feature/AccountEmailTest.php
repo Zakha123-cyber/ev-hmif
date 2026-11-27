@@ -20,7 +20,7 @@ it('builds a readable account email with the credentials, a link to the homepage
         ->toContain('232410103061')
         ->toContain('Ab3dEf7h')
         ->toContain('Rahasia99')
-        ->toContain('href="' . url('/') . '"')
+        ->toContain('href="https://election-vote.hmifunej.id/"')
         ->toContain('Buka situs pemilihan')
         ->not->toContain(url('/login'))
         ->toContain('2025/2026')
