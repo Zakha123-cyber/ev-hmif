@@ -137,3 +137,76 @@ it('tells someone who did not vote that voting has closed', function () {
         ->assertSee('Lihat hasil')
         ->assertDontSee('Suaramu sudah tercatat');
 });
+
+// --- Surat suara ---
+
+it('renders one ballot form with a radio per candidate', function () {
+    openVoting();
+
+    $html = $this->actingAs($this->voter)->get('/vote')->assertOk()
+        ->assertSee('data-ballot', false)
+        ->assertSee('action="' . url('/vote-paslon') . '"', false)
+        ->assertSee('value="' . $this->first->id . '"', false)
+        ->assertSee('value="' . $this->second->id . '"', false)
+        ->assertSee('Kirim suara')
+        ->assertSee('Halo, voter1.')
+        ->getContent();
+
+    expect(substr_count($html, 'name="candidate_id"'))->toBe(2);
+});
+
+it('offers each candidate letter from the ballot without the button selecting a candidate', function () {
+    openVoting();
+
+    $html = $this->actingAs($this->voter)->get('/vote')
+        ->assertSee('Visi &amp; misi', false)
+        ->assertSee('data-letter-open="surat-' . $this->first->id . '"', false)
+        ->assertSee('<dialog id="surat-' . $this->first->id . '"', false)
+        ->getContent();
+
+    $dom = new DOMDocument();
+    @$dom->loadHTML($html);
+    $buttonsInLabels = (new DOMXPath($dom))->query('//label//button');
+    expect($buttonsInLabels->length)->toBe(0);
+});
+
+it('includes the confirmation letter', function () {
+    openVoting();
+
+    $this->actingAs($this->voter)->get('/vote')
+        ->assertSee('id="konfirmasi"', false)
+        ->assertSee('Ya, kirim suara')
+        ->assertSee('Periksa lagi')
+        ->assertSee('Setelah dikirim, pilihanmu tidak bisa diubah.');
+});
+
+it('lists candidates by their pair number', function () {
+    openVoting();
+    $this->first->forceFill(['candidate_pair' => 3])->save();
+
+    $this->actingAs($this->voter)->get('/vote')->assertSeeInOrder(['Paslon 2', 'Paslon 3']);
+});
+
+it('shows a placeholder when a poster file is missing', function () {
+    openVoting();
+
+    $this->actingAs($this->voter)->get('/vote')->assertSee('Foto pasangan calon belum tersedia');
+});
+
+it('shows a validation error from the server above the send button', function () {
+    openVoting();
+
+    $this->actingAs($this->voter)
+        ->withSession(['errors' => (new \Illuminate\Support\ViewErrorBag())->put('default', new \Illuminate\Support\MessageBag(['candidate_id' => 'Kandidat tidak valid.']))])
+        ->get('/vote')
+        ->assertSee('Kandidat tidak valid.');
+});
+
+it('says the candidates are not announced yet instead of showing an empty ballot', function () {
+    openVoting();
+    \App\Models\Candidate::query()->delete();
+
+    $this->actingAs($this->voter)->get('/vote')
+        ->assertSee('Daftar pasangan calon belum diumumkan.')
+        ->assertDontSee('data-ballot', false);
+});
