@@ -741,6 +741,42 @@
     width: 92px;
 }
 
+/* HP, surat suara: COGITO kecil di pojok kanan atas pita, sebaris dengan judul;
+   balon di bawah teks selebar pita, ekornya menunjuk ke atas ke COGITO. */
+@media (max-width: 719px) {
+    .vote-hero--ballot .vote-hero__inner {
+        position: relative;
+    }
+
+    .vote-hero--ballot .vote-hero__text {
+        padding-right: 76px;
+    }
+
+    .vote-hero--ballot .cogito--inline {
+        display: block;
+    }
+
+    .vote-hero--ballot .cogito__figure {
+        position: absolute;
+        top: 40px;
+        right: var(--gutter);
+        width: 64px;
+    }
+
+    .vote-hero--ballot .cogito__bubble {
+        max-width: none;
+        margin-bottom: 0;
+        border-radius: 14px 4px 14px 14px;
+    }
+
+    .vote-hero--ballot .cogito__bubble::after {
+        top: -8px;
+        right: 26px;
+        bottom: auto;
+        transform: rotate(-135deg);
+    }
+}
+
 /* HP: kotak suara + COGITO + balon harus muat dalam 320px tanpa geser samping */
 @media (max-width: 519px) {
     .receipt__scene {
