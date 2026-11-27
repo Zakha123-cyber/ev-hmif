@@ -128,6 +128,10 @@
                     <input type="radio" name="target" value="backup" @checked(old('target') === 'backup')>
                     <span><strong>Email cadangan</strong><span class="a-help">Email pribadi peserta, misalnya Gmail.</span></span>
                 </label>
+                <label class="a-radio">
+                    <input type="radio" name="target" value="none" @checked(old('target') === 'none')>
+                    <span><strong>Tanpa email</strong><span class="a-help">Buat akun lalu tampilkan username &amp; password untuk dikirim panitia sendiri (WhatsApp atau cetak kartu).</span></span>
+                </label>
                 <div class="a-field" data-send-backup @unless (old('target') === 'backup') hidden @endunless>
                     <label class="a-label" for="send-backup">Alamat email cadangan</label>
                     <input class="a-input" id="send-backup" name="email_backup" type="email" autocomplete="off"
@@ -142,10 +146,7 @@
 
             <div class="a-dialog__actions">
                 <button type="button" class="a-btn a-btn--ghost" data-dialog-close>Batal</button>
-                <button type="submit" class="a-btn a-btn--primary">
-                    @include('admin.components.icon', ['name' => 'mail'])
-                    Kirim email
-                </button>
+                <button type="submit" class="a-btn a-btn--primary">Lanjutkan</button>
             </div>
         </form>
     </dialog>

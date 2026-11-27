@@ -214,6 +214,20 @@ class ParticipantController extends Controller
     public function email_backup(Request $request, Participant $participant){
         $target = $request->input('target');
 
+        // Cadangan bila pengiriman email bermasalah: buat akun tanpa email, lalu tampilkan
+        // username & password agar panitia mengirimkannya sendiri (WhatsApp / cetak kartu).
+        if ($target === 'none') {
+            $created = ! $participant->user()->exists();
+            if ($created) {
+                DB::transaction(fn () => $this->createAccount($participant, new CredentialGenerator));
+            }
+
+            return redirect('/back-admin-logged/participant-verification/info/' . $participant->id)->withStatus(
+                ($created ? 'Akun dibuat tanpa email.' : 'Peserta ini sudah punya akun.')
+                . ' Kirim username dan password ini ke peserta lewat WhatsApp atau cetak kartunya.'
+            );
+        }
+
         if ($target === 'backup') {
             $request->validate(
                 ['email_backup' => 'required|email'],

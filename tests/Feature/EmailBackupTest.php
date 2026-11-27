@@ -162,3 +162,40 @@ it('reopens the dialog for the same participant with the backup email error', fu
         ->assertSee('Isi email cadangan dulu.')
         ->assertSee('Kirim ulang email ke pemilih');
 });
+
+// --- Tanpa email: buat akun lalu tampilkan untuk dikirim manual ---
+
+it('creates the account without any email and shows it for manual sending', function () {
+    $participant = Participant::create(participantForm(['nim' => '233061']));
+
+    $this->actingAs($this->admin)
+        ->post("/back-admin-logged/participant/email-backup/{$participant->id}", ['target' => 'none'])
+        ->assertRedirect(url('/back-admin-logged/participant-verification/info/' . $participant->id))
+        ->assertSessionHas('status', fn ($s) => str_contains($s, 'tanpa email'));
+
+    Mail::assertNothingQueued();
+    expect($participant->fresh()->user)->not->toBeNull();
+
+    $this->get('/back-admin-logged/participant-verification/info/' . $participant->id)
+        ->assertOk()
+        ->assertSee($participant->fresh()->username_old)
+        ->assertSee('Kirim akun lewat WhatsApp', false);
+});
+
+it('just opens the account info when the participant already has an account', function () {
+    $voter = makeUserWithRole('Participant', 'pemilih');
+
+    $this->actingAs($this->admin)
+        ->post("/back-admin-logged/participant/email-backup/{$voter->participant_id}", ['target' => 'none'])
+        ->assertRedirect(url('/back-admin-logged/participant-verification/info/' . $voter->participant_id));
+
+    Mail::assertNothingQueued();
+    expect(\App\Models\User::where('participant_id', $voter->participant_id)->count())->toBe(1);
+});
+
+it('offers the no-email option in the dialog', function () {
+    Participant::create(participantForm(['nim' => '233061']));
+
+    $this->actingAs($this->admin)->get('/back-admin-logged/participant')
+        ->assertSee('name="target" value="none"', false);
+});

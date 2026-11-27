@@ -54,7 +54,7 @@ Route::prefix('/back-admin-logged')->group(function () {
     Route::post('/participant-verification/verified', [ParticipantController::class, 'sendVerified']);
     Route::match(['get', 'post'], '/participant-verification/edit/{participant}', [ParticipantController::class, 'editVerification']);
     Route::put('/participant-verification/update/{participant}', [ParticipantController::class, 'updateVerification']);
-    Route::post('/participant-verification/info/{participant}', [ParticipantController::class, 'infoVerification']);
+    Route::match(['get', 'post'], '/participant-verification/info/{participant}', [ParticipantController::class, 'infoVerification']);
     Route::get('/participant-verification/info/print/{participant}', [ParticipantController::class, 'printVerification']);
 
     Route::get('/live-count', [CountController::class, 'index']);

@@ -272,7 +272,7 @@
         form.addEventListener('submit', function () {
             const submit = $('[type="submit"]', form);
             submit.disabled = true;
-            submit.lastChild.textContent = ' Mengirim…';
+            submit.textContent = 'Memproses…';
         });
     }
 
