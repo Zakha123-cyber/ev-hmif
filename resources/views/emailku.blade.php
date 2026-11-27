@@ -152,17 +152,21 @@
                         </td>
                     </tr>
 
-                    {{-- Bantuan --}}
-                    <tr>
-                        <td style="padding:20px 28px 26px; font-size:14px; line-height:1.6;">
-                            <p style="margin:0 0 6px; font-weight:700;">Ada kendala?</p>
-                            <p style="margin:0;">
-                                Hubungi panitia lewat WhatsApp:<br>
-                                <a href="https://wa.me/6283823093973" style="color:#1C6B63; font-weight:600;">Farda, 0838 2309 3973</a><br>
-                                <a href="https://wa.me/6283852061105" style="color:#1C6B63; font-weight:600;">Dewi, 0838 5206 1105</a>
-                            </p>
-                        </td>
-                    </tr>
+                    {{-- Bantuan: kontak panitia dari menu Kontak panitia (disembunyikan bila kosong) --}}
+                    @php $contacts = \App\Models\ContactPerson::ordered()->get(); @endphp
+                    @if ($contacts->isNotEmpty())
+                        <tr>
+                            <td style="padding:20px 28px 26px; font-size:14px; line-height:1.6;">
+                                <p style="margin:0 0 6px; font-weight:700;">Ada kendala?</p>
+                                <p style="margin:0;">
+                                    Hubungi panitia lewat WhatsApp:
+                                    @foreach ($contacts as $contact)
+                                        <br><a href="{{ $contact->waLink() }}" style="color:#1C6B63; font-weight:600;">{{ $contact->name }}, {{ $contact->displayPhone() }}</a>
+                                    @endforeach
+                                </p>
+                            </td>
+                        </tr>
+                    @endif
 
                     {{-- Kaki --}}
                     <tr>

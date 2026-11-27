@@ -110,12 +110,18 @@
                         <button type="submit" class="btn btn--primary pass__submit" data-login-submit>Masuk</button>
                     </div>
 
+                    @php $contacts = \App\Models\ContactPerson::ordered()->get(); @endphp
                     <footer class="pass__foot">
-                        <p>Akun dikirim ke email kampusmu (<strong>@mail.unej.ac.id</strong>). Belum menerima akun atau lupa password? Chat panitia:</p>
-                        <ul>
-                            <li><a href="https://wa.me/6283823093973">Farda, 0838 2309 3973</a></li>
-                            <li><a href="https://wa.me/6283852061105">Dewi, 0838 5206 1105</a></li>
-                        </ul>
+                        @if ($contacts->isNotEmpty())
+                            <p>Akun dikirim ke email kampusmu (<strong>@mail.unej.ac.id</strong>). Belum menerima akun atau lupa password? Chat panitia:</p>
+                            <ul>
+                                @foreach ($contacts as $contact)
+                                    <li><a href="{{ $contact->waLink() }}">{{ $contact->name }}, {{ $contact->displayPhone() }}</a></li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p>Akun dikirim ke email kampusmu (<strong>@mail.unej.ac.id</strong>).</p>
+                        @endif
                     </footer>
                 </form>
             </div>

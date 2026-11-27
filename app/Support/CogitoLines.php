@@ -56,7 +56,7 @@ class CogitoLines
         $results = ['label' => 'Lihat hasil', 'href' => url('/') . '#hasil'];
 
         $lines = match ($page) {
-            'prepare' => [
+            'prepare' => array_values(array_filter([
                 self::line($setting->vote_start && $setting->vote_start->isFuture()
                     ? 'Surat suara muncul di sini saat pemilihan dibuka ' . self::when($setting->vote_start) . '.'
                     : 'Jadwal pemilihan belum diumumkan panitia.'),
@@ -65,8 +65,8 @@ class CogitoLines
                 self::line(self::FINAL),
                 self::line(self::HAT),
                 self::line(self::WAVE),
-                self::line(self::HELP),
-            ],
+                self::help(),
+            ])),
             'ballot' => array_values(array_filter([
                 self::line(self::hello($user) . ' Ketuk foto paslon pilihanmu.'),
                 self::line('Mau membandingkan dulu? Tekan Visi & misi di bawah nama paslon.'),
@@ -150,7 +150,7 @@ class CogitoLines
             ...self::scheduleLines($setting, $status, $results),
             $status === ElectionSetting::STATUS_OPEN ? self::line('Sudah punya akun? Masuk dan pilih paslonmu.', ['label' => 'Masuk untuk memilih', 'href' => route('login')]) : null,
             $status !== ElectionSetting::STATUS_CLOSED ? self::line(self::MAIL) : null,
-            self::line(self::HELP),
+            self::help(),
             self::line(self::ENVELOPES),
             self::line(self::ONE_VOTE),
             self::line(self::HAT),
@@ -198,6 +198,12 @@ class CogitoLines
         $local = $date->copy()->locale('id');
 
         return $local->translatedFormat('l, j F') . ' pukul ' . $local->format('H.i') . ' WIB';
+    }
+
+    /** Arahan ke kontak panitia hanya bila ada kontak yang tampil di footer. */
+    private static function help(): ?array
+    {
+        return \App\Models\ContactPerson::query()->exists() ? self::line(self::HELP) : null;
     }
 
     private static function line(string $text, ?array $action = null): array

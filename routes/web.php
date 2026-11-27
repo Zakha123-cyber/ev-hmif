@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CountController;
 use App\Http\Controllers\RedirectRoleController;
 use App\Http\Controllers\Admin\CandidateController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ContactPersonController;
 use App\Http\Controllers\Admin\ElectionScheduleController;
 use App\Http\Controllers\Admin\GeneratorController;
 use App\Http\Controllers\Admin\ParticipantController;
@@ -60,6 +61,12 @@ Route::prefix('/back-admin-logged')->group(function () {
 
     Route::get('/generate-username', [GeneratorController::class, 'generateUsername']);
     Route::get('/generate-password', [GeneratorController::class, 'generatePassword']);
+
+    Route::get('/contact-person', [ContactPersonController::class, 'index']);
+    Route::post('/contact-person', [ContactPersonController::class, 'store']);
+    Route::get('/contact-person/{contact}/edit', [ContactPersonController::class, 'edit']);
+    Route::put('/contact-person/{contact}', [ContactPersonController::class, 'update']);
+    Route::delete('/contact-person/{contact}', [ContactPersonController::class, 'destroy']);
 
     Route::get('/election-schedule', [ElectionScheduleController::class, 'edit']);
     Route::put('/election-schedule', [ElectionScheduleController::class, 'update']);

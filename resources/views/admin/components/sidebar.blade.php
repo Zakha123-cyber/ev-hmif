@@ -7,6 +7,7 @@
             ['candidate', 'Paslon', 'ballot'],
             ['participant', 'Peserta', 'users'],
             ['participant-verification', 'Verifikasi akun', 'check'],
+            ['contact-person', 'Kontak panitia', 'chat'],
         ],
         'Pemilihan' => [['live-count', 'Hasil suara', 'chart']],
     ];
