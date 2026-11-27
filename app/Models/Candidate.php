@@ -12,6 +12,28 @@ class Candidate extends Model
     protected $table = 'candidates';
     protected $primaryKey = 'id';
 
+    public function hasPoster(): bool
+    {
+        return (bool) $this->poster && is_file(public_path('assets/upload/kandidat/' . $this->poster));
+    }
+
+    public function posterUrl(): string
+    {
+        return asset('assets/upload/kandidat/' . $this->poster);
+    }
+
+    /**
+     * Ukuran asli poster agar tata letak tidak bergeser saat gambar dimuat.
+     *
+     * @return array{0:int,1:int}
+     */
+    public function posterSize(): array
+    {
+        $size = $this->hasPoster() ? @getimagesize(public_path('assets/upload/kandidat/' . $this->poster)) : false;
+
+        return $size ? [$size[0], $size[1]] : [600, 800];
+    }
+
     /**
      * Misi dipecah per kalimat (titik diikuti spasi/baris baru), tanpa butir kosong.
      * Singkatan seperti "S.Kom" tetap utuh karena titiknya tidak diikuti spasi.
