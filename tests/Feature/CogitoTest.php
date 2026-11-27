@@ -171,3 +171,14 @@ it('no longer carries the broken 3D mascot', function () {
     $this->get('/')->assertDontSee('model-viewer', false);
     expect(config('election.mascot_path'))->toBeNull();
 });
+
+it('greets by name only, never by the generated username', function () {
+    openSchedule();
+    $voter = makeUserWithRole('Participant', 'acak8xyz');
+    $voter->details->update(['participant_name' => '']);
+
+    $c = cogito($this->actingAs($voter->fresh())->get('/')->getContent());
+
+    expect($c['first'])->toBe('Halo! Surat suaramu sudah menunggu.');
+    expect(implode(' ', $c['texts']))->not->toContain('acak8xyz');
+});

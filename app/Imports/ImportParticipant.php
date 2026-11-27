@@ -7,8 +7,9 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
 /**
- * Format file: kolom A = Nama, kolom B = NIM, kolom C = Status (diabaikan).
- * Baris judul (header) dan baris tanpa NIM angka otomatis dilewati.
+ * Format file: kolom A = Nama, kolom B = NIM, kolom C dst. diabaikan.
+ * Baris judul (header) dan baris yang benar-benar kosong dilewati diam-diam.
+ * Baris tanpa nama atau tanpa NIM angka ditolak dan dilaporkan nomor barisnya.
  *
  * Semua peserta hasil import berstatus "not verified": di aplikasi ini "verified"
  * berarti "sudah dibuatkan akun", dan akun dibuat lewat broadcast / verifikasi manual.
@@ -30,11 +31,22 @@ class ImportParticipant implements ToCollection
             $name = trim((string) ($row[0] ?? ''));
             $nim = $this->normalizeNim($row[1] ?? null);
 
+            // Baris kosong total (sisa format di bawah tabel) bukan data.
+            if ($name === '' && trim((string) ($row[1] ?? '')) === '') {
+                continue;
+            }
+
             if ($nim === null) {
                 // Baris judul pertama (mis. "Nama | NIM | Status") bukan kesalahan.
                 if (! ($rowNumber === 1 && $this->looksLikeHeader($row))) {
                     $this->invalidRows[] = $rowNumber;
                 }
+                continue;
+            }
+
+            // Nama wajib: dipakai di email akun dan sapaan.
+            if ($name === '') {
+                $this->invalidRows[] = $rowNumber;
                 continue;
             }
 

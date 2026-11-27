@@ -118,3 +118,28 @@ it('does not keep a copy of the uploaded spreadsheet on the server', function ()
 
     expect(array_diff(storedSpreadsheets(), $this->storedBefore))->toBeEmpty();
 });
+
+it('rejects rows without a name and reports their row numbers', function () {
+    $this->actingAs($this->admin)->post('/back-admin-logged/participant/import', [
+        'file' => excelUpload([
+            ['Nama', 'NIM'],
+            ['Rina', '2210001'],
+            ['', '2210002'],
+            ['   ', '2210003'],
+        ]),
+    ])->assertSessionHas('error', fn ($e) => str_contains($e, '3') && str_contains($e, '4'));
+
+    expect(imported()->pluck('nim')->all())->toBe(['2210001']);
+});
+
+it('quietly skips completely empty rows', function () {
+    $this->actingAs($this->admin)->post('/back-admin-logged/participant/import', [
+        'file' => excelUpload([
+            ['Nama', 'NIM'],
+            ['Rina', '2210001'],
+            ['', ''],
+        ]),
+    ])->assertSessionMissing('error');
+
+    expect(imported()->count())->toBe(1);
+});

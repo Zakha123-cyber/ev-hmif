@@ -111,7 +111,7 @@
                 <input class="a-input" id="file" type="file" name="file" accept=".xlsx,.xls,.csv" aria-describedby="file-help"
                     @error('file') aria-invalid="true" @enderror>
                 <p class="a-help" id="file-help">
-                    Kolom A berisi nama, kolom B berisi NIM (angka). Baris judul boleh ada. NIM yang sudah terdaftar dilewati.
+                    Kolom A berisi nama, kolom B berisi NIM (angka); keduanya wajib diisi. Baris judul boleh ada. NIM yang sudah terdaftar dilewati.
                     Semua peserta masuk sebagai belum terverifikasi.
                 </p>
                 @error('file')

@@ -315,7 +315,7 @@ class ParticipantController extends Controller
                 ->withStatus("{$import->imported} peserta diimport, {$import->skipped} dilewati (NIM sudah terdaftar).");
 
             if ($import->invalidRows) {
-                $response->withError(count($import->invalidRows) . ' baris tidak valid (NIM kosong/bukan angka) di baris: ' . implode(', ', $import->invalidRows));
+                $response->withError(count($import->invalidRows) . ' baris tidak valid (nama kosong, atau NIM kosong/bukan angka) di baris: ' . implode(', ', $import->invalidRows));
             }
 
             return $response;

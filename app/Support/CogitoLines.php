@@ -53,7 +53,6 @@ class CogitoLines
      */
     public static function vote(string $page, ElectionSetting $setting, User $user): array
     {
-        $name = self::name($user);
         $results = ['label' => 'Lihat hasil', 'href' => url('/') . '#hasil'];
 
         $lines = match ($page) {
@@ -61,7 +60,7 @@ class CogitoLines
                 self::line($setting->vote_start && $setting->vote_start->isFuture()
                     ? 'Surat suara muncul di sini saat pemilihan dibuka ' . self::when($setting->vote_start) . '.'
                     : 'Jadwal pemilihan belum diumumkan panitia.'),
-                self::line("Halo, {$name}! Kamu sudah masuk, tinggal menunggu."),
+                self::line(self::hello($user) . ' Kamu sudah masuk, tinggal menunggu.'),
                 self::line('Sambil menunggu, buka amplop paslon di bawah.'),
                 self::line(self::FINAL),
                 self::line(self::HAT),
@@ -69,7 +68,7 @@ class CogitoLines
                 self::line(self::HELP),
             ],
             'ballot' => array_values(array_filter([
-                self::line("Halo, {$name}! Ketuk foto paslon pilihanmu."),
+                self::line(self::hello($user) . ' Ketuk foto paslon pilihanmu.'),
                 self::line('Mau membandingkan dulu? Tekan Visi & misi di bawah nama paslon.'),
                 self::line('Sudah yakin? Tekan Kirim suara. Suara hanya bisa dikirim sekali.'),
                 $setting->vote_end ? self::line('Tidak perlu buru-buru. Pemilihan dibuka sampai ' . self::when($setting->vote_end) . '.') : null,
@@ -113,7 +112,7 @@ class CogitoLines
 
         if ($who === 'voted') {
             return array_values(array_filter([
-                self::line('Terima kasih sudah memilih, ' . self::name($user) . '!'),
+                self::line(($name = self::name($user)) ? "Terima kasih sudah memilih, {$name}!" : 'Terima kasih sudah memilih!'),
                 $status === ElectionSetting::STATUS_CLOSED
                     ? self::line('Hasil penghitungan sudah bisa dilihat di bawah.', $results)
                     : ($setting->vote_end ? self::line('Hasil diumumkan setelah pemilihan ditutup ' . self::when($setting->vote_end) . '.') : null),
@@ -124,12 +123,11 @@ class CogitoLines
         }
 
         if ($who === 'voter') {
-            $name = self::name($user);
             $lead = match ($status) {
-                ElectionSetting::STATUS_OPEN => self::line("Halo, {$name}! Surat suaramu sudah menunggu.", ['label' => 'Buka surat suara', 'href' => url('/vote')]),
+                ElectionSetting::STATUS_OPEN => self::line(self::hello($user) . ' Surat suaramu sudah menunggu.', ['label' => 'Buka surat suara', 'href' => url('/vote')]),
                 ElectionSetting::STATUS_CLOSED => self::line('Pemilihan sudah ditutup. Terima kasih sudah mampir!', $results),
                 // Sudah masuk tapi belum dibuka: jangan suruh mencari akun di email.
-                default => self::line("Halo, {$name}! Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka."),
+                default => self::line(self::hello($user) . ' Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka.'),
             };
 
             return [
@@ -182,9 +180,17 @@ class CogitoLines
         };
     }
 
-    private static function name(User $user): string
+    /** Nama peserta untuk sapaan. Username acak tidak pernah dipakai sebagai nama. */
+    private static function name(User $user): ?string
     {
-        return $user->details?->participant_name ?: $user->username;
+        $name = trim((string) $user->details?->participant_name);
+
+        return $name === '' ? null : $name;
+    }
+
+    private static function hello(User $user): string
+    {
+        return ($name = self::name($user)) ? "Halo, {$name}!" : 'Halo!';
     }
 
     private static function when(CarbonInterface $date): string
