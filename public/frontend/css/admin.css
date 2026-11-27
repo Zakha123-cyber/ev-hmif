@@ -735,6 +735,52 @@ th[aria-sort="descending"] .a-sort::after { opacity: 1; }
     margin-top: 20px;
 }
 
+/* ---------- Pilihan (radio) ---------- */
+
+.a-choice {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+}
+
+.a-choice legend {
+    margin-bottom: 6px;
+}
+
+.a-radio {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 2px solid var(--a-line-strong);
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+.a-radio:has(input:checked) {
+    border-color: var(--teal-ink);
+    background: #F2F7F6;
+}
+
+.a-radio input {
+    width: 20px;
+    height: 20px;
+    margin: 2px 0 0;
+    accent-color: var(--teal-ink);
+    flex: none;
+    cursor: pointer;
+}
+
+.a-radio > span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 /* ---------- Angka & bilah ---------- */
 
 .a-stats {

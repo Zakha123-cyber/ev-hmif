@@ -93,3 +93,72 @@ it('labels the row action by whether the participant already has an account', fu
         ->assertSee('Buat akun &amp; kirim<span class="visually-hidden"> Budi</span>', false)
         ->assertSee('Kirim ulang email<span class="visually-hidden"> pemilih</span>', false);
 });
+
+// --- Pilihan tujuan: email kampus atau email cadangan ---
+
+it('sends only to the campus address when that is chosen', function () {
+    $voter = makeUserWithRole('Participant', 'pemilih');
+    $voter->details->forceFill(['nim' => '233061', 'email_backup' => 'budi@gmail.com'])->save();
+
+    $this->actingAs($this->admin)
+        ->post("/back-admin-logged/participant/email-backup/{$voter->participant_id}", ['target' => 'campus'])
+        ->assertSessionHas('status', fn ($s) => str_contains($s, '232410103061@mail.unej.ac.id'));
+
+    Mail::assertQueued(BroadcastMail::class, 1);
+    Mail::assertQueued(BroadcastMail::class, fn ($mail) => $mail->hasTo('232410103061@mail.unej.ac.id'));
+});
+
+it('sends only to the backup address when that is chosen', function () {
+    $voter = makeUserWithRole('Participant', 'pemilih');
+    $voter->details->forceFill(['nim' => '233061', 'email_backup' => 'budi@gmail.com'])->save();
+
+    $this->actingAs($this->admin)
+        ->post("/back-admin-logged/participant/email-backup/{$voter->participant_id}", ['target' => 'backup', 'email_backup' => 'budi@gmail.com'])
+        ->assertSessionHas('status', fn ($s) => str_contains($s, 'budi@gmail.com'));
+
+    Mail::assertQueued(BroadcastMail::class, 1);
+    Mail::assertQueued(BroadcastMail::class, fn ($mail) => $mail->hasTo('budi@gmail.com'));
+});
+
+it('saves a newly typed backup address and sends to it', function () {
+    $voter = makeUserWithRole('Participant', 'pemilih');
+
+    $this->actingAs($this->admin)
+        ->post("/back-admin-logged/participant/email-backup/{$voter->participant_id}", ['target' => 'backup', 'email_backup' => 'baru@gmail.com'])
+        ->assertSessionHas('status');
+
+    expect($voter->details->fresh()->email_backup)->toBe('baru@gmail.com');
+    Mail::assertQueued(BroadcastMail::class, fn ($mail) => $mail->hasTo('baru@gmail.com'));
+});
+
+it('asks for a valid backup address before sending to it', function (string $email) {
+    $voter = makeUserWithRole('Participant', 'pemilih');
+
+    $this->actingAs($this->admin)
+        ->post("/back-admin-logged/participant/email-backup/{$voter->participant_id}", ['target' => 'backup', 'email_backup' => $email])
+        ->assertSessionHasErrors('email_backup');
+
+    Mail::assertNothingQueued();
+})->with(['empty' => '', 'invalid' => 'bukan-email']);
+
+it('offers the destination choice in a dialog on the participant list', function () {
+    makeUserWithRole('Participant', 'pemilih')->details->forceFill(['nim' => '233061', 'email_backup' => 'budi@gmail.com'])->save();
+
+    $this->actingAs($this->admin)->get('/back-admin-logged/participant')
+        ->assertSee('id="kirim-email"', false)
+        ->assertSee('name="target"', false)
+        ->assertSee('data-campus-email="232410103061@mail.unej.ac.id"', false)
+        ->assertSee('data-backup-email="budi@gmail.com"', false);
+});
+
+it('reopens the dialog for the same participant with the backup email error', function () {
+    $voter = makeUserWithRole('Participant', 'pemilih');
+
+    $this->actingAs($this->admin)->from('/back-admin-logged/participant')
+        ->post("/back-admin-logged/participant/email-backup/{$voter->participant_id}", ['participant_id' => $voter->participant_id, 'target' => 'backup', 'email_backup' => '']);
+
+    $this->get('/back-admin-logged/participant')
+        ->assertSee('data-open-on-load', false)
+        ->assertSee('Isi email cadangan dulu.')
+        ->assertSee('Kirim ulang email ke pemilih');
+});

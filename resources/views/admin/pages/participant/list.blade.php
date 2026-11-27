@@ -75,9 +75,12 @@
                                     <td data-label="Aksi">
                                         <div class="a-actions">
                                             <a class="a-btn a-btn--primary a-btn--sm" href="{{ url('/back-admin-logged/participant/edit/' . $item->id) }}">Ubah<span class="visually-hidden"> {{ $item->participant_name }}</span></a>
-                                            {{-- Ke email kampus (dari NIM), juga ke email cadangan bila diisi. Belum punya akun: dibuatkan dulu. --}}
-                                            <form action="{{ url('/back-admin-logged/participant/email-backup', $item->id) }}" method="POST" data-busy="Mengirim…"
-                                                @unless ($item->user) data-confirm="Buat akun untuk {{ $item->participant_name }} lalu kirim username dan password ke email kampusnya?" data-confirm-label="Ya, buat dan kirim" @endunless>
+                                            {{-- Tanpa JS: langsung kirim ke email kampus (+ cadangan bila ada).
+                                                 Dengan JS: membuka dialog pilihan tujuan (#kirim-email). --}}
+                                            <form action="{{ url('/back-admin-logged/participant/email-backup', $item->id) }}" method="POST"
+                                                data-send-email data-id="{{ $item->id }}" data-name="{{ $item->participant_name }}"
+                                                data-campus-email="{{ $item->campusEmail() }}" data-backup-email="{{ $item->email_backup }}"
+                                                data-new="{{ $item->user ? '0' : '1' }}">
                                                 @csrf
                                                 <button type="submit" class="a-btn a-btn--ghost a-btn--sm">{{ $item->user ? 'Kirim ulang email' : 'Buat akun & kirim' }}<span class="visually-hidden"> {{ $item->participant_name }}</span></button>
                                             </form>
@@ -101,6 +104,51 @@
             @endif
         </div>
     </section>
+
+    {{-- Pilih tujuan email akun (diisi admin.js dari baris yang diklik; terbuka lagi bila ada galat) --}}
+    @php
+        $sendFor = old('participant_id') ? $dataParticipant->firstWhere('id', (int) old('participant_id')) : null;
+    @endphp
+    <dialog class="a-dialog" id="kirim-email" aria-labelledby="kirim-judul" @if ($sendFor && $errors->has('email_backup')) data-open-on-load @endif>
+        <h2 id="kirim-judul" class="a-dialog__title" data-send-title>{{ $sendFor ? (($sendFor->user ? 'Kirim ulang email ke ' : 'Buat akun & kirim ke ') . $sendFor->participant_name) : 'Kirim email akun' }}</h2>
+        <form method="POST" action="{{ $sendFor ? url('/back-admin-logged/participant/email-backup', $sendFor->id) : '' }}" class="a-form" data-send-form>
+            @csrf
+            <input type="hidden" name="participant_id" value="{{ $sendFor?->id }}" data-send-id>
+            <p class="a-help" data-send-new @unless ($sendFor && ! $sendFor->user) hidden @endunless>
+                Peserta ini belum punya akun. Akun dibuat dulu, lalu username dan password dikirim ke alamat yang dipilih.
+            </p>
+
+            <fieldset class="a-choice">
+                <legend class="a-label">Kirim ke</legend>
+                <label class="a-radio">
+                    <input type="radio" name="target" value="campus" @checked(old('target', 'campus') === 'campus')>
+                    <span><strong>Email kampus</strong><span class="a-help" data-send-campus>{{ $sendFor?->campusEmail() }}</span></span>
+                </label>
+                <label class="a-radio">
+                    <input type="radio" name="target" value="backup" @checked(old('target') === 'backup')>
+                    <span><strong>Email cadangan</strong><span class="a-help">Email pribadi peserta, misalnya Gmail.</span></span>
+                </label>
+                <div class="a-field" data-send-backup @unless (old('target') === 'backup') hidden @endunless>
+                    <label class="a-label" for="send-backup">Alamat email cadangan</label>
+                    <input class="a-input" id="send-backup" name="email_backup" type="email" autocomplete="off"
+                        value="{{ old('email_backup', $sendFor?->email_backup) }}" aria-describedby="send-backup-help"
+                        @error('email_backup') aria-invalid="true" @enderror>
+                    <p class="a-help" id="send-backup-help">Alamat ini ikut disimpan ke data peserta.</p>
+                    @error('email_backup')
+                        <p class="a-error">{{ $message }}</p>
+                    @enderror
+                </div>
+            </fieldset>
+
+            <div class="a-dialog__actions">
+                <button type="button" class="a-btn a-btn--ghost" data-dialog-close>Batal</button>
+                <button type="submit" class="a-btn a-btn--primary">
+                    @include('admin.components.icon', ['name' => 'mail'])
+                    Kirim email
+                </button>
+            </div>
+        </form>
+    </dialog>
 
     {{-- Impor Excel --}}
     <dialog class="a-dialog" id="import" aria-labelledby="import-judul" @error('file') data-open-on-load @enderror>

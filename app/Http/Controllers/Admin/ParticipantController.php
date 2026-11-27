@@ -207,35 +207,49 @@ class ParticipantController extends Controller
     
     /**
      * Kirim email akun satu peserta (tombol di tiap baris daftar Peserta).
-     * Belum punya akun: akun dibuat dulu. Tujuan selalu email kampus dari NIM;
-     * email cadangan (opsional) ikut dikirimi bila diisi.
+     * target=campus: email kampus dari NIM. target=backup: email cadangan (diisi/diubah
+     * di dialog lalu disimpan). Tanpa target (JS mati): kampus + cadangan bila ada.
+     * Belum punya akun: akun dibuat dulu, dibatalkan bila pengiriman gagal.
      */
-    public function email_backup(Participant $participant){
-        $campus = $this->campusEmail($participant);
-        $created = false;
+    public function email_backup(Request $request, Participant $participant){
+        $target = $request->input('target');
 
-        try {
-            if (! $participant->user()->exists()) {
-                DB::transaction(function () use ($participant, $campus) {
-                    $this->createAccount($participant, new CredentialGenerator);
-                    Mail::to($campus)->queue(new BroadcastMail($participant));
-                });
-                $created = true;
-            } else {
-                Mail::to($campus)->queue(new BroadcastMail($participant));
+        if ($target === 'backup') {
+            $request->validate(
+                ['email_backup' => 'required|email'],
+                [
+                    'email_backup.required' => 'Isi email cadangan dulu.',
+                    'email_backup.email' => 'Email cadangan tidak valid.',
+                ],
+            );
+            if ($participant->email_backup !== $request->email_backup) {
+                $participant->email_backup = $request->email_backup;
+                $participant->save();
             }
-
-            $sentTo = [$campus];
-            if ($participant->email_backup) {
-                Mail::to($participant->email_backup)->queue(new BroadcastMail($participant));
-                $sentTo[] = $participant->email_backup;
-            }
-        } catch (\Throwable $th) {
-            report($th);
-            return redirect()->back()->withError('Gagal mengirim email ke ' . $participant->participant_name . ': ' . $th->getMessage());
+            $recipients = [$participant->email_backup];
+        } elseif ($target === 'campus') {
+            $recipients = [$participant->campusEmail()];
+        } else {
+            $recipients = array_values(array_filter([$participant->campusEmail(), $participant->email_backup]));
         }
 
-        return redirect()->back()->withStatus(($created ? 'Akun dibuat dan email' : 'Email akun') . ' dikirim ke ' . implode(' dan ', $sentTo) . '.');
+        $created = ! $participant->user()->exists();
+
+        try {
+            DB::transaction(function () use ($participant, $recipients, $created) {
+                if ($created) {
+                    $this->createAccount($participant, new CredentialGenerator);
+                }
+                foreach ($recipients as $address) {
+                    Mail::to($address)->queue(new BroadcastMail($participant));
+                }
+            });
+        } catch (\Throwable $th) {
+            report($th);
+            return redirect()->back()->withError('Gagal mengirim email ke ' . implode(' dan ', $recipients) . ': ' . $th->getMessage());
+        }
+
+        return redirect()->back()->withStatus(($created ? 'Akun dibuat dan email' : 'Email akun') . ' dikirim ke ' . implode(' dan ', $recipients) . '.');
     }
 
     public function edit(Participant $participant){

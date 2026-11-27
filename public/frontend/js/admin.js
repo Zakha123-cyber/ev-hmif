@@ -232,6 +232,50 @@
         });
     }
 
+    // ---------- Kirim email akun: pilih email kampus atau cadangan ----------
+    function setupSendEmail() {
+        const dialog = $('#kirim-email');
+        if (!dialog || typeof dialog.showModal !== 'function') return; // tanpa dialog: form baris terkirim biasa
+        const form = $('[data-send-form]', dialog);
+        const backupField = $('[data-send-backup]', dialog);
+        const backupInput = $('#send-backup', dialog);
+        let opener = null;
+
+        function syncTarget(focus) {
+            const backup = $('input[name="target"]:checked', form).value === 'backup';
+            backupField.hidden = !backup;
+            backupInput.required = backup;
+            if (backup && focus) backupInput.focus();
+        }
+        $$('input[name="target"]', form).forEach(function (r) {
+            r.addEventListener('change', function () { syncTarget(true); });
+        });
+
+        $$('form[data-send-email]').forEach(function (row) {
+            row.addEventListener('submit', function (event) {
+                event.preventDefault();
+                opener = $('[type="submit"]', row);
+                const isNew = row.dataset.new === '1';
+                form.action = row.action;
+                $('[data-send-id]', form).value = row.dataset.id;
+                $('[data-send-title]', dialog).textContent = (isNew ? 'Buat akun & kirim ke ' : 'Kirim ulang email ke ') + row.dataset.name;
+                $('[data-send-new]', dialog).hidden = !isNew;
+                $('[data-send-campus]', dialog).textContent = row.dataset.campusEmail;
+                backupInput.value = row.dataset.backupEmail || '';
+                $('input[value="campus"]', form).checked = true;
+                syncTarget(false);
+                dialog.showModal();
+            });
+        });
+
+        dialog.addEventListener('close', function () { if (opener) opener.focus(); });
+        form.addEventListener('submit', function () {
+            const submit = $('[type="submit"]', form);
+            submit.disabled = true;
+            submit.lastChild.textContent = ' Mengirim…';
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         setupDrawer();
         setupFlash();
@@ -241,5 +285,6 @@
         setupFilePreview();
         setupRegenerate();
         setupReveal();
+        setupSendEmail();
     });
 })();
