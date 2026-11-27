@@ -332,7 +332,7 @@ class ParticipantController extends Controller
             $this->param['getRandUsername'] = (new CredentialGenerator)->username();
             $this->param['getRandPassword'] = (new CredentialGenerator)->password();
             
-            $this->param['getParticpantVerified'] = Participant::where('status', 'verified')->get();
+            $this->param['getParticpantVerified'] = Participant::where('status', 'verified')->whereDoesntHave('user', fn ($user) => $user->role('Admin'))->get(); // akun admin tidak diubah dari sini
 
             return view('admin.pages.participant-verification.list', $this->param);
         } catch (\Exception $e) {
@@ -418,14 +418,17 @@ class ParticipantController extends Controller
                 'username' => 'required',
                 'password' => 'required',
                 'whatsapp_number' => 'required',
+                'status' => 'required|in:verified,not verified',
             ],
             [
                 'required' => ':attribute harus diisi.',
+                'in' => ':attribute tidak valid.',
             ],
             [
                 'username' => 'Username',
                 'password' => 'Password',
                 'whatsapp_number' => 'Nomor Whatsapp',
+                'status' => 'Status',
             ],
         );
         try {

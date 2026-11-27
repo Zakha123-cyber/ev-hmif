@@ -1,95 +1,74 @@
 @extends('admin.layouts.app')
+
+@section('title', 'Info akun peserta')
+
+@php
+    $p = $dataDetailParticipantVerified;
+    $period = \App\Models\ElectionSetting::current()->periodLabel();
+    // Templat pesan WhatsApp lama; hanya periodenya kini mengikuti pengaturan admin.
+    $message = implode("\n", [
+        'Hai Infornation..',
+        '',
+        "Tepat hari ini kita melakukan pemilihan calon ketua dan calon wakil ketua umum Himpunan Mahasiswa Informatika (HMIF) Periode {$period}. Berikut untuk akun pemilihanmu.",
+        '',
+        "Nama : {$p->participant_name}",
+        "NIM : {$p->nim}",
+        "Nomor WA : {$p->whatsapp_number}",
+        "Username : *{$p->username_old}*",
+        "Password : *{$p->password_old}*",
+        '',
+        'Sshhtt... Jangan kamu sebar akunmu ya...',
+        'Satu suaramu menentukan Informatika kedepannya.',
+        '',
+        "'Pemilu mengingatkan kita tidak hanya tentang hak, tetapi tanggung jawab kewarganegaraan dalam demokrasi'. Robert F. Kennedy.",
+        '',
+        '[NO-REPLY MESSAGE]',
+    ]);
+@endphp
+
+@section('actions')
+    <a class="a-btn a-btn--ghost" href="{{ url('/back-admin-logged/participant-verification') }}">Kembali ke daftar</a>
+@endsection
+
 @section('content')
-<div>
-    <div class="mt-6 grid grid-cols-2 gap-6 xl:grid-cols-1">
-        <div class="bg-white col-span-2 border rounded-lg shadow-md relative">
-            <div class="grid grid-cols-3 gap-4">
-                <div class="p-6 col-span-3 justify-start">
-                    <h5 class="text-gray-900 text-xl text-center font-bold my-3">Detail Participant</h5>
-                    <div class="overflow-x-auto mt-8 relative shadow-md sm:rounded-lg">
-                        <table class="w-full text-sm text-left">
-                            <tbody>
-                                <tr class="border-b">
-                                    <th scope="row" class="py-4 pl-6 border font-semibold whitespace-nowrap">
-                                        Nama Participant
-                                    </th>
-                                    <td class="py-4 px-6 border">
-                                        {{$dataDetailParticipantVerified->participant_name}}
-                                    </td>
-                                </tr>
-                                <tr class="border-b">
-                                    <th scope="row" class="py-4 pl-6 border font-semibold whitespace-nowrap">
-                                        NIM
-                                    </th>
-                                    <td class="py-4 px-6 border">
-                                        {{$dataDetailParticipantVerified->nim}}
-                                    </td>
-                                </tr>
-                                <tr class="border-b">
-                                    <th scope="row" class="py-4 pl-6 border font-semibold whitespace-nowrap">
-                                        Nomor Whatsapp
-                                    </th>
-                                    <td class="py-4 px-6 border">
-                                        {{$dataDetailParticipantVerified->whatsapp_number}}
-                                    </td>
-                                </tr>
-                                <tr class="border-b">
-                                    <th scope="row" class="py-4 pl-6 border font-semibold whitespace-nowrap">
-                                        Username
-                                    </th>
-                                    <td class="py-4 px-6 border">
-                                        {{$dataDetailParticipantVerified->username_old}}
-                                    </td>
-                                </tr>
-                                <tr class="border-b">
-                                    <th scope="row" class="py-4 pl-6 border font-semibold whitespace-nowrap">
-                                        Password
-                                    </th>
-                                    <td class="py-4 px-6 border">
-                                        {{ str_repeat("*", strlen($dataDetailParticipantVerified->password_old)) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-8 text-right">
-                        <a href="https://api.whatsapp.com/send?phone={{$dataDetailParticipantVerified->whatsapp_number}}&text=Hai Infornation..%0a%0aTepat hari ini kita melakukan pemilihan calon ketua dan calon wakil ketua umum Himpunan Mahasiswa Informatika (HMIF) Periode 2022/2023. Berikut untuk akun pemilihanmu.%0a%0aNama : {{$dataDetailParticipantVerified->participant_name}}%0aNIM : {{$dataDetailParticipantVerified->nim}}%0aNomor WA : {{$dataDetailParticipantVerified->whatsapp_number}}%0aUsername : *{{$dataDetailParticipantVerified->username_old}}*%0aPassword : *{{$dataDetailParticipantVerified->password_old}}*%0a%0aSshhtt... Jangan kamu sebar akunmu ya...%0aSatu suaramu menentukan Informatika kedepannya.%0a%0a'Pemilu mengingatkan kita tidak hanya tentang hak, tetapi tanggung jawab kewarganegaraan dalam demokrasi'. Robert F. Kennedy.%0a%0a[NO-REPLY MESSAGE]" target="__blank" class="btn-shadow bg-teal-500 hover:bg-teal-600 w-56 py-3 inline" >Kirim Whatsapp</a> &nbsp;
-                        <a href="{{url('/back-admin-logged/participant-verification/info/print/'.$dataDetailParticipantVerified->id)}}" class="btn-shadow bg-yellow-500 hover:bg-yellow-600 w-56 py-3 inline">Cetak Kartu</a>
-                    </div>
-                </div>
-            </div>
+    <section class="a-card">
+        <div class="a-card__head">
+            <h2 class="a-card__title">{{ $p->participant_name }}</h2>
+            <span class="a-badge a-badge--ok">Terverifikasi</span>
         </div>
-    </div>
+        <div class="a-card__body">
+            <dl class="a-dl">
+                <div><dt>NIM</dt><dd>{{ $p->nim }}</dd></div>
+                <div><dt>WhatsApp</dt><dd>{{ $p->whatsapp_number ?: '-' }}</dd></div>
+                <div><dt>Username</dt><dd><strong>{{ $p->username_old }}</strong></dd></div>
+                <div>
+                    <dt>Password</dt>
+                    <dd class="a-inputgroup" style="align-items: center">
+                        <span id="info-password-mask" aria-hidden="true">{{ str_repeat('•', max(8, strlen((string) $p->password_old))) }}</span>
+                        <span id="info-password" hidden><strong>{{ $p->password_old }}</strong></span>
+                        <button type="button" class="a-btn a-btn--ghost a-btn--sm" data-reveal="#info-password" data-mask="#info-password-mask" aria-pressed="false" hidden>
+                            @include('admin.components.icon', ['name' => 'eye'])
+                            Tampilkan
+                        </button>
+                    </dd>
+                </div>
+            </dl>
 
-    
-</div>
+            <div class="a-actions" style="margin-top: 20px">
+                @if ($p->whatsapp_number)
+                    <a class="a-btn a-btn--primary" target="_blank" rel="noopener"
+                        href="https://api.whatsapp.com/send?phone={{ $p->whatsapp_number }}&text={{ rawurlencode($message) }}">
+                        @include('admin.components.icon', ['name' => 'chat'])
+                        Kirim akun lewat WhatsApp
+                    </a>
+                @endif
+                <a class="a-btn a-btn--ghost" target="_blank" rel="noopener"
+                    href="{{ url('/back-admin-logged/participant-verification/info/print/' . $p->id) }}">
+                    @include('admin.components.icon', ['name' => 'print'])
+                    Cetak kartu
+                </a>
+            </div>
+            <p class="a-help" style="margin-top: 12px">Pesan WhatsApp berisi username dan password peserta. Pastikan nomornya benar sebelum mengirim.</p>
+        </div>
+    </section>
 @endsection
-@section('extraJS')
-<script src="https://unpkg.com/flowbite@1.5.3/dist/flowbite.js"></script>
-@endsection
-
-{{-- <a
-    href="
-        https://api.whatsapp.com/send?
-            phone=6281217245488
-            &
-            text=
-                %0aHai Infornation..
-                %0a
-                %0aTepat hari ini kita melakukan pemilihan calon ketua dan calon wakil ketua umum Himpunan Mahasiswa Informatika (HMIF) Periode 2022/2023. Berikut untuk akun pemilihanmu.
-                %0a
-                %0aNama : {{$dataDetailParticipantVerified->participant_name}}
-                %0aNIM : {{$dataDetailParticipantVerified->nim}}
-                %0aNomor WA : {{$dataDetailParticipantVerified->whatsapp_number}}
-                %0aUsername : {{$dataDetailParticipantVerified->username_old}}
-                %0aPassword : {{$dataDetailParticipantVerified->password_old}}
-                %0a
-                %0aSshhtt... Jangan kamu sebar akunmu ya...
-                %0aSatu suaramu menentukan Informatika kedepannya.
-                %0a
-                %0a'Pemilu mengingatkan kita tidak hanya tentang hak, tetapi tanggung jawab kewarganegaraan dalam demokrasi'. Robert F. Kennedy.
-                %0a
-                %0a[NO-REPLY MESSAGE]"
-    target="__blank"
-    class="btn-shadow bg-teal-500 hover:bg-teal-600 w-56 py-3 inline"
->Kirim Whatsapp</a> &nbsp; --}}

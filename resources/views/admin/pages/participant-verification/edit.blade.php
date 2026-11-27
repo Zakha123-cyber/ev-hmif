@@ -1,124 +1,82 @@
 @extends('admin.layouts.app')
-@section('extraCSS')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
-@endsection
+
+@section('title', 'Ubah akun peserta')
+
+@php $p = $getDetailParticipant; @endphp
+
 @section('content')
-<div>
-    <div class="card mb-8">
-        <div class="card-header flex flex-row justify-between">
-            <h1 class="h6">Update Verifikasi Participant</h1>
+    <section class="a-card">
+        <div class="a-card__head">
+            <h2 class="a-card__title">{{ $p->participant_name }}</h2>
+            <span class="a-help">NIM {{ $p->nim }}</span>
         </div>
-        <div class="card-body">
-            <form method="POST" action="{{url('/back-admin-logged/participant-verification/update/'.$getDetailParticipant->id)}}">
-                @method('PUT')
+        <div class="a-card__body">
+            <p class="a-lead">Mengubah username atau password langsung mengganti akun login peserta ini. Beri tahu peserta setelah menyimpan.</p>
+
+            <form class="a-form" method="POST" action="{{ url('/back-admin-logged/participant-verification/update/' . $p->id) }}">
                 @csrf
-                <div>
-                    <label class="text-gray-700 ml-1"> NIM Participant : </label>
-                    <select name="nim" id="selectSearch" disabled class="form-input w-full block border-teal-500 rounded mt-1 pt-3 pb-2 px-3 border-2 @error('nim') border-red-500 @enderror focus:outline-none focus:border-teal-500" >
-                        <option value="">Cari NIM ...</option>
-                        @foreach ($getParticipant as $item)
-                            <option value="{{$item->id}}" {{$getDetailParticipant->nim == $item->nim ? 'selected' : ''}} >{{$item->nim}} - {{$item->participant_name}}</option>
-                        @endforeach
-                    </select>
-                    @error('nim')
-                    <span class="pl-1 text-xs text-red-600 text-bold">
-                        {{$message}}
-                    </span>
-                    @enderror
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="mt-3">
-                        <label class="text-gray-700 ml-1"> Username : </label>
-                        <div class="grid grid-cols-12">
-                            <div class="col-span-11">
-                                <input type="text" id="new_username" name="username" class="form-input w-full block rounded mt-1 p-3 border-2 @error('username') border-red-500 @enderror focus:outline-none focus:border-teal-500" placeholder="Username" value="{{old('username', $getDetailParticipant->username_old)}}" readonly>
-                            </div>
-                            <div class="col-span-1" style="padding: 10px;">
-                                <button type="button" onclick="getUsername()" class="bg-teal-500 h-10 w-10 rounded hover:bg-teal-600"><i class="fa fa-recycle text-white"></i></button>
-                            </div>
+                @method('PUT')
+
+                <div class="a-form__row">
+                    <div class="a-field">
+                        <label class="a-label" for="new_username">Username</label>
+                        <div class="a-inputgroup">
+                            <input class="a-input" id="new_username" name="username" type="text" readonly value="{{ old('username', $p->username_old) }}">
+                            <button type="button" class="a-btn a-btn--ghost" data-regenerate="{{ url('/back-admin-logged/generate-username') }}" data-target="#new_username">
+                                @include('admin.components.icon', ['name' => 'refresh'])
+                                Acak ulang
+                            </button>
                         </div>
                         @error('username')
-                        <span class="pl-1 text-xs text-red-600 text-bold">
-                            {{$message}}
-                        </span>
+                            <p class="a-error">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div class="mt-3">
-                        <label class="text-gray-700 ml-1"> Password : </label>
-                        <div class="grid grid-cols-12">
-                            <div class="col-span-11">
-                                <input type="password" id="new_password" name="password" class="form-input w-full block rounded mt-1 p-3 border-2 @error('password') border-red-500 @enderror focus:outline-none focus:border-teal-500" placeholder="Password" value="{{old('password', $getDetailParticipant->password_old)}}" readonly>
-                            </div>
-                            <div class="col-span-1" style="padding: 10px;">
-                                <button type="button" onclick="getPassword()" class="bg-teal-500 h-10 w-10 rounded hover:bg-teal-600"><i class="fa fa-recycle text-white"></i></button>
-                            </div>
+                    <div class="a-field">
+                        <label class="a-label" for="new_password">Password</label>
+                        <div class="a-inputgroup">
+                            <input class="a-input" id="new_password" name="password" type="password" readonly value="{{ old('password', $p->password_old) }}">
+                            <button type="button" class="a-btn a-btn--ghost" data-reveal="#new_password" aria-pressed="false" hidden>
+                                @include('admin.components.icon', ['name' => 'eye'])
+                                Tampilkan
+                            </button>
+                            <button type="button" class="a-btn a-btn--ghost" data-regenerate="{{ url('/back-admin-logged/generate-password') }}" data-target="#new_password">
+                                @include('admin.components.icon', ['name' => 'refresh'])
+                                Acak ulang
+                            </button>
                         </div>
                         @error('password')
-                        <span class="pl-1 text-xs text-red-600 text-bold">
-                            {{$message}}
-                        </span>
+                            <p class="a-error">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
-                <div class="mt-3">
-                    <label class="text-gray-700 ml-1"> Nomor Whatsapp : </label>
-                    <input type="text" name="whatsapp_number" class="form-input w-full block rounded mt-1 p-3 border-2 @error('whatsapp_number') border-red-500 @enderror focus:outline-none focus:border-teal-500" placeholder="Nomor Whatsapp" value="{{old('whatsapp_number', $getDetailParticipant->whatsapp_number)}}">
-                    @error('whatsapp_number')
-                    <span class="pl-1 text-xs text-red-600 text-bold">
-                        {{$message}}
-                    </span>
-                    @enderror
+
+                <div class="a-form__row a-form__row--2">
+                    <div class="a-field">
+                        <label class="a-label" for="whatsapp_number">Nomor WhatsApp</label>
+                        <input class="a-input" id="whatsapp_number" name="whatsapp_number" type="tel" inputmode="numeric"
+                            value="{{ old('whatsapp_number', $p->whatsapp_number) }}" @error('whatsapp_number') aria-invalid="true" @enderror>
+                        @error('whatsapp_number')
+                            <p class="a-error">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="a-field">
+                        <label class="a-label" for="status">Status</label>
+                        @php $status = old('status', $p->status); @endphp
+                        <select class="a-input" id="status" name="status" @error('status') aria-invalid="true" @enderror>
+                            <option value="verified" @selected($status === 'verified')>Terverifikasi</option>
+                            <option value="not verified" @selected($status === 'not verified')>Belum terverifikasi</option>
+                        </select>
+                        @error('status')
+                            <p class="a-error">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
-                <div class="mt-3">
-                    <label class="text-gray-700 ml-1">Status : </label>
-                    <select name="status" class="form-input mt-1 p-3 border-2 @error('status') border-red-500 @enderror focus:outline-none focus:border-teal-500 form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0">
-                        <option value="verified" {{$getDetailParticipant->status == 'verified' ? 'selected' : ''}} >Verified</option>
-                        <option value="not verified" {{$getDetailParticipant->status == 'not verified' ? 'selected' : ''}}>Not Verified</option>
-                    </select>
-                    @error('status')
-                    <span class="pl-1 text-xs text-red-600 text-bold">
-                        {{$message}}
-                    </span>
-                    @enderror
-                </div>
-                <div class="mt-5">
-                    <button type="submit" class="btn-shadow">Simpan</button>
+
+                <div class="a-form__foot">
+                    <button type="submit" class="a-btn a-btn--accent">Simpan akun</button>
+                    <a class="a-btn a-btn--ghost" href="{{ url('/back-admin-logged/participant-verification') }}">Batal</a>
                 </div>
             </form>
         </div>
-    </div>
-</div>
-@endsection
-@section('extraJS')
-<script src="https://unpkg.com/flowbite@1.5.3/dist/flowbite.js"></script>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
-<script>
-    $(document).ready(function () {
-        $('#selectSearch').selectize({
-            sortField: 'text'
-        });
-    });
-
-    function getUsername(){
-        $.ajax({
-            type:'GET',
-            url:'{{ url('/back-admin-logged/generate-username') }}',
-            success:function(data){
-                $('#new_username').val(data);
-            }
-        });
-    }
-
-    function getPassword(){
-        $.ajax({
-            type:'GET',
-            url:'{{ url('/back-admin-logged/generate-password') }}',
-            success:function(data){
-                $('#new_password').val(data);
-            }
-        });
-    }
-</script>
+    </section>
 @endsection
