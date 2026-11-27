@@ -66,8 +66,8 @@
                                                             <span class="ballot__role">Ketua</span>
                                                             <span class="ballot__name">{{ $candidate->leader_name }}</span>
                                                         </span>
-                                                        {{-- Heksagon "&": penanda pasangan, motif dari logo HMIF --}}
-                                                        <span class="ballot__and" aria-hidden="true">&amp;</span>
+                                                        {{-- Heksagon kecil di garis pemisah: penanda pasangan, motif dari logo HMIF --}}
+                                                        <span class="ballot__and" aria-hidden="true"></span>
                                                         <span class="ballot__person">
                                                             <span class="ballot__role">Wakil ketua</span>
                                                             <span class="ballot__name">{{ $candidate->vice_leader_name }}</span>

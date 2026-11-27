@@ -422,7 +422,7 @@
 }
 
 /* Papan nama pasangan: peran kecil di atas, nama dengan huruf display.
-   Dua orang dipisah garis dengan heksagon "&" (motif logo) sebagai tanda pasangan. */
+   Dua orang dipisah garis dengan heksagon kecil (motif logo) di tengahnya. */
 .ballot__names {
     display: grid;
     width: 100%;
@@ -444,7 +444,7 @@
 }
 
 .ballot__person:last-child {
-    padding-top: 20px;
+    padding-top: 14px;
 }
 
 .ballot__role {
@@ -467,19 +467,11 @@
 .ballot__and {
     position: relative;
     z-index: 1;
-    width: 30px;
-    height: 34px;
-    margin: -18px auto -16px;
-    display: grid;
-    place-items: center;
+    width: 16px;
+    height: 18px;
+    margin: -10px auto -8px;
     clip-path: var(--hexagon);
     background: var(--teal);
-    color: var(--ink);
-    /* "&" Archivo tebal mirip huruf "ε"; bentuk klasik Plus Jakarta Sans langsung terbaca */
-    font-family: var(--font-text);
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1;
 }
 
 .ballot__radio:checked + .ballot__face .ballot__names {
