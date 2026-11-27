@@ -57,3 +57,22 @@ it('no longer exposes unused account pages from the starter kit', function (stri
     'verify email' => ['GET', '/verify-email'],
     'confirm password' => ['GET', '/confirm-password'],
 ]);
+
+it('explains a wrong password in plain Indonesian instead of a translation key', function () {
+    makeUserWithRole('Participant', 'pemilih');
+
+    $this->from('/login')->post('/login', ['username' => 'pemilih', 'password' => 'salah']);
+
+    $this->get('/login')
+        ->assertSee('Username atau password salah.')
+        ->assertDontSee('auth.failed');
+});
+
+it('explains empty fields in plain Indonesian', function () {
+    $this->from('/login')->post('/login', ['username' => '', 'password' => '']);
+
+    $this->get('/login')
+        ->assertSee('Isi username dulu.')
+        ->assertSee('Isi password dulu.')
+        ->assertDontSee('validation.required');
+});
