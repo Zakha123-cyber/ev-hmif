@@ -11,10 +11,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Plus+Jakarta+Sans:wght@400;600&display=swap">
     <script>document.documentElement.classList.add('js');</script>
-    <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}">
-    <link rel="stylesheet" href="{{ asset('frontend/css/vote.css') }}">
-    <script src="{{ asset('frontend/js/home.js') }}" defer></script>
-    <script src="{{ asset('frontend/js/vote.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}?v={{ filemtime(public_path('frontend/css/home.css')) }}">
+    <link rel="stylesheet" href="{{ asset('frontend/css/vote.css') }}?v={{ filemtime(public_path('frontend/css/vote.css')) }}">
+    <script src="{{ asset('frontend/js/home.js') }}?v={{ filemtime(public_path('frontend/js/home.js')) }}" defer></script>
+    <script src="{{ asset('frontend/js/vote.js') }}?v={{ filemtime(public_path('frontend/js/vote.js')) }}" defer></script>
 </head>
 
 <body class="vote-body">

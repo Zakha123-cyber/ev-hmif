@@ -939,15 +939,8 @@ html {
     right: 12px;
     bottom: 12px;
     z-index: 25;
-    width: 170px;
-}
-
-/* Pita jadwal ada di dasar layar pertama dan tombolnya rata kanan: sisakan ruang
-   selebar COGITO (170 + 12 + jarak) di kanan agar tombol tidak tertutup. */
-@media (min-width: 720px) {
-    .slip-band__inner {
-        padding-right: max(var(--gutter), 200px - (100vw - min(100vw, var(--container) + 2 * var(--gutter))) / 2);
-    }
+    /* Boleh menutupi tombol di bawahnya (keputusan pengguna); balon bisa ditutup */
+    width: 220px;
 }
 
 .cogito__figure {
@@ -1086,7 +1079,7 @@ html {
     .cogito--corner {
         right: 8px;
         bottom: 8px;
-        width: 110px;
+        width: 140px;
     }
 
     .cogito__bubble {

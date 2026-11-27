@@ -11,7 +11,7 @@ beforeEach(function () {
 /**
  * Isi COGITO dari HTML.
  *
- * @return array{texts: string[], lines: array, first: string, firstAction: ?array, node: DOMElement, xpath: DOMXPath, key: string}
+ * @return array{texts: string[], lines: array, first: string, firstAction: ?array, node: DOMElement, xpath: DOMXPath}
  */
 function cogito(string $html): array
 {
@@ -34,7 +34,6 @@ function cogito(string $html): array
             : null,
         'node' => $node,
         'xpath' => $xpath,
-        'key' => $node->getAttribute('data-cogito-key'),
     ];
 }
 
@@ -167,16 +166,6 @@ it('keeps lines unique, without em dashes, and without screen-reader chatter', f
     expect($c['xpath']->query('.//*[@aria-live]', $c['node'])->length)->toBe(0);
 });
 
-it('remembers "Tutup" per situation, so new lines after logging in or voting are shown', function () {
-    openSchedule();
-    $guest = cogito($this->get('/')->getContent())['key'];
-    $voter = makeUserWithRole('Participant', 'voter1');
-    $before = cogito($this->actingAs($voter)->get('/')->getContent())['key'];
-    $voter->update(['status' => 'voted']);
-    $after = cogito($this->actingAs($voter)->get('/')->getContent())['key'];
-
-    expect([$guest, $before, $after])->toBe(['home:open:guest', 'home:open:voter', 'home:open:voted']);
-});
 
 it('no longer carries the broken 3D mascot', function () {
     $this->get('/')->assertDontSee('model-viewer', false);

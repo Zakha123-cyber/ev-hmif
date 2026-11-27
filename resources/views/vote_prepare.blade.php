@@ -41,5 +41,5 @@
     @endif
 
     @php $cogito = \App\Support\CogitoLines::vote('prepare', $setting, $user); @endphp
-    @include('partials.cogito', ['pose' => 'salam', 'variant' => 'corner', 'key' => $cogito['key'], 'lines' => $cogito['lines']])
+    @include('partials.cogito', ['pose' => 'salam', 'variant' => 'corner', 'lines' => $cogito['lines']])
 @endsection

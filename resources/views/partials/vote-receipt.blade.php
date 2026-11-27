@@ -14,7 +14,7 @@
                 </span>
             </div>
             @php $cogito = \App\Support\CogitoLines::vote('receipt', $setting, auth()->user()); @endphp
-            @include('partials.cogito', ['pose' => 'salute', 'variant' => 'inline', 'key' => $cogito['key'], 'lines' => $cogito['lines']])
+            @include('partials.cogito', ['pose' => 'salute', 'variant' => 'inline', 'lines' => $cogito['lines']])
         </div>
 
         <h1 id="judul" class="vote-hero__title">Suaramu sudah tercatat</h1>

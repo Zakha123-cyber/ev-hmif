@@ -208,8 +208,8 @@ function closeOnBackdrop(letter) {
 // COGITO: balon bergiliran. Satu kalimat tampil ~7 detik, balon sembunyi ~4 detik,
 // lalu kalimat acak berikutnya. Kalimat pertama selalu yang paling sesuai keadaan.
 // Berhenti sementara saat pointer/fokus di balon, saat surat/konfirmasi terbuka,
-// dan saat tab tidak terlihat. "Tutup" (atau Esc) menghentikannya selama sesi ini
-// untuk keadaan ini; mengetuk COGITO menampilkan kalimat lain dan melanjutkan.
+// dan saat tab tidak terlihat. "Tutup" (atau Esc) menghentikannya di halaman ini
+// saja (tidak diingat); mengetuk COGITO menampilkan kalimat lain dan melanjutkan.
 (function () {
     const FIRST_MS = 900;
     const SHOW_MS = 7000;
@@ -231,7 +231,6 @@ function closeOnBackdrop(letter) {
             const action = box.querySelector('[data-cogito-action]');
             const close = box.querySelector('[data-cogito-close]');
             const figure = box.querySelector('[data-cogito-toggle]');
-            const storeKey = 'cogito-closed:' + box.dataset.cogitoKey;
             let lines;
             try {
                 lines = JSON.parse(box.querySelector('[data-cogito-lines]').textContent);
@@ -247,16 +246,6 @@ function closeOnBackdrop(letter) {
             let closed = false;
             let hovering = false;
             let focused = false;
-
-            function remembered() {
-                try { return sessionStorage.getItem(storeKey) === '1'; } catch (e) { return false; }
-            }
-            function remember(value) {
-                try {
-                    if (value) sessionStorage.setItem(storeKey, '1');
-                    else sessionStorage.removeItem(storeKey);
-                } catch (e) { /* tanpa storage: hanya untuk halaman ini */ }
-            }
 
             function muted() {
                 return !!document.querySelector('dialog[open]');
@@ -321,7 +310,6 @@ function closeOnBackdrop(letter) {
                 window.clearTimeout(timer);
                 timer = null;
                 bubble.hidden = true;
-                remember(true);
                 figure.focus();
             }
 
@@ -330,11 +318,7 @@ function closeOnBackdrop(letter) {
             bubble.hidden = true;
             bubble.classList.add('is-ready');
 
-            if (remembered()) {
-                closed = true;
-            } else {
-                schedule(show, FIRST_MS);
-            }
+            schedule(show, FIRST_MS);
 
             close.addEventListener('click', shut);
             box.addEventListener('keydown', function (event) {
@@ -343,7 +327,6 @@ function closeOnBackdrop(letter) {
             figure.addEventListener('click', function () {
                 if (closed) {
                     closed = false;
-                    remember(false);
                 } else if (!bubble.hidden) {
                     advance();
                 }

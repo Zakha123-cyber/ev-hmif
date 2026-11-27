@@ -1,11 +1,11 @@
 @php
     // COGITO + balon. home.js menggilir kalimat secara acak; tanpa JS hanya kalimat
     // pertama (beserta aksinya) yang tampil dan tombol Tutup tetap tersembunyi.
-    // $pose: salam|salute, $variant: corner|inline, $key: kunci "Tutup" (sessionStorage),
+    // $pose: salam|salute, $variant: corner|inline,
     // $lines: list<['text' => string, 'action' => ?['label' => …, 'href' => …]]>
     $first = $lines[0];
 @endphp
-<aside class="cogito cogito--{{ $variant }}" data-cogito data-cogito-key="{{ $key }}" aria-label="Pesan dari COGITO">
+<aside class="cogito cogito--{{ $variant }}" data-cogito aria-label="Pesan dari COGITO">
     <div class="cogito__bubble" data-cogito-bubble>
         <p class="cogito__line" data-cogito-line>{{ $first['text'] }}</p>
         <script type="application/json" data-cogito-lines>@json($lines, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG)</script>

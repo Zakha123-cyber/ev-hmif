@@ -749,7 +749,7 @@
     }
 
     .vote-hero--ballot .vote-hero__text {
-        padding-right: 92px;
+        padding-right: 108px;
     }
 
     .vote-hero--ballot .cogito--inline {
@@ -760,7 +760,7 @@
         position: absolute;
         top: 40px;
         right: var(--gutter);
-        width: 84px;
+        width: 100px;
     }
 
     .vote-hero--ballot .cogito__bubble {
@@ -794,7 +794,7 @@
     }
 
     .receipt .cogito--inline .cogito__figure {
-        width: 80px;
+        width: 92px;
     }
 }
 
@@ -805,11 +805,11 @@
     }
 
     .cogito--inline .cogito__figure {
-        width: 150px;
+        width: 190px;
     }
 
     .receipt .cogito--inline .cogito__figure {
-        width: 130px;
+        width: 160px;
     }
 }
 
