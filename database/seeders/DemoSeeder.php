@@ -114,11 +114,13 @@ class DemoSeeder extends Seeder
         ];
 
         $text = "Akun uji Election Vote (lokal), dibuat " . now()->format('Y-m-d H:i') . "\n"
-            . "Jadwal: sedang berlangsung sampai " . now()->addDay()->format('Y-m-d H:i') . " (ubah di panel admin)\n\n"
+            . "Jadwal: sedang berlangsung sampai " . now()->addDay()->format('Y-m-d H:i') . " (ubah di panel admin)\n"
+            . "Admin masuk lewat /" . config('election.admin_login_path') . " (bukan /login); peserta lewat /login\n\n"
             . collect($rows)->map(fn ($r) => str_pad($r[0], 24) . str_pad($r[1], 16) . $r[2])->implode("\n") . "\n";
         Storage::disk('local')->put(self::CREDENTIALS_FILE, $text);
 
         $this->command?->table(['Username', 'Password', 'Peran'], $rows);
+        $this->command?->info('Admin masuk lewat /' . config('election.admin_login_path') . ' (bukan /login).');
         $this->command?->info('Daftar akun juga disimpan di storage/app/' . self::CREDENTIALS_FILE);
     }
 }
