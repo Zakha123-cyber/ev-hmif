@@ -28,12 +28,8 @@ class DashboardController extends Controller
             $this->param['countVoted'] = ElectionStats::voted();
             $this->param['countNotVoted'] = ElectionStats::notVoted();
 
-            $this->param['getLiveCount'] = \DB::table('counts')
-                                            ->select(\DB::raw('count(counts.candidate_id) as total_suara'), 'candidates.leader_name as nama_ketua')
-                                            ->join('candidates', 'candidates.id', '=', 'counts.candidate_id')
-                                            ->groupBy('counts.candidate_id')
-                                            ->get();
-            // dd($this->param['getLiveCount']);
+            $this->param += ElectionStats::results();
+            $this->param['setting'] = \App\Models\ElectionSetting::current();
 
             return view('admin.pages.dashboard.dashboard', $this->param);
         } catch (\Exception $e) {

@@ -18,11 +18,7 @@ class CountController extends Controller
     private $param;
     public function index(){
         try {
-            $this->param['getLiveCount'] = \DB::table('counts')
-            ->select(\DB::raw('count(counts.candidate_id) as total_suara'), 'candidates.leader_name as nama_ketua')
-            ->join('candidates', 'candidates.id', '=', 'counts.candidate_id')
-            ->groupBy('counts.candidate_id')
-            ->get();
+            $this->param = ElectionStats::results();
             $this->param['countVoted'] = ElectionStats::voted();
             $this->param['countNotVoted'] = ElectionStats::notVoted();
             $this->param['countParticipant'] = ElectionStats::participants();
