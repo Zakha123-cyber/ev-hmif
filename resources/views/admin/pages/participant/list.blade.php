@@ -13,7 +13,7 @@
     </button>
     <form method="POST" action="{{ url('/back-admin-logged/participant/broadcast') }}"
         data-confirm="Buat akun dan kirim email ke semua peserta yang belum punya akun?"
-        data-confirm-yes="Ya, buat akun dan kirim" data-busy="Mengirim email…">
+        data-confirm-label="Ya, buat akun dan kirim" data-busy="Mengirim email…">
         @csrf
         <button type="submit" class="a-btn a-btn--accent">
             @include('admin.components.icon', ['name' => 'mail'])
@@ -87,7 +87,7 @@
                                             </form>
                                             <form action="{{ url('/back-admin-logged/participant/delete', $item->id) }}" method="POST"
                                                 data-confirm="Hapus peserta {{ $item->participant_name }} ({{ $item->nim }})? Akunnya ikut terhapus."
-                                                data-confirm-yes="Ya, hapus peserta">
+                                                data-confirm-label="Ya, hapus peserta">
                                                 @csrf
                                                 @method('delete')
                                                 <button type="submit" class="a-btn a-btn--danger a-btn--sm">

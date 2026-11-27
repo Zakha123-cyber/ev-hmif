@@ -58,7 +58,7 @@
                 pending = form;
                 $('[data-confirm-text]', dialog).textContent = message;
                 const yes = $('[data-confirm-yes]', dialog);
-                yes.textContent = form.dataset.confirmYes || 'Ya, lanjutkan';
+                yes.textContent = form.dataset.confirmLabel || 'Ya, lanjutkan';
                 dialog.showModal();
             });
         });

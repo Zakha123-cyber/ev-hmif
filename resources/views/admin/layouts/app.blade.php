@@ -14,8 +14,6 @@
     <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}?v={{ filemtime(public_path('frontend/css/home.css')) }}">
     <link rel="stylesheet" href="{{ asset('frontend/css/admin.css') }}?v={{ filemtime(public_path('frontend/css/admin.css')) }}">
     <script src="{{ asset('frontend/js/admin.js') }}?v={{ filemtime(public_path('frontend/js/admin.js')) }}" defer></script>
-    {{-- SEMENTARA: halaman lama yang belum dibangun ulang (dihapus di Task 6) --}}
-    @yield('extraCSS')
 </head>
 
 <body class="a-body">
@@ -65,8 +63,6 @@
     </dialog>
 
     @stack('scripts')
-    {{-- SEMENTARA: halaman lama yang belum dibangun ulang (dihapus di Task 6) --}}
-    @yield('extraJS')
 </body>
 
 </html>

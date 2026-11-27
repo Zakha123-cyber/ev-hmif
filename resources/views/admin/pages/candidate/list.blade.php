@@ -63,7 +63,7 @@
                             </form>
                             <form action="{{ url('/back-admin-logged/candidate/delete', $item->id) }}" method="POST"
                                 data-confirm="Hapus Paslon {{ $item->candidate_pair }} ({{ $item->leader_name }} &amp; {{ $item->vice_leader_name }})? Tindakan ini tidak bisa dibatalkan."
-                                data-confirm-yes="Ya, hapus paslon">
+                                data-confirm-label="Ya, hapus paslon">
                                 @csrf
                                 @method('delete')
                                 <button type="submit" class="a-btn a-btn--danger a-btn--sm">
