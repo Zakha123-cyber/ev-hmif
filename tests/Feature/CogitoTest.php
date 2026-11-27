@@ -137,3 +137,51 @@ it('no longer carries the broken 3D mascot', function () {
     $this->get('/')->assertDontSee('model-viewer', false);
     expect(config('election.mascot_path'))->toBeNull();
 });
+
+// --- Perbaikan review ---
+
+it('does not tell a logged-in voter to look for an account before voting opens', function () {
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-11-30 10:00'));
+
+    $c = cogito($this->actingAs(makeUserWithRole('Participant', 'voter1'))->get('/')->getContent());
+
+    expect($c['lines'])->toBe([
+        'Halo, voter1!',
+        'Pemilihan dibuka Selasa, 1 Desember pukul 08.00 WIB.',
+        'Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka.',
+    ]);
+});
+
+it('does not tell a logged-in voter to look for an account when no schedule is set', function () {
+    $c = cogito($this->actingAs(makeUserWithRole('Participant', 'voter1'))->get('/')->getContent());
+
+    expect($c['lines'])->toBe([
+        'Halo, voter1!',
+        'Jadwal pemilihan belum diumumkan panitia.',
+        'Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka.',
+    ]);
+});
+
+it('uses the participant name when there is one', function () {
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
+    $voter = makeUserWithRole('Participant', 'voter1');
+    $voter->details->update(['participant_name' => 'Rina Ayu']);
+
+    expect(cogito($this->actingAs($voter->fresh())->get('/')->getContent())['lines'][0])->toBe('Halo, Rina Ayu! Surat suaramu sudah menunggu.');
+});
+
+it('remembers "Tutup" per situation, so new guidance after logging in or voting is shown', function () {
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
+    $key = fn ($html) => cogito($html)['node']->getAttribute('data-cogito-key');
+
+    $guest = $key($this->get('/')->getContent());
+    $voter = makeUserWithRole('Participant', 'voter1');
+    $before = $key($this->actingAs($voter)->get('/')->getContent());
+    $voter->update(['status' => 'voted']);
+    $after = $key($this->actingAs($voter)->get('/')->getContent());
+
+    expect([$guest, $before, $after])->toBe(['home:open:guest', 'home:open:voter', 'home:open:voted']);
+});

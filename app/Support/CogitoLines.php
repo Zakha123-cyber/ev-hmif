@@ -12,6 +12,8 @@ use Carbon\CarbonInterface;
  * paslon yang dipilih seseorang.
  *
  * Setiap metode mengembalikan ['lines' => string[], 'action' => ?['label' => …, 'href' => …]].
+ * home() juga mengembalikan 'key': kunci "Tutup" per keadaan, supaya arahan baru
+ * (setelah masuk atau memilih) tidak ikut tersembunyi.
  */
 class CogitoLines
 {
@@ -20,23 +22,45 @@ class CogitoLines
     public static function home(ElectionSetting $setting, ?User $user): array
     {
         $status = $setting->status();
+        $who = match (true) {
+            ! $user => 'guest',
+            $user->hasRole('Admin') => 'admin',
+            $user->status === 'voted' => 'voted',
+            default => 'voter',
+        };
 
-        if ($user?->hasRole('Admin')) {
+        return ['key' => "home:{$status}:{$who}"] + self::homeFor($who, $setting, $status, $user);
+    }
+
+    private static function homeFor(string $who, ElectionSetting $setting, string $status, ?User $user): array
+    {
+        if ($who === 'admin') {
             return self::make(self::guestLines($setting, $status, admin: true), [
                 'label' => 'Panel admin',
                 'href' => url('/back-admin-logged/redirect-role'),
             ]);
         }
 
-        if ($user && $user->status === 'voted') {
+        if ($who === 'voted') {
             return self::make([self::thanks($setting)]);
         }
 
-        if ($user && $status === ElectionSetting::STATUS_OPEN) {
+        if ($who === 'voter' && $status === ElectionSetting::STATUS_OPEN) {
             return self::make(
                 ['Halo, ' . self::name($user) . '! Surat suaramu sudah menunggu.'],
                 ['label' => 'Buka surat suara', 'href' => url('/vote')],
             );
+        }
+
+        // Sudah masuk tapi belum dibuka: jangan suruh mencari akun di email.
+        if ($who === 'voter' && in_array($status, [ElectionSetting::STATUS_UPCOMING, ElectionSetting::STATUS_NOT_SET], true)) {
+            return self::make([
+                'Halo, ' . self::name($user) . '!',
+                $status === ElectionSetting::STATUS_UPCOMING
+                    ? 'Pemilihan dibuka ' . self::when($setting->vote_start) . '.'
+                    : 'Jadwal pemilihan belum diumumkan panitia.',
+                'Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka.',
+            ]);
         }
 
         $action = match ($status) {
