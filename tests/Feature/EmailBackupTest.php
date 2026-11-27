@@ -120,6 +120,25 @@ it('sends only to the backup address when that is chosen', function () {
     Mail::assertQueued(BroadcastMail::class, fn ($mail) => $mail->hasTo('budi@gmail.com'));
 });
 
+// Laravel 10 tidak lagi dapat patch untuk celah CRLF di aturan `email` bawaan,
+// jadi alamat yang menyisipkan baris baru (header tambahan) harus ditolak di sini.
+it('rejects backup emails that smuggle a line break', function (string $route, string $bad) {
+    $voter = makeUserWithRole('Participant', 'pemilih');
+
+    $request = match ($route) {
+        'store' => fn () => $this->post('/back-admin-logged/participant/store', participantForm(['email_backup' => $bad])),
+        'update' => fn () => $this->put("/back-admin-logged/participant/update/{$voter->participant_id}", participantForm(['nim' => '2210002', 'email_backup' => $bad])),
+        'send' => fn () => $this->post("/back-admin-logged/participant/email-backup/{$voter->participant_id}", ['target' => 'backup', 'email_backup' => $bad]),
+    };
+
+    $this->actingAs($this->admin);
+    $request()->assertSessionHasErrors('email_backup');
+    Mail::assertNothingQueued();
+})->with(['store', 'update', 'send'])->with([
+    'quoted' => "\"budi\r\nBcc: penyusup@contoh.com\"@gmail.com",
+    'comment' => "budi(\r\n x)@gmail.com",
+]);
+
 it('saves a newly typed backup address and sends to it', function () {
     $voter = makeUserWithRole('Participant', 'pemilih');
 

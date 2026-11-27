@@ -162,7 +162,7 @@ class ParticipantController extends Controller
                 'whatsapp_number' => 'required',
                 'status' => 'required',
                 'image' => self::IMAGE_RULES,
-                'email_backup' => 'nullable|email',
+                'email_backup' => 'nullable|email:filter',
             ],
             [
                 'required' => ':attribute harus diisi.',
@@ -230,7 +230,7 @@ class ParticipantController extends Controller
 
         if ($target === 'backup') {
             $request->validate(
-                ['email_backup' => 'required|email'],
+                ['email_backup' => 'required|email:filter'],
                 [
                     'email_backup.required' => 'Isi email cadangan dulu.',
                     'email_backup.email' => 'Email cadangan tidak valid.',
@@ -285,7 +285,7 @@ class ParticipantController extends Controller
                 'whatsapp_number' => 'required',
                 'status' => 'required',
                 'image' => self::IMAGE_RULES,
-                'email_backup' => 'nullable|email',
+                'email_backup' => 'nullable|email:filter',
             ],
             [
                 'required' => ':attribute harus diisi.',
