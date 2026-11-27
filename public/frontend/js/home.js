@@ -270,6 +270,7 @@ function closeOnBackdrop(letter) {
             close.hidden = false;
             render();
             bubble.hidden = true;
+            bubble.classList.add('is-ready');
             if (!remembered()) {
                 window.setTimeout(open, reduceMotion.matches ? 0 : DELAY_MS);
             }

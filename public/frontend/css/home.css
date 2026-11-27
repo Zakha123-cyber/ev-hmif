@@ -1010,6 +1010,12 @@ html {
     display: none;
 }
 
+/* Dengan JS: balon tak terlihat sampai home.js selesai menyiapkannya, supaya
+   balon yang sudah ditutup tidak sempat berkedip saat halaman dimuat. */
+.js .cogito__bubble:not(.is-ready) {
+    visibility: hidden;
+}
+
 @keyframes cogito-pop {
     from {
         opacity: 0;
