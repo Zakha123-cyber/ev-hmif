@@ -106,14 +106,18 @@
             const table = $(input.dataset.tableFilter);
             if (!table) return;
             const rows = $$('tbody tr', table);
+            // Yang dicari hanya isi data, bukan teks tombol di kolom Aksi.
+            const texts = rows.map(function (row) {
+                return $$('td:not([data-label="Aksi"])', row).map(function (td) { return td.textContent; }).join(' ').toLowerCase();
+            });
             const count = $('[data-table-count="' + input.dataset.tableFilter + '"]');
             const empty = $('[data-table-empty="' + input.dataset.tableFilter + '"]');
 
             function apply() {
                 const q = input.value.trim().toLowerCase();
                 let shown = 0;
-                rows.forEach(function (row) {
-                    const hit = !q || row.textContent.toLowerCase().includes(q);
+                rows.forEach(function (row, i) {
+                    const hit = !q || texts[i].includes(q);
                     row.hidden = !hit;
                     if (hit) shown++;
                 });
@@ -159,7 +163,9 @@
                     opt.hidden = !hit;
                     if (hit && !firstMatch) firstMatch = opt;
                 });
-                if (q && firstMatch && (select.selectedOptions[0] || {}).hidden !== false) select.value = firstMatch.value;
+                // Jangan biarkan peserta yang tersaring keluar tetap terpilih diam-diam.
+                const current = select.selectedOptions[0];
+                if (q && (!current || current.hidden || !current.value)) select.value = firstMatch ? firstMatch.value : '';
             });
         });
     }

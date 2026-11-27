@@ -23,6 +23,11 @@
     background: var(--a-bg);
 }
 
+/* Atribut hidden harus menang atas display milik komponen (mis. baris tabel di HP) */
+.a-body [hidden] {
+    display: none !important;
+}
+
 .a-icon {
     flex: none;
 }
@@ -1051,6 +1056,15 @@ th[aria-sort="descending"] .a-sort::after { opacity: 1; }
 
     .a-upload {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* Input selebar baris, tombol (Tampilkan, Acak ulang) di bawahnya */
+    .a-inputgroup {
+        flex-wrap: wrap;
+    }
+
+    .a-inputgroup .a-input {
+        flex-basis: 100%;
     }
 
     .a-candidate {
