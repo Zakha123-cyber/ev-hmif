@@ -30,13 +30,14 @@ class BroadcastMail extends Mailable
      */
     public function build()
     {
-        // return $this->view('view.name');
-        return $this->from('noreply-election@hmifunej.id')
-                    ->subject("HMIF ELECTION VOTE 2k25")
-                   ->view('emailku')
-                   ->with(
-                    [
-                        'data' => $this->data
-                    ]);
+        $setting = \App\Models\ElectionSetting::current();
+
+        return $this->from('noreply-election@hmifunej.id', 'Election Vote HMIF')
+            ->subject('Akun pemilihan Ketua HMIF ' . $setting->periodLabel())
+            ->view('emailku')
+            ->with([
+                'data' => $this->data,
+                'setting' => $setting,
+            ]);
     }
 }
