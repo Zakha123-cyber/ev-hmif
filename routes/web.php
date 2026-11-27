@@ -29,7 +29,7 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/vote', [VoteController::class, 'vote_page'])->middleware('auth');
 Route::post('/vote-paslon', [VoteController::class, 'vote'])->middleware(['auth', 'voting.open']);
 
-Route::prefix('/back-admin-logged')->group(function () {
+Route::prefix('/back-admin-logged')->middleware('auth')->group(function () {
     Route::get('/redirect-role', [RedirectRoleController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 

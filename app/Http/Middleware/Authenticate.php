@@ -12,6 +12,11 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
+        // Panel admin tidak menampakkan diri ke tamu: 404, bukan arahan ke halaman login.
+        if ($request->is('back-admin-logged/*') && ! $request->is('back-admin-logged/redirect-role')) {
+            abort(404);
+        }
+
         return $request->expectsJson() ? null : route('login');
     }
 }

@@ -48,11 +48,17 @@ class LoginRequest extends FormRequest
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function authenticate(): void
+    public function authenticate(bool $adminDoor = false): void
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('username', 'password'), $this->boolean('remember'))) {
+        $credentials = $this->only('username', 'password');
+        $user = Auth::validate($credentials) ? Auth::getProvider()->retrieveByCredentials($credentials) : null;
+
+        // Pintu terpisah: akun admin hanya lewat login admin, akun lain hanya lewat /login.
+        // Salah pintu diperlakukan persis seperti password salah (tidak membocorkan peran akun)
+        // dan ikut dihitung dalam batas percobaan.
+        if (! $user || $user->hasRole('Admin') !== $adminDoor) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -60,6 +66,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        Auth::login($user, $this->boolean('remember'));
         RateLimiter::clear($this->throttleKey());
     }
 

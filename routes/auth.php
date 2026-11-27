@@ -11,6 +11,11 @@ Route::middleware('guest')->group(function () {
                 ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    // Login admin di alamat terpisah (config/election.php -> admin_login_path).
+    Route::get(config('election.admin_login_path'), [AuthenticatedSessionController::class, 'createAdmin'])
+                ->name('admin.login');
+    Route::post(config('election.admin_login_path'), [AuthenticatedSessionController::class, 'storeAdmin']);
 });
 
 Route::middleware('auth')->group(function () {

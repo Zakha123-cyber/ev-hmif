@@ -2,7 +2,9 @@
     use App\Models\ElectionSetting;
 
     $when = fn ($date) => $date->copy()->locale('id')->translatedFormat('l, j F') . ' pukul ' . $date->format('H.i') . ' WIB';
-    $title = match ($status) {
+    // $adminDoor: halaman login admin (alamat terpisah). /login khusus peserta.
+    $adminDoor = $adminDoor ?? false;
+    $title = $adminDoor ? 'Masuk panel admin' : match ($status) {
         ElectionSetting::STATUS_OPEN => 'Masuk untuk memilih',
         ElectionSetting::STATUS_CLOSED => 'Pemilihan sudah selesai',
         default => 'Masuk ke akunmu',
@@ -69,18 +71,18 @@
                 <a class="login__back" href="{{ url('/') }}">Kembali ke halaman awal</a>
 
                 {{-- Kartu pemilih: kop, isian, lalu sobekan berisi bantuan --}}
-                <form class="pass" method="POST" action="{{ route('login') }}" novalidate data-login-form>
+                <form class="pass" method="POST" action="{{ $adminDoor ? route('admin.login') : route('login') }}" novalidate data-login-form>
                     @csrf
                     <header class="pass__head">
                         <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="">
                         <p>
-                            <strong>Kartu pemilih</strong>
-                            <span>Masuk dengan akun dari email kampusmu</span>
+                            <strong>{{ $adminDoor ? 'Kartu panitia' : 'Kartu pemilih' }}</strong>
+                            <span>{{ $adminDoor ? 'Khusus akun admin panitia pemilihan' : 'Masuk dengan akun dari email kampusmu' }}</span>
                         </p>
                     </header>
 
                     <div class="pass__body">
-                        @if ($status === ElectionSetting::STATUS_CLOSED)
+                        @if (! $adminDoor && $status === ElectionSetting::STATUS_CLOSED)
                             <p class="pass__note">
                                 Kamu tetap bisa masuk untuk melihat tanda terima suaramu.
                                 <a href="{{ url('/') }}#hasil">Lihat hasil penghitungan</a>
@@ -116,7 +118,9 @@
 
                     @php $contacts = \App\Models\ContactPerson::ordered()->get(); @endphp
                     <footer class="pass__foot">
-                        @if ($contacts->isNotEmpty())
+                        @if ($adminDoor)
+                            <p>Halaman ini khusus admin. Peserta masuk lewat halaman login biasa.</p>
+                        @elseif ($contacts->isNotEmpty())
                             <p>Akun dikirim ke email kampusmu (<strong>@mail.unej.ac.id</strong>). Belum menerima akun atau lupa password? Chat panitia:</p>
                             <ul>
                                 @foreach ($contacts as $contact)
