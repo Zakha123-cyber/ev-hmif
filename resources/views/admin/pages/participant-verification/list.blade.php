@@ -123,10 +123,7 @@
                                     <td data-label="Username">{{ $item->username_old ?: '-' }}</td>
                                     <td data-label="Aksi">
                                         <div class="a-actions">
-                                            <form action="{{ url('/back-admin-logged/participant-verification/edit', $item->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="a-btn a-btn--primary a-btn--sm">Ubah akun</button>
-                                            </form>
+                                            <a class="a-btn a-btn--primary a-btn--sm" href="{{ url('/back-admin-logged/participant-verification/edit/' . $item->id) }}">Ubah akun<span class="visually-hidden"> {{ $item->participant_name }}</span></a>
                                             <form action="{{ url('/back-admin-logged/participant-verification/info', $item->id) }}" method="POST">
                                                 @csrf
                                                 <button type="submit" class="a-btn a-btn--ghost a-btn--sm">Info akun</button>

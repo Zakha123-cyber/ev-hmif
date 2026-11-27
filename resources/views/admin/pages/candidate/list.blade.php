@@ -54,13 +54,10 @@
                             </div>
                         </dl>
                         <div class="a-actions">
-                            <form action="{{ url('/back-admin-logged/candidate/edit', $item->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="a-btn a-btn--primary a-btn--sm">
-                                    @include('admin.components.icon', ['name' => 'edit'])
-                                    Ubah
-                                </button>
-                            </form>
+                            <a class="a-btn a-btn--primary a-btn--sm" href="{{ url('/back-admin-logged/candidate/edit/' . $item->id) }}">
+                                @include('admin.components.icon', ['name' => 'edit'])
+                                Ubah
+                            </a>
                             <form action="{{ url('/back-admin-logged/candidate/delete', $item->id) }}" method="POST"
                                 data-confirm="Hapus Paslon {{ $item->candidate_pair }} ({{ $item->leader_name }} &amp; {{ $item->vice_leader_name }})? Tindakan ini tidak bisa dibatalkan."
                                 data-confirm-label="Ya, hapus paslon">

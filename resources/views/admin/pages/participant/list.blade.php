@@ -73,12 +73,7 @@
                                     </td>
                                     <td data-label="Aksi">
                                         <div class="a-actions">
-                                            <form action="{{ url('/back-admin-logged/participant/edit', $item->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="a-btn a-btn--primary a-btn--sm">
-                                                    Ubah
-                                                </button>
-                                            </form>
+                                            <a class="a-btn a-btn--primary a-btn--sm" href="{{ url('/back-admin-logged/participant/edit/' . $item->id) }}">Ubah<span class="visually-hidden"> {{ $item->participant_name }}</span></a>
                                             <form action="{{ url('/back-admin-logged/participant/email-backup', $item->id) }}" method="POST">
                                                 @csrf
                                                 <button type="submit" class="a-btn a-btn--ghost a-btn--sm">

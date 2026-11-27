@@ -35,7 +35,7 @@ Route::prefix('/back-admin-logged')->group(function () {
     Route::get('/candidate', [CandidateController::class, 'index']);
     Route::get('/candidate/add', [CandidateController::class, 'add']);
     Route::post('/candidate/store', [CandidateController::class, 'store']);
-    Route::post('/candidate/edit/{candidate}', [CandidateController::class, 'edit']);
+    Route::match(['get', 'post'], '/candidate/edit/{candidate}', [CandidateController::class, 'edit']);
     Route::put('/candidate/update/{candidate}', [CandidateController::class, 'update']);
     Route::delete('/candidate/delete/{candidate}', [CandidateController::class, 'destroy']);
 
@@ -43,7 +43,7 @@ Route::prefix('/back-admin-logged')->group(function () {
     Route::get('/participant/add', [ParticipantController::class, 'add']);
     Route::post('/participant/broadcast', [ParticipantController::class, 'broadcast']);
     Route::post('/participant/store', [ParticipantController::class, 'store']);
-    Route::post('/participant/edit/{participant}', [ParticipantController::class, 'edit']);
+    Route::match(['get', 'post'], '/participant/edit/{participant}', [ParticipantController::class, 'edit']);
     Route::put('/participant/update/{participant}', [ParticipantController::class, 'update']);
     Route::delete('/participant/delete/{participant}', [ParticipantController::class, 'destroy']);
     Route::post('/participant/import', [ParticipantController::class, 'import']);
@@ -51,7 +51,7 @@ Route::prefix('/back-admin-logged')->group(function () {
 
     Route::get('/participant-verification', [ParticipantController::class, 'verification']);
     Route::post('/participant-verification/verified', [ParticipantController::class, 'sendVerified']);
-    Route::post('/participant-verification/edit/{participant}', [ParticipantController::class, 'editVerification']);
+    Route::match(['get', 'post'], '/participant-verification/edit/{participant}', [ParticipantController::class, 'editVerification']);
     Route::put('/participant-verification/update/{participant}', [ParticipantController::class, 'updateVerification']);
     Route::post('/participant-verification/info/{participant}', [ParticipantController::class, 'infoVerification']);
     Route::get('/participant-verification/info/print/{participant}', [ParticipantController::class, 'printVerification']);
