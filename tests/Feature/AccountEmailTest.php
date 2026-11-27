@@ -3,7 +3,7 @@
 use App\Mail\BroadcastMail;
 use App\Models\Participant;
 
-it('builds a readable account email with the credentials, login link and current period', function () {
+it('builds a readable account email with the credentials, a link to the homepage and the current period', function () {
     $participant = (new Participant())->forceFill([
         'participant_name' => 'Joko',
         'nim' => '233061',
@@ -20,7 +20,9 @@ it('builds a readable account email with the credentials, login link and current
         ->toContain('232410103061')
         ->toContain('Ab3dEf7h')
         ->toContain('Rahasia99')
-        ->toContain(url('/login'))
+        ->toContain('href="' . url('/') . '"')
+        ->toContain('Buka situs pemilihan')
+        ->not->toContain(url('/login'))
         ->toContain('2025/2026')
         ->not->toContain('—');
 });

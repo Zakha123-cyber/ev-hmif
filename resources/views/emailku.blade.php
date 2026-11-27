@@ -3,7 +3,9 @@
     // Gmail, Outlook, dan aplikasi email HP (CSS eksternal/flex tidak didukung).
     $period = $setting->periodLabel();
     $campusNim = $data->campusNim();
-    $loginUrl = url('/login');
+    // Ke halaman awal dulu (jadwal, paslon), baru masuk. Alamat mengikuti domain
+    // situs saat email dikirim (APP_URL saat lewat antrean/terminal).
+    $siteUrl = url('/');
     // Logo disisipkan ke dalam email (CID), bukan ditautkan ke situs: tetap tampil
     // walau situs belum online / APP_URL masih localhost. $message hanya ada saat
     // email benar-benar dikirim; saat dirender untuk pratinjau dipakai URL biasa.
@@ -110,15 +112,15 @@
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
                                     <td align="center" bgcolor="#FFE500" style="border-radius:8px;">
-                                        <a href="{{ $loginUrl }}" target="_blank"
+                                        <a href="{{ $siteUrl }}" target="_blank"
                                             style="display:inline-block; padding:15px 34px; font-size:17px; font-weight:800; color:{{ $ink }}; text-decoration:none; border-radius:8px;">
-                                            Masuk dan pilih
+                                            Buka situs pemilihan
                                         </a>
                                     </td>
                                 </tr>
                             </table>
                             <p style="margin:10px 0 0; font-size:12px; color:{{ $muted }};">
-                                Atau buka: <a href="{{ $loginUrl }}" style="color:#1C6B63;">{{ $loginUrl }}</a>
+                                Atau buka: <a href="{{ $siteUrl }}" style="color:#1C6B63;">{{ $siteUrl }}</a>
                             </p>
                         </td>
                     </tr>
@@ -128,7 +130,7 @@
                         <td style="padding:0 28px 8px; font-size:15px; line-height:1.6;">
                             <p style="margin:0 0 8px; font-weight:700;">Cara memilih</p>
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                                @foreach (['Tekan tombol "Masuk dan pilih" di atas.', 'Masukkan username dan password dari email ini.', 'Ketuk foto paslon pilihanmu, lalu tekan Kirim suara. Suara hanya bisa dikirim sekali.'] as $i => $step)
+                                @foreach (['Buka situs pemilihan lewat tombol di atas. Kamu bisa melihat jadwal dan mengenal paslon lebih dulu.', 'Tekan Masuk, lalu ketik username dan password dari email ini.', 'Ketuk foto paslon pilihanmu, lalu tekan Kirim suara. Suara hanya bisa dikirim sekali.'] as $i => $step)
                                     <tr>
                                         <td style="vertical-align:top; padding:0 10px 8px 0;">
                                             <span style="display:inline-block; width:24px; height:24px; line-height:24px; text-align:center; border-radius:50%; background:{{ $teal }}; color:{{ $ink }}; font-size:13px; font-weight:800;">{{ $i + 1 }}</span>
