@@ -65,7 +65,7 @@
                                                 </span>
                                             </label>
                                             {{-- Di luar label: membuka surat tidak ikut mencoblos --}}
-                                            <button type="button" class="ballot__info" data-letter-open="surat-{{ $candidate->id }}">Visi &amp; misi</button>
+                                            <button type="button" class="ballot__info" data-letter-open="surat-{{ $candidate->id }}" commandfor="surat-{{ $candidate->id }}" command="show-modal">Visi &amp; misi</button>
                                         </li>
                                     @endforeach
                                 </ol>
@@ -95,6 +95,11 @@
                             </div>
                         </div>
                     </dialog>
+
+                    {{-- Kotak suara yang naik dari bawah layar saat surat dikirim (animasi lipat) --}}
+                    <div class="ballot-box" aria-hidden="true">
+                        <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="" loading="lazy">
+                    </div>
                 @endif
             </div>
         </div>

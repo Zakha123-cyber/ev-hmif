@@ -63,6 +63,24 @@
     });
 })();
 
+// Tutup surat hanya jika tekan DAN lepas terjadi di latar gelap, bukan saat
+// menyeleksi teks yang berakhir di luar kertas atau mengklik tepi surat.
+function closeOnBackdrop(letter) {
+    let pressedOutside = false;
+    function outsidePaper(event) {
+        const box = letter.getBoundingClientRect();
+        return event.target === letter && (event.clientX < box.left || event.clientX > box.right
+            || event.clientY < box.top || event.clientY > box.bottom);
+    }
+    letter.addEventListener('pointerdown', function (event) {
+        pressedOutside = outsidePaper(event);
+    });
+    letter.addEventListener('click', function (event) {
+        if (pressedOutside && outsidePaper(event)) letter.close();
+        pressedOutside = false;
+    });
+}
+
 // Amplop paslon: tutup amplop terbuka dulu, baru surat (dialog) muncul.
 // Terpisah dari slider agar tetap jalan saat "kurangi gerakan" aktif.
 (function () {
@@ -92,25 +110,38 @@
                 }, reduceMotion.matches ? 0 : FLAP_MS);
             });
 
-            // Tutup hanya jika tekan DAN lepas terjadi di latar gelap, bukan saat
-            // menyeleksi teks yang berakhir di luar kertas atau mengklik tepi surat.
-            let pressedOutside = false;
-            function outsidePaper(event) {
-                const box = letter.getBoundingClientRect();
-                return event.target === letter && (event.clientX < box.left || event.clientX > box.right
-                    || event.clientY < box.top || event.clientY > box.bottom);
-            }
-            letter.addEventListener('pointerdown', function (event) {
-                pressedOutside = outsidePaper(event);
-            });
-            letter.addEventListener('click', function (event) {
-                if (pressedOutside && outsidePaper(event)) letter.close();
-                pressedOutside = false;
-            });
+            closeOnBackdrop(letter);
 
             letter.addEventListener('close', function () {
                 envelope.classList.remove('is-opening');
                 envelope.focus();
+            });
+        });
+    });
+})();
+
+// Tombol "Visi & misi" di surat suara /vote: membuka surat paslon yang sama
+// dengan amplop, tanpa animasi tutup amplop. Fokus kembali ke tombolnya.
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-letter-open]').forEach(function (button) {
+            const letter = document.getElementById(button.dataset.letterOpen);
+            if (!letter || typeof letter.showModal !== 'function') return;
+
+            // JS mengambil alih dari atribut bawaan (dipakai bila JS tidak jalan).
+            button.removeAttribute('command');
+            button.removeAttribute('commandfor');
+
+            button.addEventListener('click', function () {
+                if (letter.open) return;
+                letter.querySelectorAll('img[loading="lazy"]').forEach(function (img) {
+                    img.loading = 'eager';
+                });
+                letter.showModal();
+            });
+            closeOnBackdrop(letter);
+            letter.addEventListener('close', function () {
+                button.focus();
             });
         });
     });
