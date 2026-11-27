@@ -37,7 +37,8 @@ it('says the schedule has not been announced when none is set', function () {
 it('uses the shared layout instead of Bootstrap and SweetAlert', function () {
     $response = $this->actingAs($this->voter)->get('/vote');
 
-    $response->assertSee('site-header--solid', false)
+    $response->assertDontSee('site-header--solid', false)
+        ->assertSee('data-site-header', false)
         ->assertSee('action="' . route('logout') . '"', false)
         ->assertSee('Keluar')
         ->assertSee('2025/2026')

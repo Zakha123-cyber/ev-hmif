@@ -20,8 +20,8 @@
 <body class="vote-body">
     <a class="skip-link" href="#isi">Langsung ke isi halaman</a>
 
-    {{-- Tidak ada foto di belakangnya, jadi navbar selalu solid --}}
-    <header class="site-header site-header--solid" data-site-header>
+    {{-- Sama seperti halaman awal: transparan di atas pita teal, kaca buram saat digulir --}}
+    <header class="site-header" data-site-header>
         <div class="container site-header__inner">
             <a href="{{ url('/') }}" class="site-header__logo">
                 <img src="{{ asset('frontend/images/home/logo-election-vote.webp') }}" width="313" height="160"
