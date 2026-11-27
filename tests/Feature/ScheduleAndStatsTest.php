@@ -14,21 +14,21 @@ it('does not say the election is over on the login page in the afternoon before 
     setSchedule('2026-12-02 08:00', '2026-12-02 15:00');
     $this->travelTo(Carbon::parse('2026-12-01 16:00'));
 
-    $this->get('/login')->assertOk()->assertDontSee('Election Vote Selesai!');
+    $this->get('/login')->assertOk()->assertDontSee('Pemilihan sudah selesai');
 });
 
 it('says the election is over on the login page once voting has closed', function () {
     setSchedule('2026-12-01 08:00', '2026-12-01 12:00');
     $this->travelTo(Carbon::parse('2026-12-01 13:00'));
 
-    $this->get('/login')->assertOk()->assertSee('Election Vote Selesai!');
+    $this->get('/login')->assertOk()->assertSee('Pemilihan sudah selesai');
 });
 
 it('shows the normal login title while voting is open', function () {
     setSchedule('2026-12-01 08:00', '2026-12-01 17:00');
     $this->travelTo(Carbon::parse('2026-12-01 16:00'));
 
-    $this->get('/login')->assertOk()->assertSee('Election Login')->assertDontSee('Election Vote Selesai!');
+    $this->get('/login')->assertOk()->assertSee('Masuk untuk memilih')->assertSee('Sedang berlangsung')->assertDontSee('Pemilihan sudah selesai');
 });
 
 // --- Statistik hanya menghitung peserta, bukan admin ---

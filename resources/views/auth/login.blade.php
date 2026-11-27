@@ -1,79 +1,131 @@
+@php
+    use App\Models\ElectionSetting;
+
+    $when = fn ($date) => $date->copy()->locale('id')->translatedFormat('l, j F') . ' pukul ' . $date->format('H.i') . ' WIB';
+    $title = match ($status) {
+        ElectionSetting::STATUS_OPEN => 'Masuk untuk memilih',
+        ElectionSetting::STATUS_CLOSED => 'Pemilihan sudah selesai',
+        default => 'Masuk ke akunmu',
+    };
+    $error = implode(' ', $errors->all());
+    $cogito = \App\Support\CogitoLines::login($setting);
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="no-js">
+<html lang="id">
 
 <head>
-    <title>Login Election Vote</title>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" href="images/icons/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('assetBack/vendor/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('assetBack/fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assetBack/vendor/animate/animate.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assetBack/vendor/css-hamburgers/hamburgers.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assetBack/vendor/select2/select2.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assetBack/css/util.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assetBack/css/main.css') }}">
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <title>{{ $title }} | Election Vote HMIF</title>
+    <link rel="icon" href="{{ asset('frontend/images/logo_election_vote.png') }}" type="image/png">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Plus+Jakarta+Sans:wght@400;600&display=swap">
+    <script>document.documentElement.classList.add('js');</script>
+    <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}?v={{ filemtime(public_path('frontend/css/home.css')) }}">
+    <link rel="stylesheet" href="{{ asset('frontend/css/login.css') }}?v={{ filemtime(public_path('frontend/css/login.css')) }}">
+    <script src="{{ asset('frontend/js/home.js') }}?v={{ filemtime(public_path('frontend/js/home.js')) }}" defer></script>
+    <script src="{{ asset('frontend/js/login.js') }}?v={{ filemtime(public_path('frontend/js/login.js')) }}" defer></script>
 </head>
 
-<body>
-    <div class="limiter">
-        <div class="container-login100" style="background-image: url({{ asset('frontend/images/bg-compress.jpg') }})">
-            {{-- <div class="container-login100"> --}}
-            <div class="wrap-login100">
-                <div class="login100-pic js-tilt" data-tilt>
-                    <img src="{{ asset('frontend/images/logo_election_vote.png') }}" alt="IMG">
+<body class="login-body">
+    <a class="skip-link" href="#username">Langsung ke kolom username</a>
+
+    <main class="login">
+        {{-- Foto pengurus HMIF: pintu masuk ke "bilik suara" --}}
+        <section class="login__scene" aria-labelledby="judul">
+            <img class="login__photo" src="{{ asset('frontend/images/home/foto-1-1200.webp') }}"
+                srcset="{{ asset('frontend/images/home/foto-1-1200.webp') }} 1200w, {{ asset('frontend/images/home/foto-1-2400.webp') }} 2400w"
+                sizes="(min-width: 960px) 55vw, 100vw" width="2400" height="1350" fetchpriority="high" alt="">
+            <div class="login__scrim" aria-hidden="true"></div>
+
+            <div class="login__intro">
+                <a href="{{ url('/') }}" class="login__logo">
+                    <img src="{{ asset('frontend/images/home/logo-election-vote.webp') }}" width="313" height="160" alt="Election Vote HMIF, ke halaman awal">
+                </a>
+                <div>
+                    <h1 id="judul" class="login__title">{{ $title }}</h1>
+                    <p class="login__status">
+                        @switch($status)
+                            @case(ElectionSetting::STATUS_OPEN)
+                                <span class="live-dot" aria-hidden="true"></span>Sedang berlangsung sampai {{ $when($setting->vote_end) }}
+                                @break
+                            @case(ElectionSetting::STATUS_UPCOMING)
+                                Dibuka {{ $when($setting->vote_start) }}
+                                @break
+                            @case(ElectionSetting::STATUS_CLOSED)
+                                Ditutup {{ $when($setting->vote_end) }}
+                                @break
+                            @default
+                                Jadwal pemilihan belum diumumkan
+                        @endswitch
+                    </p>
+                    <p class="login__period">Pemilihan Ketua dan Wakil Ketua HMIF periode {{ config('election.period') }}</p>
                 </div>
-                <form class="login100-form validate-form" method="POST" action="{{ route('login') }}">
+            </div>
+        </section>
+
+        <section class="login__panel" aria-label="Formulir masuk">
+            <div class="login__panel-inner">
+                <a class="login__back" href="{{ url('/') }}">Kembali ke halaman awal</a>
+
+                {{-- Kartu pemilih: kop, isian, lalu sobekan berisi bantuan --}}
+                <form class="pass" method="POST" action="{{ route('login') }}" novalidate data-login-form>
                     @csrf
-                    @if ($voting_closed)
-                        <span class="login100-form-title" style="color: white;">Election Vote Selesai!</span>
-                    @else
-                        <span class="login100-form-title" style="color: white;">Election Login</span>
-                    @endif
+                    <header class="pass__head">
+                        <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="">
+                        <p>
+                            <strong>Kartu pemilih</strong>
+                            <span>Masuk dengan akun dari email kampusmu</span>
+                        </p>
+                    </header>
 
-                    @if ($errors->any())
-                        <div class="alert alert-danger" role="alert" style="font-size: 14px;">
-                            @foreach ($errors->all() as $error)
-                                <div>{{ $error }}</div>
-                            @endforeach
+                    <div class="pass__body">
+                        @if ($status === ElectionSetting::STATUS_CLOSED)
+                            <p class="pass__note">
+                                Kamu tetap bisa masuk untuk melihat tanda terima suaramu.
+                                <a href="{{ url('/') }}#hasil">Lihat hasil penghitungan</a>
+                            </p>
+                        @endif
+
+                        @if ($error)
+                            <p class="pass__error" id="login-error" role="alert">{{ $error }}</p>
+                        @endif
+
+                        <div class="pass__field">
+                            <label for="username">Username</label>
+                            <input id="username" name="username" type="text" value="{{ old('username') }}"
+                                autocomplete="username" autocapitalize="none" spellcheck="false" required
+                                @if ($error) aria-invalid="true" aria-describedby="login-error" autofocus @endif>
                         </div>
-                    @endif
 
-                    <div class="wrap-input100 validate-input" data-validate = "Valid username is required">
-                        <input class="input100" type="text" name="username" placeholder="Username" value="{{ old('username') }}">
-                        <span class="focus-input100"></span>
-                        <span class="symbol-input100"><i class="fa fa-user" aria-hidden="true"></i></span>
+                        <div class="pass__field">
+                            <label for="password">Password</label>
+                            <div class="pass__password">
+                                <input id="password" name="password" type="password" autocomplete="current-password" required
+                                    @if ($error) aria-invalid="true" aria-describedby="login-error" @endif>
+                                <button type="button" class="pass__toggle" data-password-toggle aria-controls="password" aria-pressed="false" hidden>Tampilkan</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn--primary pass__submit" data-login-submit>Masuk</button>
                     </div>
-                    <div class="wrap-input100 validate-input" data-validate = "Password is required">
-                        <input class="input100" type="password" name="password" placeholder="Password">
-                        <span class="focus-input100"></span>
-                        <span class="symbol-input100"> <i class="fa fa-lock" aria-hidden="true"></i></span>
-                    </div>
-                    <div class="container-login100-form-btn">
-                        <button class="login100-form-btn" type="submit">
-                            Login
-                        </button>
-                    </div>
+
+                    <footer class="pass__foot">
+                        <p>Akun dikirim ke email kampusmu (<strong>@mail.unej.ac.id</strong>). Belum menerima akun atau lupa password? Chat panitia:</p>
+                        <ul>
+                            <li><a href="https://wa.me/6283823093973">Farda, 0838 2309 3973</a></li>
+                            <li><a href="https://wa.me/6283852061105">Dewi, 0838 5206 1105</a></li>
+                        </ul>
+                    </footer>
                 </form>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <script src="{{ asset('assetBack/vendor/jquery/jquery-3.2.1.min.js') }}"></script>
-    <script src="{{ asset('assetBack/vendor/bootstrap/js/popper.js') }}"></script>
-    <script src="{{ asset('assetBack/vendor/bootstrap/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('assetBack/vendor/select2/select2.min.js') }}"></script>
-    <script src="{{ asset('assetBack/vendor/tilt/tilt.jquery.min.js') }}"></script>
-    <script>
-        $('.js-tilt').tilt({
-            scale: 1.1
-        })
-    </script>
-    <script src="{{ asset('assetBack/js/main.js') }}"></script>
+        {{-- HP: pojok kanan bawah seperti halaman lain; desktop: kanan atas foto (login.css) --}}
+        @include('partials.cogito', ['pose' => 'salam', 'variant' => 'corner', 'lines' => $cogito['lines']])
+    </main>
 </body>
 
 </html>

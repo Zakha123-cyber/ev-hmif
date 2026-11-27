@@ -18,8 +18,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
+        $setting = ElectionSetting::current();
+
         return view('auth.login', [
-            'voting_closed' => ElectionSetting::current()->status() === ElectionSetting::STATUS_CLOSED,
+            'setting' => $setting,
+            'status' => $setting->status(),
         ]);
     }
 

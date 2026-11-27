@@ -98,6 +98,27 @@ class CogitoLines
         return ['key' => "vote:{$page}", 'lines' => $lines];
     }
 
+    /** Halaman login: cara masuk, info akun, keamanan, dan sedikit candaan. */
+    public static function login(ElectionSetting $setting): array
+    {
+        $lead = match ($setting->status()) {
+            ElectionSetting::STATUS_OPEN => 'Halo! Ketik username dan password dari email akunmu, lalu masuk.',
+            ElectionSetting::STATUS_CLOSED => 'Pemilihan sudah selesai. Kamu masih bisa masuk untuk melihat tanda terimamu.',
+            default => 'Halo! Aku COGITO. Masuk pakai akun dari email kampusmu.',
+        };
+
+        return ['key' => 'login', 'lines' => [
+            self::line($lead),
+            self::line(self::MAIL),
+            self::line('Password membedakan huruf besar dan kecil. Ketik pelan-pelan, ya.'),
+            self::line('Jangan bagikan password ke siapa pun. Termasuk aku.'),
+            self::line(self::HELP),
+            self::line(self::ONE_VOTE),
+            self::line(self::HAT),
+            self::line(self::WAVE),
+        ]];
+    }
+
     private static function homeLines(string $who, ElectionSetting $setting, string $status, ?User $user): array
     {
         $results = ['label' => 'Lihat hasil', 'href' => '#hasil'];
