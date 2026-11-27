@@ -13,7 +13,7 @@
             @if ($scheduled)
                 <h1 id="judul" class="vote-hero__title">Pemilihan belum dibuka</h1>
                 <p class="vote-hero__lead">
-                    Pemilihan Ketua dan Wakil Ketua HMIF periode {{ config('election.period') }} dibuka
+                    Pemilihan Ketua dan Wakil Ketua HMIF periode {{ $setting->periodLabel() }} dibuka
                     <strong>{{ $start->translatedFormat('l, j F Y') }}</strong> pukul {{ $start->format('H.i') }} WIB.
                     Surat suara muncul di halaman ini begitu waktunya tiba.
                 </p>
@@ -21,7 +21,7 @@
             @else
                 <h1 id="judul" class="vote-hero__title">Jadwal belum diumumkan</h1>
                 <p class="vote-hero__lead">
-                    Panitia belum menetapkan waktu pemilihan Ketua dan Wakil Ketua HMIF periode {{ config('election.period') }}.
+                    Panitia belum menetapkan waktu pemilihan Ketua dan Wakil Ketua HMIF periode {{ $setting->periodLabel() }}.
                     Surat suara muncul di halaman ini saat pemilihan dibuka.
                 </p>
             @endif

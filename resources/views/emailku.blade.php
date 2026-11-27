@@ -11,7 +11,7 @@
     <h2 style="margin-bottom: 12px; font-size: 20px;">Hai Infortination..</h2>
 
     <p>
-        Hari ini pemilihan Ketua dan Wakil Ketua Umum HMIF Periode 2025/2026 resmi dimulai.
+        Hari ini pemilihan Ketua dan Wakil Ketua Umum HMIF Periode {{ \App\Models\ElectionSetting::current()->periodLabel() }} resmi dimulai.
         Berikut akun yang bisa kamu gunakan untuk memilih:
     </p>
 

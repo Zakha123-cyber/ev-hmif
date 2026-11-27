@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * Pengaturan pemilihan (satu baris). Jadwal diatur admin lewat panel.
+ * Pengaturan pemilihan (satu baris). Jadwal dan periode diatur admin lewat panel.
  */
 class ElectionSetting extends Model
 {
@@ -15,7 +15,7 @@ class ElectionSetting extends Model
     public const STATUS_OPEN = 'open';
     public const STATUS_CLOSED = 'closed';
 
-    protected $fillable = ['vote_start', 'vote_end'];
+    protected $fillable = ['period', 'vote_start', 'vote_end'];
 
     protected $casts = [
         'vote_start' => 'datetime',
@@ -44,6 +44,12 @@ class ElectionSetting extends Model
         }
 
         return self::STATUS_OPEN;
+    }
+
+    /** Periode yang ditampilkan, mis. "2025/2026". Belum diisi admin = nilai bawaan config. */
+    public function periodLabel(): string
+    {
+        return $this->period ?: (string) config('election.period');
     }
 
     public function isOpen(?Carbon $now = null): bool

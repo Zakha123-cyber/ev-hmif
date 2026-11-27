@@ -37,7 +37,7 @@
                                 <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="">
                                 <p>
                                     <strong>Surat suara</strong>
-                                    <span>Pemilihan Ketua dan Wakil Ketua HMIF periode {{ config('election.period') }}</span>
+                                    <span>Pemilihan Ketua dan Wakil Ketua HMIF periode {{ $setting->periodLabel() }}</span>
                                 </p>
                             </header>
 

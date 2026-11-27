@@ -144,3 +144,38 @@ it('forbids participants from changing the schedule', function () {
         ])
         ->assertForbidden();
 });
+
+// --- Periode diatur dari panel admin ---
+
+it('lets an admin set the period and shows it on every public page', function () {
+    $admin = makeUserWithRole('Admin', 'admin1');
+
+    $this->actingAs($admin)
+        ->put('/back-admin-logged/election-schedule', [
+            'period' => '2026/2027',
+            'vote_start' => '2026-12-01T08:00',
+            'vote_end' => '2026-12-01T15:00',
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect(ElectionSetting::current()->period)->toBe('2026/2027');
+
+    auth()->logout();
+    $this->get('/')->assertSee('Periode 2026/2027')->assertSee('<title>Pemilihan Ketua HMIF 2026/2027', false)->assertDontSee('2025/2026');
+    $this->get('/login')->assertSee('periode 2026/2027')->assertDontSee('2025/2026');
+
+    $voter = makeUserWithRole('Participant', 'voter1');
+    $this->actingAs($voter)->get('/vote')->assertSee('periode 2026/2027')->assertDontSee('2025/2026');
+});
+
+it('rejects a period that is not two consecutive years', function (string $period) {
+    $admin = makeUserWithRole('Admin', 'admin1');
+
+    $this->actingAs($admin)
+        ->put('/back-admin-logged/election-schedule', [
+            'period' => $period,
+            'vote_start' => '2026-12-01T08:00',
+            'vote_end' => '2026-12-01T15:00',
+        ])
+        ->assertSessionHasErrors('period');
+})->with(['2026', '2026-2027', '2026/2028', 'abcd/efgh']);

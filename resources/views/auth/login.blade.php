@@ -59,7 +59,7 @@
                                 Jadwal pemilihan belum diumumkan
                         @endswitch
                     </p>
-                    <p class="login__period">Pemilihan Ketua dan Wakil Ketua HMIF periode {{ config('election.period') }}</p>
+                    <p class="login__period">Pemilihan Ketua dan Wakil Ketua HMIF periode {{ $setting->periodLabel() }}</p>
                 </div>
             </div>
         </section>

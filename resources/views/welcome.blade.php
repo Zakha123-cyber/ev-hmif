@@ -16,8 +16,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pemilihan Ketua HMIF 2025/2026 | Election Vote</title>
-    <meta name="description" content="Jadwal, pasangan calon, dan hasil pemilihan Ketua dan Wakil Ketua Umum Himpunan Mahasiswa Informatika Universitas Jember periode 2025/2026.">
+    <title>Pemilihan Ketua HMIF {{ $setting->periodLabel() }} | Election Vote</title>
+    <meta name="description" content="Jadwal, pasangan calon, dan hasil pemilihan Ketua dan Wakil Ketua Umum Himpunan Mahasiswa Informatika Universitas Jember periode {{ $setting->periodLabel() }}.">
     <link rel="icon" href="{{ asset('frontend/images/logo_election_vote.png') }}" type="image/png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -70,7 +70,7 @@
                 <div class="container hero__inner">
                     <h1 id="judul" class="hero__title">
                         Pemilihan Ketua dan Wakil Ketua Umum HMIF
-                        <span class="hero__period">Periode 2025/2026</span>
+                        <span class="hero__period">Periode {{ $setting->periodLabel() }}</span>
                     </h1>
                 </div>
             </section>

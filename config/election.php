@@ -16,10 +16,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Periode kepengurusan yang dipilih
+    | Periode kepengurusan bawaan
     |--------------------------------------------------------------------------
     |
-    | Ditampilkan di halaman /vote. Ganti tiap tahun pemilihan.
+    | Nilai bawaan bila admin belum mengisi Periode di halaman Jadwal Pemilihan.
     |
     */
 

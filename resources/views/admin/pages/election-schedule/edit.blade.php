@@ -21,10 +21,20 @@
             <p class="text-gray-600 text-sm mb-4">
                 Peserta hanya bisa mengirim suara di antara Waktu Dibuka dan Waktu Ditutup (zona waktu WIB).
                 Jika jadwal belum diatur, pemilihan dianggap belum dibuka.
+                Periode tampil di halaman awal, halaman memilih, halaman login, dan email pengumuman.
             </p>
             <form method="POST" action="{{ url('/back-admin-logged/election-schedule') }}">
                 @csrf
                 @method('PUT')
+                <div class="mb-4 max-w-xs">
+                    <label for="period" class="text-gray-700 ml-1"> Periode kepengurusan : </label>
+                    <input type="text" id="period" name="period" inputmode="numeric" placeholder="{{ config('election.period') }}" class="form-input w-full block rounded mt-1 p-3 border-2 @error('period') border-red-500 @enderror focus:outline-none focus:border-teal-500" value="{{ old('period', $setting->period ?: config('election.period')) }}">
+                    @error('period')
+                    <span class="pl-1 text-xs text-red-600 text-bold">
+                        {{ $message }}
+                    </span>
+                    @enderror
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-gray-700 ml-1"> Waktu Dibuka : </label>
