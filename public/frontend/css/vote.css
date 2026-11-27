@@ -440,11 +440,12 @@
 }
 
 .ballot__person:first-child {
+    padding-bottom: 26px;
     border-bottom: 2px solid #CFE3E0;
 }
 
 .ballot__person:last-child {
-    padding-top: 20px;
+    padding-top: 26px;
 }
 
 .ballot__role {
@@ -467,17 +468,19 @@
 .ballot__and {
     position: relative;
     z-index: 1;
-    width: 30px;
-    height: 34px;
-    margin: -18px auto -16px;
+    width: 40px;
+    height: 46px;
+    margin: -24px auto -22px;
     display: grid;
     place-items: center;
     clip-path: var(--hexagon);
-    background: var(--teal);
-    color: var(--ink);
+    /* Hijau tua + putih: tanda "&" harus terbaca jelas, bukan terlihat seperti ikon */
+    background: var(--deep);
+    color: var(--paper);
     font-family: var(--font-display);
-    font-size: 15px;
-    font-weight: 900;
+    font-size: 22px;
+    font-weight: 800;
+    font-variation-settings: 'wdth' 100;
     line-height: 1;
 }
 
