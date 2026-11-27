@@ -28,10 +28,15 @@ class VoteController extends Controller
             default => 'vote_prepare',
         };
 
+        $user = Auth::user();
+
         return view($view, [
-            'user' => Auth::user(),
-            'candidates' => Candidate::all(),
+            'user' => $user,
+            'candidates' => Candidate::orderBy('candidate_pair')->get(),
             'setting' => $setting,
+            // Untuk tanda terima: kapan suara masuk, tanpa menyebut pilihannya.
+            'votedAt' => Count::where('user_id', $user->id)->value('created_at'),
+            'justVoted' => (bool) session('just_voted'),
         ]);
     }
 
@@ -46,8 +51,10 @@ class VoteController extends Controller
             ],
         );
 
+        $recorded = false;
+
         try {
-            DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request, &$recorded) {
                 // Kunci baris user agar dua request bersamaan dari akun yang sama diproses bergantian.
                 $user = User::whereKey(Auth::id())->lockForUpdate()->first();
 
@@ -57,6 +64,7 @@ class VoteController extends Controller
                         'candidate_id' => $request->candidate_id,
                         'user_id' => $user->id,
                     ]);
+                    $recorded = true;
                 }
 
                 $user->status = 'voted';
@@ -67,6 +75,7 @@ class VoteController extends Controller
             User::whereKey(Auth::id())->update(['status' => 'voted']);
         }
 
-        return redirect('/vote');
+        // Hanya suara yang baru tersimpan memutar animasi surat masuk kotak.
+        return $recorded ? redirect('/vote')->with('just_voted', true) : redirect('/vote');
     }
 }

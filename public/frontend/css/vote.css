@@ -74,6 +74,141 @@
     margin-top: 8px;
 }
 
+/* Halaman satu pesan (tanda terima, ditutup): isi di tengah, pita mengisi layar
+   agar footer tidak naik ke tengah halaman. */
+.vote-hero--center {
+    min-height: calc(100svh - 72px - 120px);
+    display: grid;
+    align-items: center;
+    text-align: center;
+}
+
+.vote-hero--center .vote-hero__inner {
+    justify-items: center;
+}
+
+.vote-hero__actions {
+    margin: 8px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* Tombol gelap untuk di atas teal: kuning disimpan untuk aksi utama */
+.btn--ink {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.btn--ink:hover {
+    background: var(--deep);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.btn--ink:active {
+    background: var(--paper);
+    color: var(--ink);
+}
+
+/* ---------- Tanda terima ---------- */
+
+/* Kotak suara hijau tua dengan surat terlipat yang mencuat dari celahnya.
+   Gambar ini satu-satunya ilustrasi di /vote: penutup dari alur mencoblos. */
+.receipt__art {
+    position: relative;
+    width: 200px;
+    height: 176px;
+    margin-bottom: 8px;
+}
+
+.receipt__paper {
+    position: absolute;
+    left: 50%;
+    top: 4px;
+    width: 104px;
+    height: 120px;
+    margin-left: -52px;
+    display: grid;
+    place-items: start center;
+    padding-top: 14px;
+    background-color: var(--paper);
+    border: 2px solid var(--deep);
+    border-radius: 3px;
+    /* Garis lipatan di tengah kertas */
+    background-image: linear-gradient(180deg, transparent 0 calc(50% - 1px), #CFE3E0 calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
+}
+
+.receipt__seal.hex-number {
+    width: 34px;
+    height: 38px;
+    font-size: 0;
+}
+
+.receipt__box {
+    position: absolute;
+    inset: auto 0 0;
+    height: 112px;
+    display: grid;
+    place-items: center;
+    background: var(--deep);
+    border-radius: var(--radius);
+    /* Celah di bibir atas kotak */
+    box-shadow: inset 0 10px 0 #0A2826;
+}
+
+.receipt__box::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 34px;
+    right: 34px;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--ink);
+}
+
+.receipt__box img {
+    width: 64px;
+    height: auto;
+    margin-top: 10px;
+}
+
+.receipt__time {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    font-variation-settings: 'wdth' 100;
+    color: var(--ink);
+}
+
+/* Tepat setelah mengirim: surat turun masuk ke celah sekali, lalu diam. */
+.receipt[data-just-voted] .receipt__paper {
+    animation: receipt-drop .7s cubic-bezier(.3, 0, .2, 1) .15s both;
+}
+
+.receipt[data-just-voted] .receipt__box {
+    animation: receipt-settle .25s ease-out .85s both;
+}
+
+@keyframes receipt-drop {
+    from {
+        transform: translateY(-64px) rotate(-4deg);
+    }
+
+    to {
+        transform: none;
+    }
+}
+
+@keyframes receipt-settle {
+    50% {
+        transform: translateY(3px);
+    }
+}
+
 /* ---------- Bagian isi ---------- */
 
 .vote-section {
@@ -105,5 +240,12 @@
     .vote-hero {
         background-size: 300px 300px;
         background-position: right -60px bottom -90px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .receipt[data-just-voted] .receipt__paper,
+    .receipt[data-just-voted] .receipt__box {
+        animation: none;
     }
 }
