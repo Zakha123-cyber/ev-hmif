@@ -26,4 +26,15 @@ return [
 
     'mascot_path' => 'frontend/3d/cogito.glb',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Periode kepengurusan yang dipilih
+    |--------------------------------------------------------------------------
+    |
+    | Ditampilkan di halaman /vote. Ganti tiap tahun pemilihan.
+    |
+    */
+
+    'period' => '2025/2026',
+
 ];

@@ -1,101 +1,109 @@
-@font-face {
-    font-family: 'poppins-regular';
-    src: url("../fonts/poppins/Poppins-Regular.ttf");
-    font-weight: normal;
-    font-style: normal;
+/*
+ * Halaman /vote (surat suara, tanda terima, belum dibuka, ditutup).
+ * Dimuat setelah home.css: token warna, huruf, tombol, amplop, surat, dan hitung
+ * mundur diambil dari sana. File ini hanya berisi bagian khusus /vote.
+ */
+
+/* Tanpa foto di belakangnya: navbar selalu hijau tua, juga saat digulir
+   (kaca buram di atas kertas putih membuat teks putih pudar). */
+.site-header--solid,
+.js .site-header--solid:not(.is-scrolled),
+.site-header--solid.is-scrolled {
+    background: var(--deep);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
 }
 
-@font-face {
-    font-family: 'poppins-bold';
-    src: url("../fonts/poppins/Poppins-Bold.ttf");
-    font-weight: normal;
-    font-style: normal;
+/* Ruang setinggi navbar tetap */
+.vote-main {
+    padding-top: 72px;
 }
 
-@font-face {
-    font-family: 'poppins-black';
-    src: url("../fonts/poppins/Poppins-Black.ttf");
-    font-weight: bold;
-    font-style: normal;
+.vote-main:focus {
+    outline: none;
 }
 
-:root {
-    --primary-color: #31BDAA;
-    --secondary-color: #f48c06;
-}
+/* ---------- Pita judul ---------- */
 
-body {
-    font-family: 'poppins-regular';
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 1.8;
-    color: #777;
-    background: #fff;
-}
-
-.img-responsive {
-    display: block;
-    max-width: 100%;
-    height: auto;
-}
-
-.radius-image {
-    border-radius: 20% 2% 20% 2%;
-}
-
-.img-shadow {
+/* Pita teal bermotif heksagon, sama seperti pita jadwal di halaman awal,
+   supaya /vote terasa satu rangkaian dengan halaman awal. */
+.vote-hero {
     position: relative;
-    border: 4px solid #31BDAA;
-    border-radius: 20% 2% 20% 2%;
-    width: 100%;
-    float: left;
-    margin-bottom: 30px;
+    overflow: hidden;
+    background-color: var(--teal);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='%230E3532' stroke-opacity='.16' stroke-width='6'%3E%3Cpath d='M100 8l40 23v46l-40 23-40-23V31z'/%3E%3Cpath d='M58 82l40 23v46l-40 23-40-23v-46z'/%3E%3Cpath d='M142 82l40 23v46l-40 23-40-23v-46z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 220px 220px;
+    background-position: right -80px bottom -60px;
+    color: var(--ink);
 }
 
-.img-shadow img {
-    position: relative;
-    top: -20px;
-    right: -20px;
+/* Di atas teal, cincin fokus teal-ink terlalu pudar: pakai tinta */
+.vote-hero :focus-visible {
+    outline-color: var(--ink);
 }
 
-.gtco-nav #gtco-logo {
-    font-size: 30px;
-    line-height: 1;
+.vote-hero__inner {
+    display: grid;
+    gap: 16px;
+    padding-block: 40px 44px;
+}
+
+.vote-hero__title {
     margin: 0;
-    padding: 0;
-    font-weight: bold;
+    font-family: var(--font-display);
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 900;
+    font-variation-settings: 'wdth' 112;
+    line-height: 1.02;
+    overflow-wrap: anywhere;
 }
 
-.gtco-nav ul li {
-    padding: 0;
+.vote-hero__lead {
     margin: 0;
-    list-style: none;
-    display: inline;
+    max-width: 62ch;
+    color: var(--deep);
+    font-size: 17px;
 }
 
-.logo-nav {
-    width: 100px;
-    filter: drop-shadow(0px 0px 5px #000);
+.vote-hero__lead strong {
+    color: var(--ink);
 }
 
+.vote-hero .countdown {
+    margin-top: 8px;
+}
 
-.button-custom {
-    background-color: var(--secondary-color);
-    border-radius: 10px;
-    border: none;
-    color: #eeeeee;
+/* ---------- Bagian isi ---------- */
+
+.vote-section {
+    padding-block: 56px 88px;
+}
+
+.vote-section__intro {
+    margin-bottom: 32px;
     text-align: center;
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-    -o-transition: all 0.5s;
-    transition: all 0.5s;
-    cursor: pointer;
-    font-size: 20px;
-    padding: 1rem 2rem;
-    text-decoration: none !important;
 }
 
-.button-custom:hover {
-    background-color: #eeeeee;
-    color: var(--secondary-color);
+.vote-section__intro p {
+    margin: 0 auto;
+    max-width: 60ch;
+    color: var(--ink-soft);
+}
+
+/* ---------- Tablet & desktop ---------- */
+
+@media (min-width: 720px) {
+    .vote-main {
+        padding-top: 84px;
+    }
+
+    .vote-hero__inner {
+        padding-block: 64px 68px;
+    }
+
+    .vote-hero {
+        background-size: 300px 300px;
+        background-position: right -60px bottom -90px;
+    }
 }

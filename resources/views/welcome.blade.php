@@ -82,7 +82,6 @@
                     ElectionSetting::STATUS_OPEN => $end,
                     default => null,
                 };
-                $countdownLeft = $countdownTarget ? now()->diff($countdownTarget) : null;
             @endphp
             <div class="slip-band">
                 <div class="container slip-band__inner">
@@ -99,15 +98,8 @@
                             </p>
                         </div>
 
-                        @if ($countdownLeft)
-                            <div class="countdown" data-countdown="{{ $countdownTarget->toIso8601String() }}" data-now="{{ now()->toIso8601String() }}">
-                                <p class="countdown__caption">{{ $status === ElectionSetting::STATUS_OPEN ? 'Ditutup dalam' : 'Dibuka dalam' }}</p>
-                                <p class="countdown__tiles">
-                                    <span class="countdown__unit"><span class="countdown__value" data-unit="days">{{ $countdownLeft->days }}</span> <span class="countdown__name">hari</span></span>
-                                    <span class="countdown__unit"><span class="countdown__value" data-unit="hours">{{ sprintf('%02d', $countdownLeft->h) }}</span> <span class="countdown__name">jam</span></span>
-                                    <span class="countdown__unit"><span class="countdown__value" data-unit="minutes">{{ sprintf('%02d', $countdownLeft->i) }}</span> <span class="countdown__name">menit</span></span>
-                                </p>
-                            </div>
+                        @if ($countdownTarget)
+                            @include('partials.countdown', ['target' => $countdownTarget, 'caption' => $status === ElectionSetting::STATUS_OPEN ? 'Ditutup dalam' : 'Dibuka dalam'])
                         @endif
 
                         <div class="slip__body">
@@ -202,24 +194,7 @@
         </section>
     </main>
 
-    <footer class="site-footer">
-        <div class="container site-footer__inner">
-            <div class="site-footer__org">
-                <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" loading="lazy"
-                    alt="Logo Himpunan Mahasiswa Informatika">
-                <p>Himpunan Mahasiswa Informatika<br>Universitas Jember</p>
-            </div>
-            <div class="site-footer__help">
-                <h2 class="site-footer__title">Kendala login atau belum menerima email akun?</h2>
-                <p>Hubungi panitia lewat WhatsApp:</p>
-                <ul>
-                    <li><a href="https://wa.me/6283823093973">Farda, 0838 2309 3973</a></li>
-                    <li><a href="https://wa.me/6283852061105">Dewi, 0838 5206 1105</a></li>
-                </ul>
-            </div>
-        </div>
-        <p class="container site-footer__copy">&copy; {{ now()->year }} Election Vote HMIF</p>
-    </footer>
+    @include('partials.site-footer')
 
     @if ($mascotUrl)
         <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
