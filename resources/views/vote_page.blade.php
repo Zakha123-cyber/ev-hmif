@@ -61,7 +61,18 @@
                                                         </svg>
                                                     </span>
                                                     <span class="ballot__pair">Paslon {{ $candidate->candidate_pair }}</span>
-                                                    <span class="ballot__names">{{ $candidate->leader_name }}<br>{{ $candidate->vice_leader_name }}</span>
+                                                    <span class="ballot__names">
+                                                        <span class="ballot__person">
+                                                            <span class="ballot__role">Ketua</span>
+                                                            <span class="ballot__name">{{ $candidate->leader_name }}</span>
+                                                        </span>
+                                                        {{-- Heksagon "&": penanda pasangan, motif dari logo HMIF --}}
+                                                        <span class="ballot__and" aria-hidden="true">&amp;</span>
+                                                        <span class="ballot__person">
+                                                            <span class="ballot__role">Wakil ketua</span>
+                                                            <span class="ballot__name">{{ $candidate->vice_leader_name }}</span>
+                                                        </span>
+                                                    </span>
                                                     <span class="ballot__picked">Pilihanmu</span>
                                                 </span>
                                             </label>

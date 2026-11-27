@@ -227,3 +227,18 @@ it('does not let the browser restore a previous choice on the ballot', function 
 
     $this->actingAs($this->voter)->get('/vote')->assertSee('data-ballot method="POST" action="' . url('/vote-paslon') . '" autocomplete="off"', false);
 });
+
+it('labels each pair as a name plate with the role above each name', function () {
+    openVoting();
+
+    $html = $this->actingAs($this->voter)->get('/vote')->getContent();
+    $xpath = new DOMXPath(tap(new DOMDocument(), fn ($dom) => @$dom->loadHTML($html)));
+
+    // span, bukan dl: isi <label> hanya boleh elemen inline
+    $plates = $xpath->query('//form[@data-ballot]//label//span[contains(@class,"ballot__names")]');
+    expect($plates->length)->toBe(2);
+
+    $first = $plates->item(0);
+    expect(array_map(fn ($n) => trim($n->textContent), iterator_to_array($xpath->query('.//span[@class="ballot__role"]', $first))))->toBe(['Ketua', 'Wakil ketua']);
+    expect(array_map(fn ($n) => trim($n->textContent), iterator_to_array($xpath->query('.//span[@class="ballot__name"]', $first))))->toBe(['Ketua 1', 'Wakil 1']);
+});
