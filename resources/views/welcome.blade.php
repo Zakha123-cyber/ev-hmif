@@ -136,11 +136,6 @@
                         @endif
                     </section>
 
-                    @if ($mascotUrl)
-                        <model-viewer class="mascot" src="{{ $mascotUrl }}" alt="COGITO, maskot HMIF. Geser untuk memutar."
-                            camera-controls disable-zoom disable-pan interaction-prompt="none" touch-action="pan-y"
-                            shadow-intensity="0.6"></model-viewer>
-                    @endif
                 </div>
             </div>
         </div>
@@ -196,9 +191,8 @@
 
     @include('partials.site-footer')
 
-    @if ($mascotUrl)
-        <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
-    @endif
+    @php($cogito = \App\Support\CogitoLines::home($setting, $user))
+    @include('partials.cogito', ['pose' => 'salam', 'variant' => 'corner', 'key' => 'home', 'lines' => $cogito['lines'], 'action' => $cogito['action']])
 </body>
 
 </html>

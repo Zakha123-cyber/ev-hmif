@@ -7,7 +7,7 @@ it('ships the transparent COGITO image', function (string $file) {
 
     expect(is_file($path))->toBeTrue();
     $info = getimagesize($path);
-    expect([$info[0], $info[1]])->toBe([437, 388]);
+    expect([$info[0], $info[1]])->toBe([278, 385]);
     expect($info['mime'])->toBe('image/webp');
 })->with('cogito files');
 

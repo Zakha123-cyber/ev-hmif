@@ -67,12 +67,6 @@ it('reports zero percent instead of dividing by zero when nobody voted', functio
         ->assertViewHas('results', fn ($results) => collect($results)->pluck('percent')->all() === [0, 0]);
 });
 
-it('has no mascot when the 3D model file is missing', function () {
-    config(['election.mascot_path' => 'frontend/3d/__tidak-ada.glb']);
-
-    $this->get('/')->assertViewHas('mascotUrl', null);
-});
-
 // --- Tampilan per keadaan jadwal ---
 
 it('tells visitors the schedule has not been announced yet', function () {
@@ -155,8 +149,6 @@ it('shows the candidate names, roles and vision', function () {
 // --- Kerangka halaman ---
 
 it('renders the page frame without the old libraries', function () {
-    config(['election.mascot_path' => 'frontend/3d/__tidak-ada.glb']);
-
     $this->get('/')
         ->assertSee('Periode 2025/2026')
         ->assertDontSee('data-slider-toggle', false)
@@ -169,27 +161,6 @@ it('renders the page frame without the old libraries', function () {
         ->assertDontSee('Chart.min.js', false)
         ->assertDontSee('jquery', false)
         ->assertDontSee('model-viewer', false);
-});
-
-it('shows the rotatable COGITO mascot once the 3D model file exists', function () {
-    // File uji tersendiri: jangan pernah menyentuh cogito.glb milik pengguna.
-    config(['election.mascot_path' => 'frontend/3d/__test-mascot.glb']);
-    $path = public_path('frontend/3d/__test-mascot.glb');
-    file_put_contents($path, 'glb');
-
-    try {
-        $this->get('/')
-            ->assertSee('<model-viewer', false)
-            ->assertSee('frontend/3d/__test-mascot.glb', false)
-            ->assertSee('@google/model-viewer@3.5.0', false)
-            ->assertDontSee('auto-rotate', false);
-    } finally {
-        unlink($path);
-    }
-});
-
-it('looks for the mascot at public/frontend/3d/cogito.glb by default', function () {
-    expect(config('election.mascot_path'))->toBe('frontend/3d/cogito.glb');
 });
 
 // --- Amplop dan surat ---

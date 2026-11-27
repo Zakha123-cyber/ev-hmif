@@ -204,3 +204,95 @@ function closeOnBackdrop(letter) {
         });
     });
 })();
+
+// COGITO: balon sapaan/arahan. Teks hanya berganti oleh aksi pengunjung (Lanjut
+// atau mengetuk COGITO), tidak pernah sendiri. "Tutup" diingat selama sesi tab
+// ini per halaman; mengetuk COGITO membukanya lagi dari kalimat pertama.
+(function () {
+    const DELAY_MS = 900;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        document.querySelectorAll('[data-cogito]').forEach(function (box) {
+            const bubble = box.querySelector('[data-cogito-bubble]');
+            const lineEl = box.querySelector('[data-cogito-line]');
+            const next = box.querySelector('[data-cogito-next]');
+            const close = box.querySelector('[data-cogito-close]');
+            const action = box.querySelector('[data-cogito-action]');
+            const figure = box.querySelector('[data-cogito-toggle]');
+            const storeKey = 'cogito-closed:' + box.dataset.cogitoKey;
+            let lines;
+            try {
+                lines = JSON.parse(box.querySelector('[data-cogito-lines]').textContent);
+            } catch (e) {
+                return; // tetap tampil kalimat pertama dari server
+            }
+            let index = 0;
+
+            function remembered() {
+                try { return sessionStorage.getItem(storeKey) === '1'; } catch (e) { return false; }
+            }
+            function remember(closed) {
+                try {
+                    if (closed) sessionStorage.setItem(storeKey, '1');
+                    else sessionStorage.removeItem(storeKey);
+                } catch (e) { /* tanpa storage: hanya untuk halaman ini */ }
+            }
+
+            function render() {
+                const last = index === lines.length - 1;
+                lineEl.textContent = lines[index];
+                next.hidden = last;
+                if (action) action.hidden = !last;
+            }
+            function advance() {
+                if (index >= lines.length - 1) return;
+                const hadFocus = document.activeElement === next;
+                index++;
+                render();
+                // Lanjut hilang di kalimat terakhir: pindahkan fokus ke aksi/Tutup.
+                if (hadFocus && next.hidden) (action || close).focus();
+            }
+            function open() {
+                index = 0;
+                render();
+                bubble.hidden = false;
+            }
+            function shut() {
+                bubble.hidden = true;
+                remember(true);
+                figure.focus();
+            }
+
+            // Pembaca layar mendengar kalimat baru setelah Lanjut ditekan.
+            lineEl.setAttribute('aria-live', 'polite');
+            close.hidden = false;
+            render();
+            bubble.hidden = true;
+            if (!remembered()) {
+                window.setTimeout(open, reduceMotion.matches ? 0 : DELAY_MS);
+            }
+
+            next.addEventListener('click', advance);
+            close.addEventListener('click', shut);
+            figure.addEventListener('click', function () {
+                if (bubble.hidden) {
+                    remember(false);
+                    open();
+                } else {
+                    advance();
+                }
+            });
+            box.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && !bubble.hidden) shut();
+            });
+
+            // Surat paslon / konfirmasi terbuka: balon disembunyikan agar tidak bertumpuk.
+            function sync() {
+                box.classList.toggle('is-muted', !!document.querySelector('dialog[open]'));
+            }
+            new MutationObserver(sync).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] });
+        });
+    });
+})();
