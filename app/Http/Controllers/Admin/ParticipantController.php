@@ -49,7 +49,7 @@ class ParticipantController extends Controller
     private $param;
     public function index(){
         try {
-            $this->param['dataParticipant'] = Participant::all();
+            $this->param['dataParticipant'] = Participant::whereDoesntHave('user', fn ($user) => $user->role('Admin'))->get(); // akun admin bukan peserta (dan jangan sampai terhapus dari sini)
 
             return view('admin.pages.participant.list', $this->param);
         } catch (\Exception $e) {
@@ -268,7 +268,7 @@ class ParticipantController extends Controller
             
             $participant->save();
 
-            return redirect('/back-admin-logged/participant')->withStatus('Berhasil menambah data.');
+            return redirect('/back-admin-logged/participant')->withStatus('Berhasil memperbarui data.');
 
         } catch (\Exception $e) {
             return redirect()->back()->withError($e->getMessage());
@@ -299,6 +299,7 @@ class ParticipantController extends Controller
             ],
             [
                 'required' => ':attribute harus diisi.',
+                'mimes' => ':attribute harus berformat .xlsx, .xls, atau .csv.',
             ],
             [
                 'file' => 'File Excel',

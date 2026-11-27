@@ -622,7 +622,7 @@ textarea.a-input {
 
 .a-table th,
 .a-table td {
-    padding: 12px 14px;
+    padding: 12px 10px;
     border-bottom: 1px solid var(--a-line);
     text-align: left;
     vertical-align: middle;
@@ -643,6 +643,15 @@ textarea.a-input {
 .a-table td.a-table__num {
     color: var(--a-muted);
     width: 1%;
+}
+
+/* Desktop: tombol aksi tetap satu baris */
+.a-table .a-actions {
+    flex-wrap: nowrap;
+}
+
+.a-table .a-btn--sm {
+    padding: 0 10px;
 }
 
 .a-sort {
@@ -1020,6 +1029,24 @@ th[aria-sort="descending"] .a-sort::after { opacity: 1; }
 
     .a-table td.a-table__num {
         display: none;
+    }
+
+    .a-table td .a-badge {
+        justify-self: start;
+    }
+
+    /* Kolom aksi selebar kartu, tombol boleh berbaris */
+    .a-table td:last-child {
+        display: block;
+        padding-top: 10px;
+    }
+
+    .a-table td:last-child::before {
+        display: none;
+    }
+
+    .a-table .a-actions {
+        flex-wrap: wrap;
     }
 
     .a-upload {
