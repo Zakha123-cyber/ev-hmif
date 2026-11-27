@@ -11,6 +11,11 @@ use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
 {
+    /** Batas salah password per akun (dari IP mana pun) dalam satu jendela waktu. */
+    private const ACCOUNT_MAX_ATTEMPTS = 20;
+
+    private const ACCOUNT_DECAY_SECONDS = 3600;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -60,6 +65,7 @@ class LoginRequest extends FormRequest
         // dan ikut dihitung dalam batas percobaan.
         if (! $user || $user->hasRole('Admin') !== $adminDoor) {
             RateLimiter::hit($this->throttleKey());
+            RateLimiter::hit($this->accountThrottleKey(), self::ACCOUNT_DECAY_SECONDS);
 
             throw ValidationException::withMessages([
                 'username' => trans('auth.failed'),
@@ -68,6 +74,7 @@ class LoginRequest extends FormRequest
 
         Auth::login($user, $this->boolean('remember'));
         RateLimiter::clear($this->throttleKey());
+        RateLimiter::clear($this->accountThrottleKey());
     }
 
     /**
@@ -77,6 +84,17 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
+        // Kunci per akun dicek dulu: berlaku dari IP mana pun, jadi ganti-ganti IP tidak membantu menebak password.
+        if (RateLimiter::tooManyAttempts($this->accountThrottleKey(), self::ACCOUNT_MAX_ATTEMPTS)) {
+            event(new Lockout($this));
+
+            throw ValidationException::withMessages([
+                'username' => trans('auth.throttle_account', [
+                    'minutes' => (int) ceil(RateLimiter::availableIn($this->accountThrottleKey()) / 60),
+                ]),
+            ]);
+        }
+
         if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
@@ -99,5 +117,13 @@ class LoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('username')).'|'.$this->ip());
+    }
+
+    /**
+     * Kunci per username saja (tanpa IP) untuk batas percobaan per akun.
+     */
+    public function accountThrottleKey(): string
+    {
+        return 'login-account|'.Str::transliterate(Str::lower($this->string('username')));
     }
 }
