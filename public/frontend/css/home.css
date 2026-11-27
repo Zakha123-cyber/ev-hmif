@@ -939,14 +939,14 @@ html {
     right: 12px;
     bottom: 12px;
     z-index: 25;
-    width: 120px;
+    width: 170px;
 }
 
 /* Pita jadwal ada di dasar layar pertama dan tombolnya rata kanan: sisakan ruang
-   selebar COGITO (120 + 12 + jarak) di kanan agar tombol tidak tertutup. */
+   selebar COGITO (170 + 12 + jarak) di kanan agar tombol tidak tertutup. */
 @media (min-width: 720px) {
     .slip-band__inner {
-        padding-right: max(var(--gutter), 150px - (100vw - min(100vw, var(--container) + 2 * var(--gutter))) / 2);
+        padding-right: max(var(--gutter), 200px - (100vw - min(100vw, var(--container) + 2 * var(--gutter))) / 2);
     }
 }
 
@@ -1032,8 +1032,9 @@ html {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
     gap: 6px;
-    margin-top: 10px;
+    margin-top: 6px;
 }
 
 .cogito__actions:not(:has(:not([hidden]))) {
@@ -1069,6 +1070,7 @@ html {
 }
 
 .cogito__button--quiet {
+    padding: 0 8px;
     border-color: transparent;
     text-decoration: underline;
     text-underline-offset: 4px;
@@ -1084,7 +1086,7 @@ html {
     .cogito--corner {
         right: 8px;
         bottom: 8px;
-        width: 76px;
+        width: 110px;
     }
 
     .cogito__bubble {

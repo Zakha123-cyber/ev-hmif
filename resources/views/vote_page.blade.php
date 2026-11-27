@@ -19,7 +19,7 @@
                 </div>
                 {{-- Di dalam pita, bukan di pojok: tidak menutupi "Kirim suara" maupun animasi kotak suara --}}
                 @php $cogito = \App\Support\CogitoLines::vote('ballot', $setting, $user); @endphp
-                @include('partials.cogito', ['pose' => 'salam', 'variant' => 'inline', 'key' => 'vote-ballot', 'lines' => $cogito['lines'], 'action' => $cogito['action']])
+                @include('partials.cogito', ['pose' => 'salam', 'variant' => 'inline', 'key' => $cogito['key'], 'lines' => $cogito['lines']])
             </div>
         </section>
 

@@ -27,6 +27,6 @@
         </section>
 
         @php $cogito = \App\Support\CogitoLines::vote('closed', $setting, $user); @endphp
-        @include('partials.cogito', ['pose' => 'salam', 'variant' => 'corner', 'key' => 'vote-closed', 'lines' => $cogito['lines'], 'action' => $cogito['action']])
+        @include('partials.cogito', ['pose' => 'salam', 'variant' => 'corner', 'key' => $cogito['key'], 'lines' => $cogito['lines']])
     @endif
 @endsection

@@ -9,9 +9,9 @@ beforeEach(function () {
 });
 
 /**
- * Isi COGITO dari HTML: kalimat (JSON), kalimat pertama yang terlihat tanpa JS, dan aksi.
+ * Isi COGITO dari HTML.
  *
- * @return array{lines: string[], first: string, action: ?array{label: string, href: string}, node: DOMElement, xpath: DOMXPath}
+ * @return array{texts: string[], lines: array, first: string, firstAction: ?array, node: DOMElement, xpath: DOMXPath, key: string}
  */
 function cogito(string $html): array
 {
@@ -22,166 +22,163 @@ function cogito(string $html): array
     expect($nodes->length)->toBe(1);
     $node = $nodes->item(0);
 
-    $json = $xpath->query('.//script[@data-cogito-lines]', $node)->item(0)->textContent;
-    $action = $xpath->query('.//a[@data-cogito-action]', $node)->item(0);
+    $lines = json_decode($xpath->query('.//script[@data-cogito-lines]', $node)->item(0)->textContent, true);
+    $link = $xpath->query('.//a[@data-cogito-action]', $node)->item(0);
 
     return [
-        'lines' => json_decode($json, true),
+        'texts' => array_column($lines, 'text'),
+        'lines' => $lines,
         'first' => trim($xpath->query('.//p[@data-cogito-line]', $node)->item(0)->textContent),
-        'action' => $action ? ['label' => trim($action->textContent), 'href' => $action->getAttribute('href')] : null,
+        'firstAction' => $link && ! $link->hasAttribute('hidden')
+            ? ['label' => trim($link->textContent), 'href' => $link->getAttribute('href')]
+            : null,
         'node' => $node,
         'xpath' => $xpath,
+        'key' => $node->getAttribute('data-cogito-key'),
     ];
 }
 
-it('greets and says the schedule is not announced yet', function () {
+function actionOf(array $c, string $text): ?array
+{
+    foreach ($c['lines'] as $line) {
+        if ($line['text'] === $text) {
+            return $line['action'];
+        }
+    }
+    throw new RuntimeException("Kalimat tidak ada: {$text}");
+}
+
+function openSchedule(): void
+{
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    test()->travelTo(Carbon::parse('2026-12-01 10:00'));
+}
+
+it('mixes greetings, account info, guidance and jokes for a guest before the schedule exists', function () {
     $c = cogito($this->get('/')->getContent());
 
-    expect($c['lines'])->toBe([
-        'Halo! Aku COGITO, maskot HMIF.',
-        'Jadwal pemilihan belum diumumkan. Akun memilih dikirim ke email kampusmu.',
-        'Sambil menunggu, buka amplop paslon untuk kenalan.',
-    ]);
-    expect($c['action'])->toBeNull();
+    expect($c['first'])->toBe('Halo! Aku COGITO, maskot HMIF.');
+    expect($c['texts'])->toContain(
+        'Jadwal pemilihan belum diumumkan. Sabar ya, aku juga menunggu.',
+        'Akun memilih dikirim ke email kampusmu (@mail.unej.ac.id). Cek juga folder spam, ya.',
+        'Kendala login atau belum terima email akun? Chat panitia lewat WhatsApp di bagian paling bawah.',
+        'Bingung pilih siapa? Buka amplop paslon untuk membaca visi dan misinya.',
+        'Topi ini bukan cuma gaya. Oke, sebagian besar gaya.',
+    );
+    expect(count($c['texts']))->toBeGreaterThanOrEqual(6);
 });
 
-it('tells visitors when voting opens', function () {
+it('mentions the real opening time before voting opens', function () {
     setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
     $this->travelTo(Carbon::parse('2026-11-30 10:00'));
 
-    expect(cogito($this->get('/')->getContent())['lines'])->toBe([
-        'Halo! Aku COGITO, maskot HMIF.',
-        'Pemilihan dibuka Selasa, 1 Desember pukul 08.00 WIB.',
-        'Cek email kampusmu untuk akun memilih.',
-    ]);
+    expect(cogito($this->get('/')->getContent())['texts'])->toContain('Pemilihan dibuka Selasa, 1 Desember pukul 08.00 WIB. Pasang pengingat, ya!');
 });
 
-it('sends guests to the login page while voting is open', function () {
-    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
-    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
+it('offers guests a line that leads to the login page while voting is open', function () {
+    openSchedule();
 
     $c = cogito($this->get('/')->getContent());
 
-    expect($c['lines'][1])->toBe('Pemilihan sedang berlangsung sampai Selasa, 1 Desember pukul 15.00 WIB.');
-    expect($c['lines'][2])->toBe('Masuk dengan akun dari email kampusmu.');
-    expect($c['action'])->toBe(['label' => 'Masuk untuk memilih', 'href' => route('login')]);
+    expect($c['texts'])->toContain('Pemilihan sedang berlangsung sampai Selasa, 1 Desember pukul 15.00 WIB.');
+    expect(actionOf($c, 'Sudah punya akun? Masuk dan pilih paslonmu.'))->toBe(['label' => 'Masuk untuk memilih', 'href' => route('login')]);
 });
 
-it('points a logged-in voter who has not voted to the ballot', function () {
-    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
-    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
+it('opens with the ballot for a logged-in voter who has not voted', function () {
+    openSchedule();
 
     $c = cogito($this->actingAs(makeUserWithRole('Participant', 'voter1'))->get('/')->getContent());
 
-    expect($c['lines'])->toBe(['Halo, voter1! Surat suaramu sudah menunggu.']);
-    expect($c['action'])->toBe(['label' => 'Buka surat suara', 'href' => url('/vote')]);
+    expect($c['first'])->toBe('Halo, voter1! Surat suaramu sudah menunggu.');
+    expect($c['firstAction'])->toBe(['label' => 'Buka surat suara', 'href' => url('/vote')]);
 });
 
-it('thanks a voter without naming the candidate they chose', function () {
-    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
-    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
+it('never tells a logged-in voter to look for an account in their email', function (string $start) {
+    if ($start !== 'none') {
+        setSchedule($start, '2026-12-01 15:00');
+        $this->travelTo(Carbon::parse('2026-11-30 10:00'));
+    }
+
+    $c = cogito($this->actingAs(makeUserWithRole('Participant', 'voter1'))->get('/')->getContent());
+
+    expect($c['first'])->toBe('Halo, voter1! Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka.');
+    expect(collect($c['texts'])->filter(fn ($t) => str_contains($t, 'email kampusmu'))->all())->toBe([]);
+})->with(['upcoming' => '2026-12-01 08:00', 'not set' => 'none']);
+
+it('uses the participant name when there is one', function () {
+    openSchedule();
+    $voter = makeUserWithRole('Participant', 'voter1');
+    $voter->details->update(['participant_name' => 'Rina Ayu']);
+
+    expect(cogito($this->actingAs($voter->fresh())->get('/')->getContent())['first'])->toBe('Halo, Rina Ayu! Surat suaramu sudah menunggu.');
+});
+
+it('thanks a voter without ever naming a candidate', function () {
+    openSchedule();
     $voter = makeUserWithRole('Participant', 'voter1');
     $voter->update(['status' => 'voted']);
 
     $c = cogito($this->actingAs($voter)->get('/')->getContent());
 
-    expect($c['lines'])->toBe(['Terima kasih sudah memilih! Hasil diumumkan setelah pemilihan ditutup Selasa, 1 Desember pukul 15.00 WIB.']);
-    expect($c['node']->textContent)->not->toContain('Ketua 1')->not->toContain('Paslon');
+    expect($c['first'])->toBe('Terima kasih sudah memilih, voter1!');
+    expect($c['texts'])->toContain('Hasil diumumkan setelah pemilihan ditutup Selasa, 1 Desember pukul 15.00 WIB.');
+    expect($c['node']->textContent)->not->toContain('Ketua 1')->not->toContain('Paslon 1');
 });
 
-it('points to the results once voting has closed', function () {
+it('leads with the results once voting has closed', function () {
     setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
     $this->travelTo(Carbon::parse('2026-12-01 16:00'));
 
     $c = cogito($this->get('/')->getContent());
 
-    expect($c['lines'])->toBe([
-        'Pemilihan sudah ditutup. Terima kasih untuk semua yang memilih!',
-        'Lihat hasil penghitungannya di bawah.',
-    ]);
-    expect($c['action'])->toBe(['label' => 'Lihat hasil', 'href' => '#hasil']);
+    expect($c['first'])->toBe('Pemilihan sudah ditutup. Terima kasih untuk semua yang memilih!');
+    expect($c['firstAction'])->toBe(['label' => 'Lihat hasil', 'href' => '#hasil']);
+    expect($c['texts'])->not->toContain('Akun memilih dikirim ke email kampusmu (@mail.unej.ac.id). Cek juga folder spam, ya.');
 });
 
-it('offers the admin panel instead of the login to an admin', function () {
-    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
-    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
+it('offers the admin panel and never the login to an admin', function () {
+    openSchedule();
 
     $c = cogito($this->actingAs(makeUserWithRole('Admin', 'admin1'))->get('/')->getContent());
 
-    expect($c['action'])->toBe(['label' => 'Panel admin', 'href' => url('/back-admin-logged/redirect-role')]);
-    expect($c['lines'])->not->toContain('Masuk dengan akun dari email kampusmu.');
+    expect($c['firstAction'])->toBe(['label' => 'Panel admin', 'href' => url('/back-admin-logged/redirect-role')]);
+    expect(collect($c['lines'])->pluck('action.label')->filter()->all())->not->toContain('Masuk untuk memilih');
 });
 
-it('reads without JavaScript: first line visible, no dead buttons, still frame for reduced motion', function () {
-    $c = cogito($this->get('/')->getContent());
+it('reads without JavaScript: first line and its action visible, no dead buttons', function () {
+    openSchedule();
+    $c = cogito($this->actingAs(makeUserWithRole('Participant', 'voter1'))->get('/')->getContent());
     $x = $c['xpath'];
 
-    expect($c['first'])->toBe('Halo! Aku COGITO, maskot HMIF.');
-    foreach (['data-cogito-next', 'data-cogito-close'] as $attr) {
-        expect($x->query(".//button[@{$attr}][@hidden]", $c['node'])->length)->toBe(1);
-    }
+    expect($c['first'])->toBe('Halo, voter1! Surat suaramu sudah menunggu.');
+    expect($c['firstAction'])->not->toBeNull();
+    expect($x->query('.//button[@data-cogito-close][@hidden]', $c['node'])->length)->toBe(1);
+    expect($x->query('.//button[@data-cogito-next]', $c['node'])->length)->toBe(0);
     expect($x->query('.//img[@width="278"][@height="385"][contains(@src,"cogito/salam.webp")]', $c['node'])->length)->toBe(1);
     expect($x->query('.//source[@media="(prefers-reduced-motion: reduce)"][contains(@srcset,"salam-still.webp")]', $c['node'])->length)->toBe(1);
 });
 
-it('hides the action behind the last line when there are several lines', function () {
-    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
-    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
-
+it('keeps lines unique, without em dashes, and without screen-reader chatter', function () {
+    openSchedule();
     $c = cogito($this->get('/')->getContent());
 
-    expect($c['xpath']->query('.//a[@data-cogito-action][@hidden]', $c['node'])->length)->toBe(1);
+    expect($c['texts'])->toBe(array_values(array_unique($c['texts'])));
+    expect(implode(' ', $c['texts']))->not->toContain('—');
+    expect($c['xpath']->query('.//*[@aria-live]', $c['node'])->length)->toBe(0);
+});
+
+it('remembers "Tutup" per situation, so new lines after logging in or voting are shown', function () {
+    openSchedule();
+    $guest = cogito($this->get('/')->getContent())['key'];
+    $voter = makeUserWithRole('Participant', 'voter1');
+    $before = cogito($this->actingAs($voter)->get('/')->getContent())['key'];
+    $voter->update(['status' => 'voted']);
+    $after = cogito($this->actingAs($voter)->get('/')->getContent())['key'];
+
+    expect([$guest, $before, $after])->toBe(['home:open:guest', 'home:open:voter', 'home:open:voted']);
 });
 
 it('no longer carries the broken 3D mascot', function () {
     $this->get('/')->assertDontSee('model-viewer', false);
     expect(config('election.mascot_path'))->toBeNull();
-});
-
-// --- Perbaikan review ---
-
-it('does not tell a logged-in voter to look for an account before voting opens', function () {
-    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
-    $this->travelTo(Carbon::parse('2026-11-30 10:00'));
-
-    $c = cogito($this->actingAs(makeUserWithRole('Participant', 'voter1'))->get('/')->getContent());
-
-    expect($c['lines'])->toBe([
-        'Halo, voter1!',
-        'Pemilihan dibuka Selasa, 1 Desember pukul 08.00 WIB.',
-        'Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka.',
-    ]);
-});
-
-it('does not tell a logged-in voter to look for an account when no schedule is set', function () {
-    $c = cogito($this->actingAs(makeUserWithRole('Participant', 'voter1'))->get('/')->getContent());
-
-    expect($c['lines'])->toBe([
-        'Halo, voter1!',
-        'Jadwal pemilihan belum diumumkan panitia.',
-        'Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka.',
-    ]);
-});
-
-it('uses the participant name when there is one', function () {
-    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
-    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
-    $voter = makeUserWithRole('Participant', 'voter1');
-    $voter->details->update(['participant_name' => 'Rina Ayu']);
-
-    expect(cogito($this->actingAs($voter->fresh())->get('/')->getContent())['lines'][0])->toBe('Halo, Rina Ayu! Surat suaramu sudah menunggu.');
-});
-
-it('remembers "Tutup" per situation, so new guidance after logging in or voting is shown', function () {
-    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
-    $this->travelTo(Carbon::parse('2026-12-01 10:00'));
-    $key = fn ($html) => cogito($html)['node']->getAttribute('data-cogito-key');
-
-    $guest = $key($this->get('/')->getContent());
-    $voter = makeUserWithRole('Participant', 'voter1');
-    $before = $key($this->actingAs($voter)->get('/')->getContent());
-    $voter->update(['status' => 'voted']);
-    $after = $key($this->actingAs($voter)->get('/')->getContent());
-
-    expect([$guest, $before, $after])->toBe(['home:open:guest', 'home:open:voter', 'home:open:voted']);
 });

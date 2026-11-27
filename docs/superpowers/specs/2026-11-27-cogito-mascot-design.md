@@ -150,3 +150,26 @@ COGITO salute (varian `inline`) berdiri di kanan kotak suara CSS, dengan satu ba
 - Toleransi hapus latar yang tepat, serta kualitas dan ukuran WebP.
 - Bentuk ekor balon dan detail animasi muncul balon (singkat, dan mati bila `prefers-reduced-motion`).
 - Penamaan kunci sessionStorage.
+
+## Revisi 2026-11-27 (permintaan pengguna)
+
+1. **COGITO lebih besar, boleh menutupi tombol (tapi tidak terlalu besar).**
+   - Pojok: 170px di desktop dan 110px di HP.
+   - Surat suara: 150px di desktop dan 84px di HP.
+   - Tanda terima: 130px di desktop dan 80px di HP.
+2. **Balon tampil bergiliran otomatis.**
+   - Satu kalimat tampil sekitar 7 detik, balon lalu tersembunyi sekitar 4 detik, kemudian muncul kalimat berikutnya.
+   - Pergantian berhenti sementara saat pointer atau fokus berada di balon, saat ada `<dialog>` terbuka, dan saat
+     tab tidak terlihat.
+   - "Tutup" menghentikannya untuk sesi itu. Tombol ini juga berfungsi sebagai mekanisme stop/hide sesuai WCAG 2.2.2.
+   - Mengetuk COGITO langsung menampilkan kalimat lain lalu melanjutkan giliran.
+   - Tombol "Lanjut" dihapus.
+   - Pergantian otomatis tidak diumumkan pembaca layar (tanpa `aria-live`), supaya tidak bising.
+3. **Kalimat diacak dari kumpulan per halaman dan keadaan:** sapaan, info akun/pendaftaran, arahan, dan
+   kalimat lucu.
+   - Kalimat pertama selalu yang paling sesuai keadaan, misalnya "Surat suaramu sudah menunggu".
+   - Setiap kalimat boleh membawa satu aksi.
+   - Fakta tetap nyata: tanggal dari jadwal; akun dikirim ke email kampus (@mail.unej.ac.id); kendala ke WhatsApp
+     panitia di footer.
+   - Tidak pernah menyebut paslon yang dipilih.
+   - Data ke JS: `[{"text": "...", "action": {"label","href"}|null}]`.

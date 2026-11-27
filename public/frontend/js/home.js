@@ -205,21 +205,31 @@ function closeOnBackdrop(letter) {
     });
 })();
 
-// COGITO: balon sapaan/arahan. Teks hanya berganti oleh aksi pengunjung (Lanjut
-// atau mengetuk COGITO), tidak pernah sendiri. "Tutup" diingat selama sesi tab
-// ini per halaman; mengetuk COGITO membukanya lagi dari kalimat pertama.
+// COGITO: balon bergiliran. Satu kalimat tampil ~7 detik, balon sembunyi ~4 detik,
+// lalu kalimat acak berikutnya. Kalimat pertama selalu yang paling sesuai keadaan.
+// Berhenti sementara saat pointer/fokus di balon, saat surat/konfirmasi terbuka,
+// dan saat tab tidak terlihat. "Tutup" (atau Esc) menghentikannya selama sesi ini
+// untuk keadaan ini; mengetuk COGITO menampilkan kalimat lain dan melanjutkan.
 (function () {
-    const DELAY_MS = 900;
+    const FIRST_MS = 900;
+    const SHOW_MS = 7000;
+    const GAP_MS = 4000;
+
+    function shuffled(list) {
+        const copy = list.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
         document.querySelectorAll('[data-cogito]').forEach(function (box) {
             const bubble = box.querySelector('[data-cogito-bubble]');
             const lineEl = box.querySelector('[data-cogito-line]');
-            const next = box.querySelector('[data-cogito-next]');
-            const close = box.querySelector('[data-cogito-close]');
             const action = box.querySelector('[data-cogito-action]');
+            const close = box.querySelector('[data-cogito-close]');
             const figure = box.querySelector('[data-cogito-toggle]');
             const storeKey = 'cogito-closed:' + box.dataset.cogitoKey;
             let lines;
@@ -228,72 +238,137 @@ function closeOnBackdrop(letter) {
             } catch (e) {
                 return; // tetap tampil kalimat pertama dari server
             }
-            let index = 0;
+
+            // Urutan: kalimat pertama dulu, sisanya acak; setelah habis diacak ulang
+            // tanpa mengulang kalimat yang baru saja tampil.
+            let order = [0].concat(shuffled(lines.map(function (_, i) { return i; }).slice(1)));
+            let pos = 0;
+            let timer = null;
+            let closed = false;
+            let hovering = false;
+            let focused = false;
 
             function remembered() {
                 try { return sessionStorage.getItem(storeKey) === '1'; } catch (e) { return false; }
             }
-            function remember(closed) {
+            function remember(value) {
                 try {
-                    if (closed) sessionStorage.setItem(storeKey, '1');
+                    if (value) sessionStorage.setItem(storeKey, '1');
                     else sessionStorage.removeItem(storeKey);
                 } catch (e) { /* tanpa storage: hanya untuk halaman ini */ }
             }
 
-            function render() {
-                const last = index === lines.length - 1;
-                lineEl.textContent = lines[index];
-                next.hidden = last;
-                if (action) action.hidden = !last;
+            function muted() {
+                return !!document.querySelector('dialog[open]');
             }
+            function paused() {
+                return closed || hovering || focused || muted() || document.hidden;
+            }
+
+            function render(index) {
+                const line = lines[index];
+                lineEl.textContent = line.text;
+                if (line.action) {
+                    action.textContent = line.action.label;
+                    action.href = line.action.href;
+                    action.hidden = false;
+                } else {
+                    action.hidden = true;
+                }
+            }
+
             function advance() {
-                if (index >= lines.length - 1) return;
-                const hadFocus = document.activeElement === next;
-                index++;
-                render();
-                // Lanjut hilang di kalimat terakhir: pindahkan fokus ke aksi/Tutup.
-                if (hadFocus && next.hidden) (action || close).focus();
+                const previous = order[pos];
+                pos++;
+                if (pos >= order.length) {
+                    order = shuffled(order);
+                    if (order[0] === previous && order.length > 1) order.push(order.shift());
+                    pos = 0;
+                }
             }
-            function open() {
-                index = 0;
-                render();
+
+            function schedule(fn, ms) {
+                window.clearTimeout(timer);
+                timer = paused() ? null : window.setTimeout(fn, ms);
+            }
+
+            function show() {
+                render(order[pos]);
                 bubble.hidden = false;
+                schedule(rest, SHOW_MS);
             }
+
+            function rest() {
+                // Jangan sembunyikan kalimat yang sedang dibaca/difokus.
+                if (focused || hovering) return;
+                bubble.hidden = true;
+                advance();
+                schedule(show, GAP_MS);
+            }
+
+            // Setelah jeda (hover/fokus/surat/tab) berakhir, lanjutkan dari keadaan sekarang.
+            function resume() {
+                if (paused()) {
+                    window.clearTimeout(timer);
+                    timer = null;
+                    return;
+                }
+                if (!timer) schedule(bubble.hidden ? show : rest, bubble.hidden ? GAP_MS : SHOW_MS);
+            }
+
             function shut() {
+                closed = true;
+                window.clearTimeout(timer);
+                timer = null;
                 bubble.hidden = true;
                 remember(true);
                 figure.focus();
             }
 
-            // Pembaca layar mendengar kalimat baru setelah Lanjut ditekan.
-            lineEl.setAttribute('aria-live', 'polite');
             close.hidden = false;
-            render();
+            render(0);
             bubble.hidden = true;
             bubble.classList.add('is-ready');
-            if (!remembered()) {
-                window.setTimeout(open, reduceMotion.matches ? 0 : DELAY_MS);
+
+            if (remembered()) {
+                closed = true;
+            } else {
+                schedule(show, FIRST_MS);
             }
 
-            next.addEventListener('click', advance);
             close.addEventListener('click', shut);
-            figure.addEventListener('click', function () {
-                if (bubble.hidden) {
-                    remember(false);
-                    open();
-                } else {
-                    advance();
-                }
-            });
             box.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape' && !bubble.hidden) shut();
             });
+            figure.addEventListener('click', function () {
+                if (closed) {
+                    closed = false;
+                    remember(false);
+                } else if (!bubble.hidden) {
+                    advance();
+                }
+                show();
+            });
 
-            // Surat paslon / konfirmasi terbuka: balon disembunyikan agar tidak bertumpuk.
-            function sync() {
-                box.classList.toggle('is-muted', !!document.querySelector('dialog[open]'));
-            }
-            new MutationObserver(sync).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] });
+            bubble.addEventListener('pointerenter', function () { hovering = true; resume(); });
+            bubble.addEventListener('pointerleave', function () { hovering = false; resume(); });
+            // Hanya fokus keyboard yang menahan giliran; klik mouse pada COGITO tidak.
+            box.addEventListener('focusin', function (event) {
+                focused = event.target.matches(':focus-visible');
+                resume();
+            });
+            box.addEventListener('focusout', function (event) {
+                if (box.contains(event.relatedTarget)) return;
+                focused = false;
+                resume();
+            });
+            document.addEventListener('visibilitychange', resume);
+
+            // Surat paslon / konfirmasi terbuka: balon disembunyikan dan giliran berhenti.
+            new MutationObserver(function () {
+                box.classList.toggle('is-muted', muted());
+                resume();
+            }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] });
         });
     });
 })();

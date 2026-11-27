@@ -7,17 +7,30 @@ use App\Models\User;
 use Carbon\CarbonInterface;
 
 /**
- * Kalimat balon COGITO (sapaan + arahan) per halaman dan keadaan jadwal.
- * Hanya data nyata: tanggal dari jadwal, nama dari akun. Tidak pernah menyebut
- * paslon yang dipilih seseorang.
+ * Kalimat balon COGITO per halaman dan keadaan: sapaan, info akun, arahan, dan
+ * kalimat lucu. Kalimat pertama selalu yang paling sesuai keadaan; sisanya diacak
+ * bergiliran oleh home.js.
  *
- * Setiap metode mengembalikan ['lines' => string[], 'action' => ?['label' => …, 'href' => …]].
- * home() juga mengembalikan 'key': kunci "Tutup" per keadaan, supaya arahan baru
- * (setelah masuk atau memilih) tidak ikut tersembunyi.
+ * Hanya fakta nyata: tanggal dari jadwal, akun dikirim ke email kampus, kendala ke
+ * WhatsApp panitia di footer. Tidak pernah menyebut paslon yang dipilih seseorang.
+ *
+ * Mengembalikan ['key' => string, 'lines' => list<array{text: string, action: ?array{label: string, href: string}}>].
+ * 'key' membedakan keadaan, supaya "Tutup" tidak ikut menyembunyikan arahan baru
+ * (setelah masuk atau memilih).
  */
 class CogitoLines
 {
     private const HELLO = 'Halo! Aku COGITO, maskot HMIF.';
+
+    private const SECRET = 'Psst, pilihanmu rahasia. Aku pun tidak boleh tahu.';
+    private const ONE_VOTE = 'Satu akun, satu suara. Tidak bisa titip, ya!';
+    private const HAT = 'Topi ini bukan cuma gaya. Oke, sebagian besar gaya.';
+    private const WAVE = 'Aku sudah latihan melambai dari pagi. Tanganku pegal, tapi demi kamu.';
+    private const WATER = 'Jangan lupa minum air putih. Memilih juga butuh fokus.';
+    private const HELP = 'Kendala login atau belum terima email akun? Chat panitia lewat WhatsApp di bagian paling bawah.';
+    private const MAIL = 'Akun memilih dikirim ke email kampusmu (@mail.unej.ac.id). Cek juga folder spam, ya.';
+    private const FINAL = 'Suara hanya bisa dikirim satu kali dan tidak bisa diubah.';
+    private const ENVELOPES = 'Bingung pilih siapa? Buka amplop paslon untuk membaca visi dan misinya.';
 
     public static function home(ElectionSetting $setting, ?User $user): array
     {
@@ -29,47 +42,10 @@ class CogitoLines
             default => 'voter',
         };
 
-        return ['key' => "home:{$status}:{$who}"] + self::homeFor($who, $setting, $status, $user);
-    }
-
-    private static function homeFor(string $who, ElectionSetting $setting, string $status, ?User $user): array
-    {
-        if ($who === 'admin') {
-            return self::make(self::guestLines($setting, $status, admin: true), [
-                'label' => 'Panel admin',
-                'href' => url('/back-admin-logged/redirect-role'),
-            ]);
-        }
-
-        if ($who === 'voted') {
-            return self::make([self::thanks($setting)]);
-        }
-
-        if ($who === 'voter' && $status === ElectionSetting::STATUS_OPEN) {
-            return self::make(
-                ['Halo, ' . self::name($user) . '! Surat suaramu sudah menunggu.'],
-                ['label' => 'Buka surat suara', 'href' => url('/vote')],
-            );
-        }
-
-        // Sudah masuk tapi belum dibuka: jangan suruh mencari akun di email.
-        if ($who === 'voter' && in_array($status, [ElectionSetting::STATUS_UPCOMING, ElectionSetting::STATUS_NOT_SET], true)) {
-            return self::make([
-                'Halo, ' . self::name($user) . '!',
-                $status === ElectionSetting::STATUS_UPCOMING
-                    ? 'Pemilihan dibuka ' . self::when($setting->vote_start) . '.'
-                    : 'Jadwal pemilihan belum diumumkan panitia.',
-                'Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka.',
-            ]);
-        }
-
-        $action = match ($status) {
-            ElectionSetting::STATUS_OPEN => ['label' => 'Masuk untuk memilih', 'href' => route('login')],
-            ElectionSetting::STATUS_CLOSED => ['label' => 'Lihat hasil', 'href' => '#hasil'],
-            default => null,
-        };
-
-        return self::make(self::guestLines($setting, $status), $action);
+        return [
+            'key' => "home:{$status}:{$who}",
+            'lines' => self::homeLines($who, $setting, $status, $user),
+        ];
     }
 
     /**
@@ -77,61 +53,132 @@ class CogitoLines
      */
     public static function vote(string $page, ElectionSetting $setting, User $user): array
     {
-        $hello = 'Halo, ' . self::name($user) . '!';
+        $name = self::name($user);
+        $results = ['label' => 'Lihat hasil', 'href' => url('/') . '#hasil'];
 
-        return match ($page) {
-            'prepare' => self::make($setting->vote_start && $setting->vote_start->isFuture()
-                ? [$hello, 'Surat suara muncul di sini saat pemilihan dibuka ' . self::when($setting->vote_start) . '.', 'Sambil menunggu, buka amplop paslon di bawah.']
-                : [$hello, 'Jadwal pemilihan belum diumumkan panitia.', 'Sambil menunggu, buka amplop paslon di bawah.']),
-            'ballot' => self::make([
-                $hello . ' Ketuk foto paslon pilihanmu.',
-                'Ingin membandingkan? Tekan Visi & misi di bawah nama paslon.',
-                'Sudah yakin? Tekan Kirim suara. Suara hanya bisa dikirim sekali.',
-            ]),
-            'closed' => self::make(
-                ['Pemilihan sudah ditutup.', 'Hasil penghitungan ada di halaman awal.'],
-                ['label' => 'Lihat hasil', 'href' => url('/') . '#hasil'],
-            ),
-            'receipt' => self::make(['Terima kasih sudah memilih!']),
+        $lines = match ($page) {
+            'prepare' => [
+                self::line($setting->vote_start && $setting->vote_start->isFuture()
+                    ? 'Surat suara muncul di sini saat pemilihan dibuka ' . self::when($setting->vote_start) . '.'
+                    : 'Jadwal pemilihan belum diumumkan panitia.'),
+                self::line("Halo, {$name}! Kamu sudah masuk, tinggal menunggu."),
+                self::line('Sambil menunggu, buka amplop paslon di bawah.'),
+                self::line(self::FINAL),
+                self::line(self::HAT),
+                self::line(self::WAVE),
+                self::line(self::HELP),
+            ],
+            'ballot' => array_values(array_filter([
+                self::line("Halo, {$name}! Ketuk foto paslon pilihanmu."),
+                self::line('Mau membandingkan dulu? Tekan Visi & misi di bawah nama paslon.'),
+                self::line('Sudah yakin? Tekan Kirim suara. Suara hanya bisa dikirim sekali.'),
+                $setting->vote_end ? self::line('Tidak perlu buru-buru. Pemilihan dibuka sampai ' . self::when($setting->vote_end) . '.') : null,
+                self::line('Tenang, aku tidak mengintip pilihanmu.'),
+                self::line(self::WATER),
+                self::line(self::ONE_VOTE),
+            ])),
+            'closed' => [
+                self::line('Pemilihan sudah ditutup.', $results),
+                self::line('Hasil penghitungan ada di halaman awal.', $results),
+                self::line('Sampai jumpa di pemilihan berikutnya!'),
+                self::line(self::HAT),
+            ],
+            'receipt' => array_values(array_filter([
+                self::line('Terima kasih sudah memilih!'),
+                self::line('Hormat untukmu, pemilih teladan!'),
+                self::line('Suaramu sudah masuk kotak. Aman.'),
+                self::line(self::SECRET),
+                $setting->status() === ElectionSetting::STATUS_OPEN ? self::line('Ajak temanmu yang belum memilih, ya!') : null,
+                $setting->status() === ElectionSetting::STATUS_OPEN && $setting->vote_end
+                    ? self::line('Hasil diumumkan setelah pemilihan ditutup ' . self::when($setting->vote_end) . '.')
+                    : null,
+            ])),
         };
+
+        return ['key' => "vote:{$page}", 'lines' => $lines];
     }
 
-    /** @return string[] */
-    private static function guestLines(ElectionSetting $setting, string $status, bool $admin = false): array
+    private static function homeLines(string $who, ElectionSetting $setting, string $status, ?User $user): array
+    {
+        $results = ['label' => 'Lihat hasil', 'href' => '#hasil'];
+
+        if ($who === 'admin') {
+            return [
+                self::line('Halo, admin! Panel admin ada di sini.', ['label' => 'Panel admin', 'href' => url('/back-admin-logged/redirect-role')]),
+                ...self::scheduleLines($setting, $status, $results),
+                self::line(self::HAT),
+                self::line(self::WATER),
+            ];
+        }
+
+        if ($who === 'voted') {
+            return array_values(array_filter([
+                self::line('Terima kasih sudah memilih, ' . self::name($user) . '!'),
+                $status === ElectionSetting::STATUS_CLOSED
+                    ? self::line('Hasil penghitungan sudah bisa dilihat di bawah.', $results)
+                    : ($setting->vote_end ? self::line('Hasil diumumkan setelah pemilihan ditutup ' . self::when($setting->vote_end) . '.') : null),
+                $status === ElectionSetting::STATUS_OPEN ? self::line('Ajak temanmu yang belum memilih, ya!') : null,
+                self::line(self::SECRET),
+                self::line(self::WAVE),
+            ]));
+        }
+
+        if ($who === 'voter') {
+            $name = self::name($user);
+            $lead = match ($status) {
+                ElectionSetting::STATUS_OPEN => self::line("Halo, {$name}! Surat suaramu sudah menunggu.", ['label' => 'Buka surat suara', 'href' => url('/vote')]),
+                ElectionSetting::STATUS_CLOSED => self::line('Pemilihan sudah ditutup. Terima kasih sudah mampir!', $results),
+                // Sudah masuk tapi belum dibuka: jangan suruh mencari akun di email.
+                default => self::line("Halo, {$name}! Kamu sudah masuk. Surat suara muncul saat pemilihan dibuka."),
+            };
+
+            return [
+                $lead,
+                ...self::scheduleLines($setting, $status, $results),
+                self::line(self::ENVELOPES),
+                self::line(self::FINAL),
+                self::line(self::HAT),
+                self::line(self::WATER),
+            ];
+        }
+
+        // Tamu
+        $lead = $status === ElectionSetting::STATUS_CLOSED
+            ? self::line('Pemilihan sudah ditutup. Terima kasih untuk semua yang memilih!', $results)
+            : self::line(self::HELLO);
+
+        return array_values(array_filter([
+            $lead,
+            ...self::scheduleLines($setting, $status, $results),
+            $status === ElectionSetting::STATUS_OPEN ? self::line('Sudah punya akun? Masuk dan pilih paslonmu.', ['label' => 'Masuk untuk memilih', 'href' => route('login')]) : null,
+            $status !== ElectionSetting::STATUS_CLOSED ? self::line(self::MAIL) : null,
+            self::line(self::HELP),
+            self::line(self::ENVELOPES),
+            self::line(self::ONE_VOTE),
+            self::line(self::HAT),
+            self::line(self::WAVE),
+        ]));
+    }
+
+    /** Kalimat jadwal sesuai keadaan (tanpa sapaan). */
+    private static function scheduleLines(ElectionSetting $setting, string $status, array $results): array
     {
         return match ($status) {
             ElectionSetting::STATUS_UPCOMING => [
-                self::HELLO,
-                'Pemilihan dibuka ' . self::when($setting->vote_start) . '.',
-                'Cek email kampusmu untuk akun memilih.',
+                self::line('Pemilihan dibuka ' . self::when($setting->vote_start) . '. Pasang pengingat, ya!'),
+                self::line('Hitung mundurnya ada di pita jadwal. Aku juga ikut menghitung.'),
             ],
-            ElectionSetting::STATUS_OPEN => array_values(array_filter([
-                self::HELLO,
-                $setting->vote_end
+            ElectionSetting::STATUS_OPEN => [
+                self::line($setting->vote_end
                     ? 'Pemilihan sedang berlangsung sampai ' . self::when($setting->vote_end) . '.'
-                    : 'Pemilihan sedang berlangsung.',
-                $admin ? null : 'Masuk dengan akun dari email kampusmu.',
-            ])),
+                    : 'Pemilihan sedang berlangsung.'),
+            ],
             ElectionSetting::STATUS_CLOSED => [
-                'Pemilihan sudah ditutup. Terima kasih untuk semua yang memilih!',
-                'Lihat hasil penghitungannya di bawah.',
+                self::line('Hasil penghitungannya ada di bawah.', $results),
             ],
             default => [
-                self::HELLO,
-                'Jadwal pemilihan belum diumumkan. Akun memilih dikirim ke email kampusmu.',
-                'Sambil menunggu, buka amplop paslon untuk kenalan.',
+                self::line('Jadwal pemilihan belum diumumkan. Sabar ya, aku juga menunggu.'),
             ],
-        };
-    }
-
-    private static function thanks(ElectionSetting $setting): string
-    {
-        $closed = $setting->status() === ElectionSetting::STATUS_CLOSED;
-
-        return match (true) {
-            $closed => 'Terima kasih sudah memilih! Hasil penghitungan sudah bisa dilihat di bawah.',
-            (bool) $setting->vote_end => 'Terima kasih sudah memilih! Hasil diumumkan setelah pemilihan ditutup ' . self::when($setting->vote_end) . '.',
-            default => 'Terima kasih sudah memilih!',
         };
     }
 
@@ -147,8 +194,8 @@ class CogitoLines
         return $local->translatedFormat('l, j F') . ' pukul ' . $local->format('H.i') . ' WIB';
     }
 
-    private static function make(array $lines, ?array $action = null): array
+    private static function line(string $text, ?array $action = null): array
     {
-        return ['lines' => $lines, 'action' => $action];
+        return ['text' => $text, 'action' => $action];
     }
 }
