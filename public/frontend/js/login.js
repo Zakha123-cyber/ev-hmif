@@ -14,7 +14,10 @@
         toggle.addEventListener('click', function () {
             const show = password.type === 'password';
             password.type = show ? 'text' : 'password';
-            toggle.textContent = show ? 'Sembunyikan' : 'Tampilkan';
+            // SVG tidak punya properti .hidden: pakai atributnya.
+            toggle.querySelector('[data-eye]').toggleAttribute('hidden', show);
+            toggle.querySelector('[data-eye-off]').toggleAttribute('hidden', !show);
+            toggle.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
             toggle.setAttribute('aria-pressed', String(show));
             password.focus();
         });
