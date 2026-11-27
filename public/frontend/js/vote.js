@@ -84,11 +84,21 @@
 
         yes.addEventListener('click', function () {
             if (sending) return;
+            // Yang dikirim harus paslon yang baru saja dikonfirmasi: selama animasi,
+            // surat suara dibuat inert (radio tidak bisa diganti lewat panah, tapi
+            // tetap ikut terkirim) dan pilihan ditegaskan lagi tepat sebelum submit.
+            const picked = chosen();
             lock();
+            if (paper) paper.inert = true;
             confirm.close();
 
-            if (reduceMotion.matches || !paper) {
+            function submitPicked() {
+                picked.checked = true;
                 form.submit();
+            }
+
+            if (reduceMotion.matches || !paper) {
+                submitPicked();
                 return;
             }
 
@@ -103,7 +113,7 @@
             function send() {
                 if (sent) return;
                 sent = true;
-                form.submit();
+                submitPicked();
             }
             paper.addEventListener('animationend', send, { once: true });
             window.setTimeout(send, FOLD_MS + 150);
