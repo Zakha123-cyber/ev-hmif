@@ -208,12 +208,14 @@ function closeOnBackdrop(letter) {
 // COGITO: balon bergiliran. Satu kalimat tampil ~7 detik, balon sembunyi ~4 detik,
 // lalu kalimat acak berikutnya. Kalimat pertama selalu yang paling sesuai keadaan.
 // Berhenti sementara saat pointer/fokus di balon, saat surat/konfirmasi terbuka,
-// dan saat tab tidak terlihat. "Tutup" (atau Esc) menghentikannya di halaman ini
-// saja (tidak diingat); mengetuk COGITO menampilkan kalimat lain dan melanjutkan.
+// dan saat tab tidak terlihat. "Tutup" (atau Esc) hanya menyembunyikan kalimat ini;
+// setelah jeda sedikit lebih lama COGITO muncul lagi dengan kalimat baru.
+// Mengetuk COGITO langsung menampilkan kalimat lain.
 (function () {
     const FIRST_MS = 900;
     const SHOW_MS = 7000;
     const GAP_MS = 4000;
+    const CLOSED_GAP_MS = 8000;
 
     function shuffled(list) {
         const copy = list.slice();
@@ -243,7 +245,6 @@ function closeOnBackdrop(letter) {
             let order = [0].concat(shuffled(lines.map(function (_, i) { return i; }).slice(1)));
             let pos = 0;
             let timer = null;
-            let closed = false;
             let hovering = false;
             let focused = false;
 
@@ -251,7 +252,7 @@ function closeOnBackdrop(letter) {
                 return !!document.querySelector('dialog[open]');
             }
             function paused() {
-                return closed || hovering || focused || muted() || document.hidden;
+                return hovering || focused || muted() || document.hidden;
             }
 
             function render(index) {
@@ -331,11 +332,14 @@ function closeOnBackdrop(letter) {
             }
 
             function shut() {
-                closed = true;
-                window.clearTimeout(timer);
-                timer = null;
+                // Pointer berada di atas balon saat Tutup diklik; balon hilang tanpa
+                // pointerleave, jadi lepaskan tahanannya di sini.
+                hovering = false;
+                focused = false;
                 hideBubble();
+                advance();
                 figure.focus();
+                schedule(show, CLOSED_GAP_MS);
             }
 
             close.hidden = false;
@@ -350,11 +354,7 @@ function closeOnBackdrop(letter) {
                 if (event.key === 'Escape' && !bubble.hidden) shut();
             });
             figure.addEventListener('click', function () {
-                if (closed) {
-                    closed = false;
-                } else if (!bubble.hidden) {
-                    advance();
-                }
+                if (!bubble.hidden) advance();
                 show();
             });
 
@@ -362,7 +362,7 @@ function closeOnBackdrop(letter) {
             bubble.addEventListener('pointerleave', function () { hovering = false; resume(); });
             // Hanya fokus keyboard yang menahan giliran; klik mouse pada COGITO tidak.
             box.addEventListener('focusin', function (event) {
-                focused = event.target.matches(':focus-visible');
+                focused = bubble.contains(event.target) && event.target.matches(':focus-visible');
                 resume();
             });
             box.addEventListener('focusout', function (event) {
