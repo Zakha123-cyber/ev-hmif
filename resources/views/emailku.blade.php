@@ -4,6 +4,11 @@
     $period = $setting->periodLabel();
     $campusNim = substr($data->nim, 0, 2) . '241010' . substr($data->nim, 2);
     $loginUrl = url('/login');
+    // Logo disisipkan ke dalam email (CID), bukan ditautkan ke situs: tetap tampil
+    // walau situs belum online / APP_URL masih localhost. $message hanya ada saat
+    // email benar-benar dikirim; saat dirender untuk pratinjau dipakai URL biasa.
+    $logoPath = resource_path('mail/hmif-logo.png');
+    $logoSrc = isset($message) ? $message->embed($logoPath) : asset('assets/logos/' . rawurlencode('Logo HMIF Compress.png'));
     $when = fn ($date) => $date->copy()->locale('id')->translatedFormat('l, j F Y') . ' pukul ' . $date->format('H.i') . ' WIB';
 
     $deep = '#0E3532';
@@ -39,7 +44,7 @@
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
                                     <td style="padding-right:14px; vertical-align:middle;">
-                                        <img src="{{ asset('assets/logos/' . rawurlencode('Logo HMIF Compress.png')) }}" width="48" height="48" alt="HMIF" style="display:block; border:0;">
+                                        <img src="{{ $logoSrc }}" width="48" height="48" alt="HMIF" style="display:block; border:0;">
                                     </td>
                                     <td style="vertical-align:middle; color:#FFFFFF;">
                                         <div style="font-size:13px; color:#CFE3E0; letter-spacing:.2px;">Election Vote HMIF</div>

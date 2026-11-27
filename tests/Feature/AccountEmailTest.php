@@ -24,3 +24,14 @@ it('builds a readable account email with the credentials, login link and current
         ->toContain('2025/2026')
         ->not->toContain('—');
 });
+
+it('embeds the HMIF logo inside the email instead of linking to the site', function () {
+    config(['mail.default' => 'array']);
+    $participant = (new Participant())->forceFill(['participant_name' => 'Joko', 'nim' => '233061', 'username_old' => 'a', 'password_old' => 'b']);
+
+    \Illuminate\Support\Facades\Mail::to('joko@example.test')->send(new BroadcastMail($participant));
+
+    $email = app('mail.manager')->mailer('array')->getSymfonyTransport()->messages()->last()->getOriginalMessage();
+    expect($email->getHtmlBody())->toContain('src="cid:');
+    expect(collect($email->getAttachments())->map(fn ($a) => $a->getMediaType() . '/' . $a->getMediaSubtype())->all())->toContain('image/png');
+});
