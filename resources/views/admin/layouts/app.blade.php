@@ -1,44 +1,72 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="id">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">  
-  <link rel="icon" href="{{ asset('assets/logos/Logo HMIF Compress.png') }}" type="image/x-icon"> 
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title') | Admin Election Vote HMIF</title>
+    <link rel="icon" href="{{ asset('frontend/images/logo_election_vote.png') }}" type="image/png">
 
-  <title>ElectionVote | Admin</title>
-
-  <link rel="stylesheet" href="https://kit-pro.fontawesome.com/releases/v5.12.1/css/pro.min.css">
-  <link rel="stylesheet" type="text/css" href="{{asset('assets/css-admin/style.css')}}">
-  @yield('extraCSS')
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Plus+Jakarta+Sans:wght@400;600&display=swap">
+    <script>document.documentElement.classList.add('js');</script>
+    <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}?v={{ filemtime(public_path('frontend/css/home.css')) }}">
+    <link rel="stylesheet" href="{{ asset('frontend/css/admin.css') }}?v={{ filemtime(public_path('frontend/css/admin.css')) }}">
+    <script src="{{ asset('frontend/js/admin.js') }}?v={{ filemtime(public_path('frontend/js/admin.js')) }}" defer></script>
+    {{-- SEMENTARA: halaman lama yang belum dibangun ulang (dihapus di Task 6) --}}
+    @yield('extraCSS')
 </head>
-<body class="bg-gray-100">
-    @include('admin.components.navbar')
-    <div class="h-screen flex flex-row flex-wrap">
+
+<body class="a-body">
+    <a class="skip-link" href="#isi">Langsung ke isi halaman</a>
+
+    <div class="a-shell">
         @include('admin.components.sidebar')
-        <div class="bg-gray-100 flex-1 p-6 md:mt-16"> 
-            <div>
+        <div class="a-overlay" data-drawer-overlay hidden></div>
+
+        <div class="a-main">
+            @include('admin.components.topbar')
+
+            <main id="isi" class="a-content" tabindex="-1">
+                <div class="a-pagehead">
+                    <h1 class="a-pagehead__title">@yield('title')</h1>
+                    @hasSection('actions')
+                        <div class="a-pagehead__actions">@yield('actions')</div>
+                    @endif
+                </div>
+
                 @if (session('status'))
-                    <div class="alert alert-default alert-close mb-5">
-                        <button class="alert-btn-close">
-                            <i class="fad fa-times"></i>
-                        </button>
-                        <span>{{session('status')}}</span>
+                    <div class="a-flash a-flash--ok" role="status">
+                        <p>{{ session('status') }}</p>
+                        <button type="button" class="a-flash__close" data-flash-close>Tutup</button>
                     </div>
                 @endif
                 @if (session('error'))
-                    <div class="alert alert-error alert-close mb-5">
-                        <button class="alert-btn-close">
-                            <i class="fad fa-times"></i>
-                        </button>
-                        <span>{{session('error')}}!</span>
+                    <div class="a-flash a-flash--err" role="alert">
+                        <p>{{ session('error') }}</p>
+                        <button type="button" class="a-flash__close" data-flash-close>Tutup</button>
                     </div>
                 @endif
-            </div>
-            @yield('content')
+
+                @yield('content')
+            </main>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script src="{{asset('assets/js-admin/scripts.js')}}"></script>
+
+    {{-- Konfirmasi bersama untuk form[data-confirm] (hapus, kirim email massal) --}}
+    <dialog class="a-dialog" id="a-confirm" aria-labelledby="a-confirm-title">
+        <h2 id="a-confirm-title" class="a-dialog__title">Yakin?</h2>
+        <p class="a-dialog__text" data-confirm-text></p>
+        <div class="a-dialog__actions">
+            <button type="button" class="a-btn a-btn--ghost" data-confirm-no autofocus>Batal</button>
+            <button type="button" class="a-btn a-btn--danger" data-confirm-yes>Ya, lanjutkan</button>
+        </div>
+    </dialog>
+
+    @stack('scripts')
+    {{-- SEMENTARA: halaman lama yang belum dibangun ulang (dihapus di Task 6) --}}
     @yield('extraJS')
 </body>
+
 </html>

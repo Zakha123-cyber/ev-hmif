@@ -1,65 +1,69 @@
 @extends('admin.layouts.app')
-@section('content')
+
+@section('title', 'Jadwal & periode')
+
 @php
-    $status = $setting->status();
-    $statusLabel = [
-        'not_set' => ['Belum diatur', 'bg-gray-300 text-gray-800'],
-        'upcoming' => ['Belum dibuka', 'bg-yellow-300 text-yellow-800'],
-        'open' => ['Sedang dibuka', 'bg-green-300 text-green-800'],
-        'closed' => ['Sudah ditutup', 'bg-red-300 text-red-800'],
-    ][$status];
+    [$statusLabel, $statusTone] = [
+        'not_set' => ['Belum diatur', 'muted'],
+        'upcoming' => ['Belum dibuka', 'warn'],
+        'open' => ['Sedang dibuka', 'ok'],
+        'closed' => ['Sudah ditutup', 'danger'],
+    ][$setting->status()];
 @endphp
-<div>
-    <div class="card mb-8">
-        <div class="card-header flex flex-row justify-between items-center">
-            <h1 class="h6">Jadwal Pemilihan</h1>
-            <span class="py-2 px-4 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusLabel[1] }}">
-                {{ $statusLabel[0] }}
-            </span>
+
+@section('content')
+    <section class="a-card" aria-labelledby="jadwal-judul">
+        <div class="a-card__head">
+            <h2 id="jadwal-judul" class="a-card__title">Periode dan waktu pemilihan</h2>
+            <span class="a-badge a-badge--{{ $statusTone }}">{{ $statusLabel }}</span>
         </div>
-        <div class="card-body">
-            <p class="text-gray-600 text-sm mb-4">
-                Peserta hanya bisa mengirim suara di antara Waktu Dibuka dan Waktu Ditutup (zona waktu WIB).
-                Jika jadwal belum diatur, pemilihan dianggap belum dibuka.
-                Periode tampil di halaman awal, halaman memilih, halaman login, dan email pengumuman.
+        <div class="a-card__body">
+            <p class="a-lead">
+                Peserta hanya bisa mengirim suara di antara waktu dibuka dan waktu ditutup (WIB). Selama jadwal belum diatur,
+                pemilihan dianggap belum dibuka. Periode tampil di halaman awal, halaman memilih, halaman login, dan email pengumuman.
             </p>
-            <form method="POST" action="{{ url('/back-admin-logged/election-schedule') }}">
+
+            <form class="a-form" method="POST" action="{{ url('/back-admin-logged/election-schedule') }}">
                 @csrf
                 @method('PUT')
-                <div class="mb-4 max-w-xs">
-                    <label for="period" class="text-gray-700 ml-1"> Periode kepengurusan : </label>
-                    <input type="text" id="period" name="period" inputmode="numeric" placeholder="{{ config('election.period') }}" class="form-input w-full block rounded mt-1 p-3 border-2 @error('period') border-red-500 @enderror focus:outline-none focus:border-teal-500" value="{{ old('period', $setting->period ?: config('election.period')) }}">
+
+                <div class="a-field">
+                    <label class="a-label" for="period">Periode kepengurusan</label>
+                    <input class="a-input" style="max-width: 220px" type="text" id="period" name="period" inputmode="numeric"
+                        placeholder="{{ config('election.period') }}" aria-describedby="period-help"
+                        value="{{ old('period', $setting->period ?: config('election.period')) }}"
+                        @error('period') aria-invalid="true" @enderror>
+                    <p class="a-help" id="period-help">Dua tahun berurutan, misalnya 2025/2026.</p>
                     @error('period')
-                    <span class="pl-1 text-xs text-red-600 text-bold">
-                        {{ $message }}
-                    </span>
+                        <p class="a-error">{{ $message }}</p>
                     @enderror
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-gray-700 ml-1"> Waktu Dibuka : </label>
-                        <input type="datetime-local" name="vote_start" class="form-input w-full block rounded mt-1 p-3 border-2 @error('vote_start') border-red-500 @enderror focus:outline-none focus:border-teal-500" value="{{ old('vote_start', $setting->vote_start?->format('Y-m-d\TH:i')) }}">
+
+                <div class="a-form__row a-form__row--2">
+                    <div class="a-field">
+                        <label class="a-label" for="vote_start">Waktu dibuka</label>
+                        <input class="a-input" type="datetime-local" id="vote_start" name="vote_start"
+                            value="{{ old('vote_start', $setting->vote_start?->format('Y-m-d\TH:i')) }}"
+                            @error('vote_start') aria-invalid="true" @enderror>
                         @error('vote_start')
-                        <span class="pl-1 text-xs text-red-600 text-bold">
-                            {{ $message }}
-                        </span>
+                            <p class="a-error">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div>
-                        <label class="text-gray-700 ml-1"> Waktu Ditutup : </label>
-                        <input type="datetime-local" name="vote_end" class="form-input w-full block rounded mt-1 p-3 border-2 @error('vote_end') border-red-500 @enderror focus:outline-none focus:border-teal-500" value="{{ old('vote_end', $setting->vote_end?->format('Y-m-d\TH:i')) }}">
+                    <div class="a-field">
+                        <label class="a-label" for="vote_end">Waktu ditutup</label>
+                        <input class="a-input" type="datetime-local" id="vote_end" name="vote_end"
+                            value="{{ old('vote_end', $setting->vote_end?->format('Y-m-d\TH:i')) }}"
+                            @error('vote_end') aria-invalid="true" @enderror>
                         @error('vote_end')
-                        <span class="pl-1 text-xs text-red-600 text-bold">
-                            {{ $message }}
-                        </span>
+                            <p class="a-error">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
-                <div class="mt-5">
-                    <button type="submit" class="btn-shadow">Simpan</button>
+
+                <div class="a-form__foot">
+                    <button type="submit" class="a-btn a-btn--accent">Simpan periode dan jadwal</button>
                 </div>
             </form>
         </div>
-    </div>
-</div>
+    </section>
 @endsection
