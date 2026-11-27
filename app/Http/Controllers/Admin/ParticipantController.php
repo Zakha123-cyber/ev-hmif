@@ -151,7 +151,7 @@ class ParticipantController extends Controller
      */
     private function campusEmail(Participant $participant): string
     {
-        return substr($participant->nim, 0, 2) . '241010' . substr($participant->nim, 2) . '@mail.unej.ac.id';
+        return $participant->campusEmail();
     }
 
     public function store(Request $request){

@@ -2,7 +2,7 @@
     // Email akun peserta. Ditulis dengan tabel + gaya inline agar tampil rapi di
     // Gmail, Outlook, dan aplikasi email HP (CSS eksternal/flex tidak didukung).
     $period = $setting->periodLabel();
-    $campusNim = substr($data->nim, 0, 2) . '241010' . substr($data->nim, 2);
+    $campusNim = $data->campusNim();
     $loginUrl = url('/login');
     // Logo disisipkan ke dalam email (CID), bukan ditautkan ke situs: tetap tampil
     // walau situs belum online / APP_URL masih localhost. $message hanya ada saat
