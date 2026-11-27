@@ -660,6 +660,123 @@
     min-height: 48px;
 }
 
+/* ---------- COGITO di /vote (varian inline) ---------- */
+
+/* Mengikuti alur halaman: balon di kiri, COGITO di kanan. Ruang balon tetap
+   disediakan saat tersembunyi agar pita tidak melompat ketika balon muncul. */
+.cogito--inline {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 14px;
+}
+
+.cogito--inline .cogito__figure {
+    flex: none;
+    width: 104px;
+}
+
+.cogito--inline .cogito__bubble {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    max-width: 280px;
+    margin-bottom: 52px;
+    text-align: left;
+}
+
+.cogito--inline [data-cogito-bubble][hidden] {
+    display: block !important;
+    visibility: hidden;
+}
+
+/* Pita surat suara: teks kiri, COGITO kanan */
+.vote-hero--ballot .vote-hero__inner {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: end;
+}
+
+.vote-hero__text {
+    display: grid;
+    gap: 16px;
+}
+
+.vote-hero--ballot .cogito__bubble {
+    max-width: 240px;
+}
+
+/* Tanda terima: kotak suara dan COGITO hormat berdampingan, balon di atasnya */
+.receipt__scene {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.receipt__scene .receipt__art {
+    margin-bottom: 0;
+}
+
+.receipt .cogito--inline {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.receipt .cogito--inline .cogito__bubble {
+    margin-bottom: 0;
+    border-radius: 14px;
+    text-align: center;
+}
+
+/* Ekor menunjuk ke bawah, ke arah COGITO */
+.receipt .cogito__bubble::after {
+    right: calc(50% - 6px);
+    bottom: -8px;
+    transform: rotate(45deg);
+}
+
+.receipt .cogito--inline .cogito__figure {
+    width: 92px;
+}
+
+/* HP: kotak suara + COGITO + balon harus muat dalam 320px tanpa geser samping */
+@media (max-width: 519px) {
+    .receipt__scene {
+        gap: 10px;
+    }
+
+    /* Sisa lebar setelah balon (132) + jarak (10), maksimal 160px */
+    .receipt__scene .receipt__art {
+        width: min(160px, 100vw - 2 * var(--gutter) - 142px);
+    }
+
+    .receipt .cogito--inline .cogito__bubble {
+        max-width: 132px;
+        font-size: 14px;
+    }
+
+    .receipt .cogito--inline .cogito__figure {
+        width: 72px;
+    }
+}
+
+@media (min-width: 720px) {
+    .vote-hero--ballot .vote-hero__inner {
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 32px;
+    }
+
+    .cogito--inline .cogito__figure {
+        width: 120px;
+    }
+
+    .receipt .cogito--inline .cogito__figure {
+        width: 104px;
+    }
+}
+
 /* ---------- Bagian isi ---------- */
 
 .vote-section {

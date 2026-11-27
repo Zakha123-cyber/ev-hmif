@@ -39,4 +39,7 @@
             </div>
         </section>
     @endif
+
+    @php $cogito = \App\Support\CogitoLines::vote('prepare', $setting, $user); @endphp
+    @include('partials.cogito', ['pose' => 'salam', 'variant' => 'corner', 'key' => 'vote-prepare', 'lines' => $cogito['lines'], 'action' => $cogito['action']])
 @endsection

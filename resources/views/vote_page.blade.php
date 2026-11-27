@@ -7,14 +7,19 @@
         @include('partials.vote-receipt', ['votedAt' => $votedAt, 'setting' => $setting, 'justVoted' => $justVoted])
     @else
         @php
-            $name = $user->details?->participant_name ?: $user->username;
             $columns = min($candidates->count(), 3);
         @endphp
 
         <section class="vote-hero vote-hero--ballot" aria-labelledby="judul">
             <div class="container vote-hero__inner">
-                <h1 id="judul" class="vote-hero__title">Berikan suaramu</h1>
-                <p class="vote-hero__lead">Halo, {{ $name }}. Ketuk foto paslon pilihanmu, lalu kirim. Suara hanya bisa dikirim satu kali.</p>
+                <div class="vote-hero__text">
+                    <h1 id="judul" class="vote-hero__title">Berikan suaramu</h1>
+                    {{-- Sapaan & cara memilih diucapkan COGITO di sampingnya; di sini aturan pentingnya saja --}}
+                    <p class="vote-hero__lead">Suara hanya bisa dikirim satu kali dan tidak dapat diubah.</p>
+                </div>
+                {{-- Di dalam pita, bukan di pojok: tidak menutupi "Kirim suara" maupun animasi kotak suara --}}
+                @php $cogito = \App\Support\CogitoLines::vote('ballot', $setting, $user); @endphp
+                @include('partials.cogito', ['pose' => 'salam', 'variant' => 'inline', 'key' => 'vote-ballot', 'lines' => $cogito['lines'], 'action' => $cogito['action']])
             </div>
         </section>
 

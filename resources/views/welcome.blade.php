@@ -191,7 +191,7 @@
 
     @include('partials.site-footer')
 
-    @php($cogito = \App\Support\CogitoLines::home($setting, $user))
+    @php $cogito = \App\Support\CogitoLines::home($setting, $user); @endphp
     @include('partials.cogito', ['pose' => 'salam', 'variant' => 'corner', 'key' => 'home', 'lines' => $cogito['lines'], 'action' => $cogito['action']])
 </body>
 

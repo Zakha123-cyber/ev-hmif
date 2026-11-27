@@ -150,7 +150,7 @@ it('renders one ballot form with a radio per candidate', function () {
         ->assertSee('value="' . $this->first->id . '"', false)
         ->assertSee('value="' . $this->second->id . '"', false)
         ->assertSee('Kirim suara')
-        ->assertSee('Halo, voter1.')
+        ->assertSee('Suara hanya bisa dikirim satu kali dan tidak dapat diubah.')
         ->getContent();
 
     expect(substr_count($html, 'name="candidate_id"'))->toBe(2);
@@ -241,4 +241,60 @@ it('labels each pair as a name plate with the role above each name', function ()
     $first = $plates->item(0);
     expect(array_map(fn ($n) => trim($n->textContent), iterator_to_array($xpath->query('.//span[@class="ballot__role"]', $first))))->toBe(['Ketua', 'Wakil ketua']);
     expect(array_map(fn ($n) => trim($n->textContent), iterator_to_array($xpath->query('.//span[@class="ballot__name"]', $first))))->toBe(['Ketua 1', 'Wakil 1']);
+});
+
+// --- COGITO di /vote ---
+
+function cogitoNode(string $html, string $xpathQuery = '//aside[@data-cogito]'): DOMNodeList
+{
+    $dom = new DOMDocument();
+    @$dom->loadHTML($html);
+
+    return (new DOMXPath($dom))->query($xpathQuery);
+}
+
+it('shows COGITO in the corner with the opening time before voting opens', function () {
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-11-30 10:00'));
+
+    $this->actingAs($this->voter)->get('/vote')
+        ->assertSee('Surat suara muncul di sini saat pemilihan dibuka Selasa, 1 Desember pukul 08.00 WIB.')
+        ->assertSee('cogito--corner', false);
+});
+
+it('has COGITO say the schedule is not announced yet', function () {
+    $this->actingAs($this->voter)->get('/vote')->assertSee('Jadwal pemilihan belum diumumkan panitia.');
+});
+
+it('keeps COGITO inside the ballot hero instead of the corner while voting', function () {
+    openVoting();
+
+    $html = $this->actingAs($this->voter)->get('/vote')
+        ->assertSee('Halo, voter1! Ketuk foto paslon pilihanmu.')
+        ->assertDontSee('cogito--corner', false)
+        ->getContent();
+
+    expect(cogitoNode($html, '//section[contains(@class,"vote-hero--ballot")]//aside[@data-cogito]')->length)->toBe(1);
+});
+
+it('has COGITO point to the results when voting closed without a vote', function () {
+    setSchedule('2026-12-01 08:00', '2026-12-01 15:00');
+    $this->travelTo(Carbon::parse('2026-12-01 16:00'));
+
+    $this->actingAs($this->voter)->get('/vote')
+        ->assertSee('Hasil penghitungan ada di halaman awal.')
+        ->assertSee('cogito--corner', false);
+});
+
+it('has a saluting COGITO on the receipt without naming the choice', function () {
+    openVoting();
+    castVote($this, $this->first);
+
+    $html = $this->get('/vote')
+        ->assertSee('Terima kasih sudah memilih!')
+        ->assertSee('cogito/salute.webp', false)
+        ->assertDontSee('Ketua 1')
+        ->getContent();
+
+    expect(cogitoNode($html, '//section[contains(@class,"receipt")]//aside[@data-cogito]')->length)->toBe(1);
 });

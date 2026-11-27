@@ -6,11 +6,15 @@
 @endphp
 <section class="vote-hero vote-hero--center receipt" aria-labelledby="judul" @if ($justVoted) data-just-voted @endif>
     <div class="container vote-hero__inner">
-        <div class="receipt__art" aria-hidden="true">
-            <span class="receipt__paper"><span class="hex-number receipt__seal"></span></span>
-            <span class="receipt__box">
-                <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="">
-            </span>
+        <div class="receipt__scene">
+            <div class="receipt__art" aria-hidden="true">
+                <span class="receipt__paper"><span class="hex-number receipt__seal"></span></span>
+                <span class="receipt__box">
+                    <img src="{{ asset('frontend/images/home/logo-hmif-320.webp') }}" width="316" height="320" alt="">
+                </span>
+            </div>
+            @php $cogito = \App\Support\CogitoLines::vote('receipt', $setting, auth()->user()); @endphp
+            @include('partials.cogito', ['pose' => 'salute', 'variant' => 'inline', 'key' => 'vote-receipt', 'lines' => $cogito['lines'], 'action' => $cogito['action']])
         </div>
 
         <h1 id="judul" class="vote-hero__title">Suaramu sudah tercatat</h1>
@@ -26,7 +30,7 @@
             </p>
         @else
             <p class="vote-hero__lead">
-                Terima kasih sudah memilih.
+                {{-- "Terima kasih sudah memilih!" diucapkan COGITO di atas --}}
                 @if ($end)
                     Hasil diumumkan setelah pemilihan ditutup {{ $end->translatedFormat('l, j F Y') }} pukul {{ $end->format('H.i') }} WIB.
                 @endif
